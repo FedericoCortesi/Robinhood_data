@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import warnings
 warnings.simplefilter(action='ignore', category=Warning)
@@ -14,6 +15,7 @@ class DataLoader:
         # Load Dataframes
         self._load_robinhood_data()
         self._load_crsp_data()
+        self.merge_dfs()
 
     def _load_robinhood_data(self):
         """"
@@ -127,7 +129,7 @@ class DataLoader:
         return df_crsp
     
 
-    def merge_dfs(self, users:bool=True):
+    def merge_dfs(self, users:bool=False, start_date:str=None):
         print("Merging...")
         # Filter dataframes
         self._filter_dfs_common_tickers()
@@ -156,20 +158,33 @@ class DataLoader:
         self.df_rh_long['date'] = pd.to_datetime(self.df_rh_long['date'])
         self.df_crsp['date'] = pd.to_datetime(self.df_crsp['date'])
 
+        if start_date:
+            self.df_rh_long = self.df_rh_long[self.df_rh_long["date"]>=start_date]
+            self.df_crsp = self.df_crsp[self.df_crsp["date"]>=start_date]
+
         # Merge both dataframes on 'date' and 'ticker'
         self.df_merged = self.df_rh_long.merge(self.df_crsp, on=['date', 'ticker'], how='inner')
+
+        # Get the total number of trading days and filter out tickers with different values (missing or repeating data)
+        trading_days = self.df_merged["date"].nunique()
+        tickers_to_keep = self.df_merged["ticker"].value_counts()[self.df_merged["ticker"].value_counts()==trading_days].index
+        self.df_merged = self.df_merged[self.df_merged["ticker"].isin(tickers_to_keep)]
 
         # Drop columns
         self.df_merged = self.df_merged.drop(columns=["prc", "shrout", "permno"])
 
 
         # Build additional features
+        self.df_merged["daily_returns"] = self.df_merged.groupby("ticker")["prc_adj"].apply(lambda x: np.log(x / x.shift(1))).reset_index(level=0, drop=True).fillna(0)
+        self.df_merged["cumulative_returns"] = self.df_merged.groupby("ticker")["daily_returns"].cumsum()
         self.df_merged['mc'] = self.df_merged['prc_adj'] * self.df_merged['shrout_adj']
-        self.df_merged['mc_retail'] = self.df_merged['prc_adj'] * self.df_merged['holders']
-        #df_merged['retail_ownership'] = df_merged['holders'] / df_merged['shrout_adj']
-        self.df_merged['daily_change_holders'] = self.df_merged.groupby('ticker')['holders'].diff()
-        self.df_merged["daily_holders"] = self.df_merged[["date", "holders"]].groupby("date").transform('sum')
+        self.df_merged['mc_retail'] = self.df_merged['prc_adj'] * self.df_merged["holders"]
+        #df_merged["retail_ownership"] = df_merged["holders"] / df_merged["shrout_adj"]
+        self.df_merged["daily_change_holders"] = self.df_merged.groupby("ticker")["holders"].diff()
+        self.df_merged["daily_holders"] = self.df_merged[["date", "holders"]].groupby("date").transform("sum")
         self.df_merged["popularity"] = self.df_merged["holders"] / self.df_merged[["date", "holders"]].groupby("date")["holders"].transform("sum")
+        self.df_merged['market_weight'] = self.df_merged['mc'] / self.df_merged[["date", "mc"]].groupby("date")["mc"].transform("sum")
+        self.df_merged['retail_weight'] = self.df_merged['mc_retail'] / self.df_merged[["date", "mc_retail"]].groupby("date")["mc_retail"].transform("sum")
 
         # Sort
         self.df_merged = self.df_merged.sort_values(by=["ticker", "date"])
@@ -237,7 +252,7 @@ class DataLoader:
         else:
             pass
         # Extract required columns first (avoids unnecessary memory usage)
-        df = self.df_merged[['date', 'ticker', 'm', 'mc_retail', 'holders', 'prc_adj', 'shrcd', "vol"]].copy()
+        df = self.df_merged[['date', 'ticker', 'mc', "popularity", 'mc_retail', 'holders', 'prc_adj', 'shrcd', "vol"]].copy()
 
         # Sort by m in descending order (this is done for all dates at once)
         df_sorted = df.sort_values(by=['date', by], ascending=[True, False])
@@ -245,6 +260,7 @@ class DataLoader:
         # Build rank based on market cap and users
         df_sorted["rank_mkt"] = df_sorted.groupby("date")["mc"].rank(ascending=False)
         df_sorted["rank_ret"] = df_sorted.groupby("date")["mc_retail"].rank(ascending=False)
+        df_sorted[f"rank_{by}"] = df_sorted.groupby("date")[by].rank(ascending=False)
         
         # Compute distance metric for rank
         df_sorted["rank_distance"] = (df_sorted["rank_mkt"] - df_sorted["rank_ret"]) / df_sorted["rank_ret"]
@@ -252,11 +268,15 @@ class DataLoader:
         # Compute distance metric for distribution
         df_sorted["m_daily"] = df_sorted[["date", "mc"]].groupby("date").transform('sum')
         df_sorted["mc_retail_daily"] = df_sorted[["date", "mc_retail"]].groupby("date").transform('sum')
+        df_sorted[f"{by}_daily"] = df_sorted[["date", "mc"]].groupby("date").transform('sum')
+        
         df_sorted["m_daily_pct"] = df_sorted["mc"] / df_sorted["m_daily"]
         df_sorted["mc_retail_daily_pct"] = df_sorted["mc_retail"] / df_sorted["mc_retail_daily"]
+        df_sorted[f"{by}_daily_pct"] = df_sorted[by] / df_sorted[f"{by}_daily"]
 
         # Compute distance metric for rank
         df_sorted["pct_distance"] = (df_sorted["mc_retail_daily_pct"] - df_sorted["m_daily_pct"])*df_sorted["mc_retail_daily_pct"]
+        df_sorted[f"{by}_pct_distance"] = (df_sorted[f"{by}_daily_pct"] - df_sorted["m_daily_pct"])*df_sorted[f"{by}_daily_pct"]
 
         # Keep only the top N tickers per date
         df_top_n = df_sorted.groupby('date').head(n)
