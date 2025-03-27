@@ -3,4 +3,6 @@
 *.env
 /Data
 /Papers
-/__pycache__
+__pycache__/
+**/__pycache__/
+*.py[cod]
