@@ -1,0 +1,6 @@
+/venv
+/archive
+*.env
+/Data
+/Papers
+/__pycache__

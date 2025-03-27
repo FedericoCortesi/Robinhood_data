@@ -179,7 +179,8 @@ class DataLoader:
         df_merged['mc'] = df_merged['prc_adj'] * df_merged['shrout_adj']
         df_merged['mc_retail'] = df_merged['prc_adj'] * df_merged["holders"]
         #df_merged["retail_ownership"] = df_merged["holders"] / df_merged["shrout_adj"]
-        df_merged["holders_change"] = df_merged.groupby("ticker")["holders"].pct_change()
+        df_merged["holders_change_pct"] = df_merged.groupby("ticker")["holders"].pct_change()
+        df_merged["holders_change_diff"] = df_merged.groupby("ticker")["holders"].diff()
         df_merged["total_holders"] = df_merged[["date", "holders"]].groupby("date").transform("sum")
         df_merged["popularity"] = df_merged["holders"] / df_merged[["date", "holders"]].groupby("date")["holders"].transform("sum")
         df_merged['market_weight'] = df_merged['mc'] / df_merged[["date", "mc"]].groupby("date")["mc"].transform("sum")
@@ -187,10 +188,12 @@ class DataLoader:
 
         # Create total holders change
         total_holders_series = df_merged.drop_duplicates("date")[["date", "total_holders"]].set_index("date").sort_index()
-        total_holders_change = total_holders_series.pct_change().rename(columns={"total_holders": "total_holders_change"})
+        total_holders_change_pct = total_holders_series.pct_change().rename(columns={"total_holders": "total_holders_change_pct"})
+        total_holders_change_diff = total_holders_series.diff().rename(columns={"total_holders": "total_holders_change_diff"})
 
         # Merge back to df_merged
-        df_merged = df_merged.merge(total_holders_change, on="date", how="left")
+        df_merged = df_merged.merge(total_holders_change_pct, on="date", how="left")
+        df_merged = df_merged.merge(total_holders_change_diff, on="date", how="left")
 
         # Sort
         df_merged = df_merged.sort_values(by=["ticker", "date"])
