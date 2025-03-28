@@ -49,7 +49,7 @@ class Analyzer():
         returns.index = pd.to_datetime(returns.index)
 
         # Add the cumulative returns for the whole period and keep smaller values
-        #horizons.append(len(returns))
+        horizons.append(len(returns))
         horizons = [h for h in horizons if h <= len(returns)]
         horizons = sorted(list(set(horizons)))
 
@@ -124,7 +124,7 @@ class Analyzer():
         # Show plot
         plt.show()
 
-    def plot_kdes(self, returns_kwargs:dict={"horizons":[5,15,30, 60, 120], "start_date":None}):
+    def plot_returns_kdes(self, returns_kwargs:dict={"horizons":[5,15,30, 60, 120], "start_date":None}):
         # Retrieve Returns 
         returns, horizons = self.build_returns(**returns_kwargs)
 
@@ -176,4 +176,4 @@ class Analyzer():
 
         # Show plot
         plt.show()
-
+ 
