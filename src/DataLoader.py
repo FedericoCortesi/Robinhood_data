@@ -3,11 +3,15 @@ import pandas as pd
 import warnings
 warnings.simplefilter(action='ignore', category=Warning)
 
+import os
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
 class DataLoader:
-    def __init__(self, df_robinhood_path:str="./Data/df_rh.csv", df_crsp_path:str=".\Data\df_crsp.csv", handle_nans:str="keep"):
+    def __init__(self, df_robinhood_path:str="df_rh.csv", df_crsp_path:str="df_crsp.csv", handle_nans:str="keep"):
         # load variables
-        self.df_robinhood_path = df_robinhood_path
-        self.df_crsp_path = df_crsp_path
+        self.df_robinhood_path = os.path.join(ROOT, 'Data', df_robinhood_path)
+        self.df_crsp_path = os.path.join(ROOT, 'Data', df_crsp_path)
 
         assert handle_nans in ["fill", "drop", "keep"], "only 'fill', 'drop', and 'keep' are possible values for handle_nans"
         self.handle_nans = handle_nans
