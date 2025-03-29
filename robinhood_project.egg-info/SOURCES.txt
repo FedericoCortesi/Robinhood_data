@@ -1,0 +1,5 @@
+setup.py
+robinhood_project.egg-info/PKG-INFO
+robinhood_project.egg-info/SOURCES.txt
+robinhood_project.egg-info/dependency_links.txt
+robinhood_project.egg-info/top_level.txt
