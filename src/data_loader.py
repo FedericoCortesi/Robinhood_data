@@ -3,15 +3,16 @@ import pandas as pd
 import warnings
 warnings.simplefilter(action='ignore', category=Warning)
 
-import os
+from pathlib import Path
 
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+CURRENT_DIR = Path(__file__).resolve().parent
 
 class DataLoader:
     def __init__(self, df_robinhood_path:str="df_rh.csv", df_crsp_path:str="df_crsp.csv", handle_nans:str="keep"):
-        # load variables
-        self.df_robinhood_path = os.path.join(ROOT, 'Data', df_robinhood_path)
-        self.df_crsp_path = os.path.join(ROOT, 'Data', df_crsp_path)
+    
+        # Build the absolute paths
+        self.df_robinhood_path = CURRENT_DIR.parents[0] / "data" / df_robinhood_path
+        self.df_crsp_path = CURRENT_DIR.parents[0] / "data" /df_crsp_path
 
         assert handle_nans in ["fill", "drop", "keep"], "only 'fill', 'drop', and 'keep' are possible values for handle_nans"
         self.handle_nans = handle_nans
@@ -183,7 +184,8 @@ class DataLoader:
         df_merged['mc'] = df_merged['prc_adj'] * df_merged['shrout_adj']
         df_merged['mc_retail'] = df_merged['prc_adj'] * df_merged["holders"]
         #df_merged["retail_ownership"] = df_merged["holders"] / df_merged["shrout_adj"]
-        df_merged["holders_change_pct"] = df_merged.groupby("ticker")["holders"].pct_change()
+        #df_merged["holders_change_pct"] = df_merged.groupby("ticker")["holders"].pct_change()
+        df_merged["holders_change_pct"] = df_merged.groupby("ticker")["holders"].apply(lambda x: np.log(x / x.shift(1))).reset_index(level=0, drop=True)
         df_merged["holders_change_diff"] = df_merged.groupby("ticker")["holders"].diff()
         df_merged["total_holders"] = df_merged[["date", "holders"]].groupby("date").transform("sum")
         df_merged["popularity"] = df_merged["holders"] / df_merged[["date", "holders"]].groupby("date")["holders"].transform("sum")

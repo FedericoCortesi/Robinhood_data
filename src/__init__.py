@@ -1,3 +1,3 @@
-from .Analyzer import Analyzer
-from .Clustering import Clustering
-from .DataLoader import DataLoader
+from .clustering import Clustering
+from .data_loader import DataLoader
+from .analyzer import Analyzer

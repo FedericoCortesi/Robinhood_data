@@ -1,6 +1,6 @@
-from src.Analyzer import Analyzer
+from src import Analyzer
 
-an = Analyzer(compare_tickers=["VOO", "VT"])
+an = Analyzer(compare_tickers=["TSLA"])
 
-an.plot_returns_timeseries(save=True)
-an.plot_returns_kdes(save=True)
+an.plot_returns_timeseries(save=False)
+#an.plot_returns_kdes(save=True)

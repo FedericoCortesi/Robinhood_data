@@ -4,8 +4,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-
-from src.DataLoader import DataLoader
+from . import DataLoader
+from .utils import log_ma_returns
 
 class Analyzer():
     def __init__(self, compare_tickers:list=["VOO"], dl_kwargs:dict={"handle_nans":"drop"}):
@@ -19,6 +19,7 @@ class Analyzer():
         # Memorize important dfs
         self.df_merged = self.dl.merge_dfs()
         self.df_sp = self.df_merged[self.df_merged["ticker"]=="VOO"]
+      
 
 
     def _extract_relevant_tickers(self):
@@ -71,29 +72,11 @@ class Analyzer():
         if start_date != None:
             levels = levels[levels.index>=start_date]
 
-        # Build returns df, applying logs ensure additivity of returns
-        returns = np.log(levels / levels.shift(1)).fillna(0)
-        returns.index = pd.to_datetime(returns.index)
+        result = log_ma_returns(levels=levels, horizons=horizons)
+        
+        return result
+        
 
-        # Add the cumulative returns for the whole period and keep smaller values
-        horizons.append(len(returns))
-        horizons = [h for h in horizons if h <= len(returns)]
-        horizons = sorted(list(set(horizons)))
-
-        for d in horizons: # delete min_periods if you want to start at date d and not before
-            returns[f"mc_{d}_return"] = returns["mc"].rolling(d, min_periods=1).sum()
-            returns[f"rh_portfolio_{d}_return"] = returns["rh_portfolio"].rolling(d, min_periods=1).sum()
-            
-            for ticker in self.compare_tickers:
-                returns[f"{ticker}_{d}_return"] = returns[ticker].rolling(d, min_periods=1).sum()
-
-            # Corr 
-            #returns[f"mc_rh_{d}_corr"] = returns["mc"].rolling(d, min_periods=1).corr(returns["rh_portfolio"])
-            #returns[f"rh_voo_{d}_corr"] = returns["rh_portfolio"].rolling(d, min_periods=1).corr(returns["voo"])
-
-
-
-        return returns, horizons
 
     def plot_returns_timeseries(self, returns_kwargs:dict={"horizons":[5,15,30, 60, 120], "start_date":None}, save:bool=False):
         # Retrieve Returns 
@@ -103,7 +86,7 @@ class Analyzer():
         sns.set_style("whitegrid")
 
         # Create figure with 2x3 subplots
-        fig, axes = plt.subplots(3, 2, figsize=(20, 12), sharex=True)
+        fig, axes = plt.subplots(3, 2, figsize=(18, 12), sharex=True)
         axes = axes.flatten()
 
         # Define colors using Seaborn palette
@@ -152,7 +135,10 @@ class Analyzer():
         plt.tight_layout(rect=[0, 0, 1, 0.96])
 
         if save:
-            plt.savefig("returns_plot.svg", dpi=600, bbox_inches='tight')
+            out_dir = "../images/returns_plot.png"
+            plt.savefig(out_dir, dpi=600, bbox_inches='tight')
+            print(f"file saved at {out_dir}")
+
 
         # Show plot
         plt.show()
@@ -205,7 +191,9 @@ class Analyzer():
         plt.tight_layout(rect=[0, 0, 1, 0.96])
 
         if save:
-            plt.savefig("distributions_plot.svg", dpi=600, bbox_inches='tight')
+            out_dir = "../images/distributions_plot.png"
+            plt.savefig(out_dir, dpi=600, bbox_inches='tight')
+            print(f"file saved at {out_dir}")
 
         # Show plot
         plt.show()
