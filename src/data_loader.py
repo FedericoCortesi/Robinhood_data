@@ -133,7 +133,7 @@ class DataLoader:
         return df_crsp
     
 
-    def merge_dfs(self, users:bool=False, start_date:str=None):
+    def merge_dfs(self, users:bool=False, start_date:str=None, end_date:str=None):
         print("Merging...")
         # Filter dataframes
         self._filter_dfs_common_tickers()
@@ -165,6 +165,11 @@ class DataLoader:
         if start_date:
             self.df_rh_long = self.df_rh_long[self.df_rh_long["date"]>=start_date]
             self.df_crsp = self.df_crsp[self.df_crsp["date"]>=start_date]
+
+        if end_date:
+            self.df_rh_long = self.df_rh_long[self.df_rh_long["date"]<=end_date]
+            self.df_crsp = self.df_crsp[self.df_crsp["date"]<=end_date]
+
 
         # Merge both dataframes on 'date' and 'ticker'
         df_merged = self.df_rh_long.merge(self.df_crsp, on=['date', 'ticker'], how='inner')

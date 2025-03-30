@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 
-def log_ma_returns(levels, horizons:list=[5,15,30, 60, 120]):
+def log_ma_returns(levels, horizons:list=[5,15,30, 60, 120], cumulative:bool=True):
     """
     Given a dataframe with daily prices the function returns moving averages of log returns.
     """
@@ -11,7 +11,9 @@ def log_ma_returns(levels, horizons:list=[5,15,30, 60, 120]):
     returns.index = pd.to_datetime(returns.index)
 
     # Add the cumulative returns for the whole period and keep smaller values
-    horizons.append(len(returns))
+    if cumulative:
+        horizons.append(len(returns))
+        
     horizons = [h for h in horizons if h <= len(returns)]
     horizons = sorted(list(set(horizons)))
 

@@ -62,17 +62,20 @@ class Analyzer():
         return levels        
 
 
-    def build_returns(self, horizons:list=[5,15,30, 60, 120], start_date=None):
+    def build_returns(self, start_date=None, end_date=None, horizons:list=[5,15,30, 60, 120], cumulative:bool=True):
         if start_date != None:
             self.df_merged = self.dl.merge_dfs(start_date=start_date)
 
         # Retrieve levels
         levels = self._build_levels()
 
+        # Filter
         if start_date != None:
             levels = levels[levels.index>=start_date]
+        if end_date != None:
+            levels = levels[levels.index<=end_date]
 
-        result = log_ma_returns(levels=levels, horizons=horizons)
+        result = log_ma_returns(levels=levels, horizons=horizons, cumulative=cumulative)
         
         return result
         
@@ -85,8 +88,14 @@ class Analyzer():
         # Apply Seaborn styling
         sns.set_style("whitegrid")
 
-        # Create figure with 2x3 subplots
-        fig, axes = plt.subplots(3, 2, figsize=(18, 12), sharex=True)
+        # Create figure with subplots, determine dinamycally the number
+        rows = int(np.ceil(len(horizons)/2))
+        
+        if rows > 1:
+            fig, axes = plt.subplots(rows, 2, figsize=(18, 12), sharex=True)
+        else:
+            fig, axes = plt.subplots(2, 1, figsize=(18, 8), sharex=True)
+        
         axes = axes.flatten()
 
         # Define colors using Seaborn palette
@@ -104,7 +113,7 @@ class Analyzer():
             # Plot Market Cap returns
             sns.lineplot(x=returns.index, y=returns[f"mc_{d}_return"], label=f"Market returns", ax=ax, color=colors[0], markers=True, markersize=5, linewidth=1.0)
             # Plot Retail Market Cap returns
-            sns.lineplot(x=returns.index, y=returns[f"rh_portfolio_{d}_return"], label=f"Retail returns", ax=ax, color=colors[1], markers=True, markersize=5, linewidth=1.0)
+            sns.lineplot(x=returns.index, y=returns[f"rh_portfolio_{d}_return"], label=f"RH returns", ax=ax, color=colors[1], markers=True, markersize=5, linewidth=1.0)
             # Plot ticker returns
             for i, ticker in enumerate(self.compare_tickers):
                 sns.lineplot(x=returns.index, y=returns[f"{ticker}_{d}_return"], label=f"{ticker} returns", ax=ax, color=colors[2+i], markers=True, markersize=5, linewidth=1.0)
@@ -150,8 +159,14 @@ class Analyzer():
         # Apply Seaborn styling
         sns.set_style("whitegrid")
 
-        # Create figure with 2x3 subplots
-        fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+        # Create figure with automatic subplots
+        cols = int(np.ceil(len(horizons)/2))
+        
+        if cols > 1:
+            fig, axes = plt.subplots(2, cols, figsize=(18, 10), sharex=True)
+        else:
+            fig, axes = plt.subplots(2, 1, figsize=(14, 8))
+
         axes = axes.flatten()
 
         # Define colors using Seaborn palette
@@ -197,4 +212,71 @@ class Analyzer():
 
         # Show plot
         plt.show()
- 
+
+    def plot_returns_cdfs(self, returns_kwargs:dict={"horizons":[5,15,30, 60, 120], "start_date":None}, save=False):
+        # Retrieve Returns 
+        returns, horizons = self.build_returns(**returns_kwargs)
+        
+        # Apply Seaborn styling
+        sns.set_style("whitegrid")
+        
+        # Create figure with automatic subplots
+        cols = int(np.ceil(len(horizons)/2))
+        
+        if cols > 1:
+            fig, axes = plt.subplots(2, cols, figsize=(18, 10), sharex=True)
+        else:
+            fig, axes = plt.subplots(2, 1, figsize=(14, 8))
+        
+        axes = axes.flatten()
+        
+        # Define colors using Seaborn palette
+        colors = sns.color_palette()
+        
+        # Iterate through horizons and create subplots
+        for i, d in enumerate(horizons):
+            ax = axes[i]
+            
+            # Plot CDF for each column
+            self._plot_cdf(returns[f"mc_{d}_return"], "Market CDF", ax, colors[0])
+            self._plot_cdf(returns[f"rh_portfolio_{d}_return"], "RH CDF", ax, colors[1])
+            
+            for j, ticker in enumerate(self.compare_tickers):
+                self._plot_cdf(returns[f"{ticker}_{d}_return"], f"{ticker} CDF", ax, colors[2+j])
+            
+            # Set subplot title
+            ax.set_title(f"Horizon: {d}")
+            
+            # Clean up x-axis labels
+            if i > 2:  # Bottom row only
+                ax.set_xlabel("Returns")
+            else:
+                ax.set_xlabel("")
+            
+            # Improve X-axis formatting
+            ax.tick_params(axis='x', rotation=0)
+            
+            # Add grid and legend
+            ax.grid(True, linestyle='--', alpha=0.6)
+            ax.legend()
+        
+        # Set main figure title
+        fig.suptitle("Empirical CDF of Returns Across Horizons", fontsize=16)
+        
+        # Adjust layout
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        
+        if save:
+            out_dir = "../images/cdf_plot.png"
+            plt.savefig(out_dir, dpi=600, bbox_inches='tight')
+            print(f"file saved at {out_dir}")
+        
+        # Show plot
+        plt.show()
+
+    def _plot_cdf(self, data, label, ax, color):
+        """Helper method to plot a single CDF on the given axis"""
+        sorted_data = np.sort(data)
+        cdf = np.arange(1, len(sorted_data) + 1) / len(sorted_data)
+        ax.plot(sorted_data, cdf, label=label, color=color, linewidth=1.0)
+        
