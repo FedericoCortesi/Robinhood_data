@@ -8,18 +8,27 @@ from . import DataLoader
 from .utils import log_ma_returns
 
 class Analyzer():
-    def __init__(self, compare_tickers:list=["VOO"], dl_kwargs:dict={"handle_nans":"drop"}):
+    def __init__(self, compare_tickers:list=["VOO"], 
+                 dl_kwargs:dict={"handle_nans":"drop"}, 
+                 return_params:dict={"horizons":[5,15,30, 60, 120], 
+                                     "start_date":None, 
+                                     "end_date":None, 
+                                     "cumulative":True}):
+        
         # Instantiate Dataloader
         handle_nans = dl_kwargs.get("handle_nans", None)
         self.dl = DataLoader(handle_nans=handle_nans)
         
-        # Memorize tickers to compare
+        # Memorize tickers to compare and return params
         self.compare_tickers = compare_tickers
+        self.return_params = return_params
 
         # Memorize important dfs
         self.df_merged = self.dl.merge_dfs()
-        self.df_sp = self.df_merged[self.df_merged["ticker"]=="VOO"]
-      
+
+        # Define images directory
+        self.images_dir = "../non_code/latex/images"
+
 
 
     def _extract_relevant_tickers(self):
@@ -62,10 +71,13 @@ class Analyzer():
         return levels        
 
 
-    def build_returns(self, start_date=None, end_date=None, horizons:list=[5,15,30, 60, 120], cumulative:bool=True):
-        if start_date != None:
-            self.df_merged = self.dl.merge_dfs(start_date=start_date)
-
+    def build_returns(self):
+        # Get params
+        start_date = self.return_params.get("start_date")
+        end_date = self.return_params.get("end_date")
+        horizons = self.return_params.get("horizons")
+        cumulative = self.return_params.get("cumulative")
+        
         # Retrieve levels
         levels = self._build_levels()
 
@@ -81,9 +93,9 @@ class Analyzer():
         
 
 
-    def plot_returns_timeseries(self, returns_kwargs:dict={"horizons":[5,15,30, 60, 120], "start_date":None}, save:bool=False):
+    def plot_returns_timeseries(self, save:bool=False, name:str="returns_plot", show:bool=True):
         # Retrieve Returns 
-        returns, horizons = self.build_returns(**returns_kwargs)
+        returns, horizons = self.build_returns()
 
         # Apply Seaborn styling
         sns.set_style("whitegrid")
@@ -144,17 +156,17 @@ class Analyzer():
         plt.tight_layout(rect=[0, 0, 1, 0.96])
 
         if save:
-            out_dir = "../images/returns_plot.png"
-            plt.savefig(out_dir, dpi=600, bbox_inches='tight')
+            out_dir = f"{self.images_dir}/{name}.png"
+            plt.savefig(out_dir, dpi=400, bbox_inches='tight')
             print(f"file saved at {out_dir}")
 
+        if show:
+            # Show plot
+            plt.show()
 
-        # Show plot
-        plt.show()
-
-    def plot_returns_kdes(self, returns_kwargs:dict={"horizons":[5,15,30, 60, 120], "start_date":None}, save=False):
+    def plot_returns_kdes(self, save=False, name:str="cdf_plot", show:bool=True):
         # Retrieve Returns 
-        returns, horizons = self.build_returns(**returns_kwargs)
+        returns, horizons = self.build_returns()
 
         # Apply Seaborn styling
         sns.set_style("whitegrid")
@@ -163,7 +175,7 @@ class Analyzer():
         cols = int(np.ceil(len(horizons)/2))
         
         if cols > 1:
-            fig, axes = plt.subplots(2, cols, figsize=(18, 10), sharex=True)
+            fig, axes = plt.subplots(2, cols, figsize=(18, 10))
         else:
             fig, axes = plt.subplots(2, 1, figsize=(14, 8))
 
@@ -206,16 +218,17 @@ class Analyzer():
         plt.tight_layout(rect=[0, 0, 1, 0.96])
 
         if save:
-            out_dir = "../images/distributions_plot.png"
+            out_dir = f"{self.images_dir}/{name}.png"
             plt.savefig(out_dir, dpi=600, bbox_inches='tight')
             print(f"file saved at {out_dir}")
 
-        # Show plot
-        plt.show()
+        if show:
+            # Show plot
+            plt.show()
 
-    def plot_returns_cdfs(self, returns_kwargs:dict={"horizons":[5,15,30, 60, 120], "start_date":None}, save=False):
+    def plot_returns_cdfs(self, save=False, name:str="cdf_plot", show:bool=True):
         # Retrieve Returns 
-        returns, horizons = self.build_returns(**returns_kwargs)
+        returns, horizons = self.build_returns()
         
         # Apply Seaborn styling
         sns.set_style("whitegrid")
@@ -267,12 +280,13 @@ class Analyzer():
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         
         if save:
-            out_dir = "../images/cdf_plot.png"
+            out_dir = f"{self.images_dir}/{name}.png"
             plt.savefig(out_dir, dpi=600, bbox_inches='tight')
             print(f"file saved at {out_dir}")
         
-        # Show plot
-        plt.show()
+        if show:
+            # Show plot
+            plt.show()
 
     def _plot_cdf(self, data, label, ax, color):
         """Helper method to plot a single CDF on the given axis"""
