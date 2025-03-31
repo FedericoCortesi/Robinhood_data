@@ -19,6 +19,7 @@ def log_ma_returns(levels, horizons:list=[5,15,30, 60, 120], cumulative:bool=Tru
 
     for h in horizons: # delete min_periods if you want to start at date d and not before
         min_periods = 1 if append_start else h
+        min_periods = min_periods if min_periods < len(returns) else 1
         for col in levels.columns:
             returns[f"{col}_{h}_return"] = returns[col].rolling(h, min_periods=min_periods).sum()
         

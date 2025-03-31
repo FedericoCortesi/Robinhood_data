@@ -8,18 +8,25 @@ from pathlib import Path
 CURRENT_DIR = Path(__file__).resolve().parent
 
 class DataLoader:
-    def __init__(self, df_robinhood_path:str="df_rh.csv", df_crsp_path:str="df_crsp.csv", handle_nans:str="keep"):
-    
-        # Build the absolute paths
-        self.df_robinhood_path = CURRENT_DIR.parents[0] / "data" / df_robinhood_path
-        self.df_crsp_path = CURRENT_DIR.parents[0] / "data" /df_crsp_path
+    def __init__(self, df_robinhood_path:str="df_rh.csv", df_crsp_path:str="df_crsp.csv", handle_nans:str="drop", load_merged:bool=True, load_other_dfs:bool=False):
 
+        # Check if value is ok
         assert handle_nans in ["fill", "drop", "keep"], "only 'fill', 'drop', and 'keep' are possible values for handle_nans"
         self.handle_nans = handle_nans
+    
+        # Memorize the variables
+        self.load_merged = load_merged
+        self.load_other_dfs = load_other_dfs
 
-        # Load Dataframes
-        self._load_robinhood_data()
-        self._load_crsp_data()
+        # Build the absolute paths
+        self.df_robinhood_path = CURRENT_DIR.parents[0] / "data" / df_robinhood_path
+        self.df_crsp_path = CURRENT_DIR.parents[0] / "data" / df_crsp_path
+        self.df_crsp_path = CURRENT_DIR.parents[0] / "data" / f"df_merged{handle_nans}.csv"
+
+        # Load the other dfs only in case its specificied (saves time in case you are just reading the csv)
+        if load_other_dfs:
+            self._load_robinhood_data()
+            self._load_crsp_data()
 
     def _load_robinhood_data(self):
         """"
@@ -133,7 +140,19 @@ class DataLoader:
         return df_crsp
     
 
-    def merge_dfs(self, users:bool=False, start_date:str=None, end_date:str=None):
+    def merge_dfs(self):
+        if self.load_merged: # Access just read the file
+            df = pd.read_csv("../data/df_merged_drop.csv", index_col=0)
+            return df
+        else:
+            if not self.load_other_dfs: # Build the necessary files if not built in __init__
+                self._load_robinhood_data()
+                self._load_crsp_data()
+            df = self._build_merged_df_from_crsp_rh()
+            return df
+
+
+    def _build_merged_df_from_crsp_rh(self, users:bool=False, start_date:str=None, end_date:str=None):
         print("Merging...")
         # Filter dataframes
         self._filter_dfs_common_tickers()
@@ -184,8 +203,8 @@ class DataLoader:
 
 
         # Build additional features
-        df_merged["daily_returns"] = df_merged.groupby("ticker")["prc_adj"].apply(lambda x: np.log(x / x.shift(1))).reset_index(level=0, drop=True).fillna(0)
-        df_merged["cumulative_returns"] = df_merged.groupby("ticker")["daily_returns"].cumsum()
+        #df_merged["daily_returns"] = df_merged.groupby("ticker")["prc_adj"].apply(lambda x: np.log(x / x.shift(1))).reset_index(level=0, drop=True).fillna(0)
+        #df_merged["cumulative_returns"] = df_merged.groupby("ticker")["daily_returns"].cumsum()
         df_merged['mc'] = df_merged['prc_adj'] * df_merged['shrout_adj']
         df_merged['mc_retail'] = df_merged['prc_adj'] * df_merged["holders"]
         #df_merged["retail_ownership"] = df_merged["holders"] / df_merged["shrout_adj"]

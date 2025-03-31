@@ -13,7 +13,8 @@ class Analyzer():
                  return_params:dict={"horizons":[5,15,30, 60, 120], 
                                      "start_date":None, 
                                      "end_date":None, 
-                                     "cumulative":True}):
+                                     "cumulative":True,
+                                     "append_start":True}):
         
         # Instantiate Dataloader
         handle_nans = dl_kwargs.get("handle_nans", None)
@@ -77,6 +78,7 @@ class Analyzer():
         end_date = self.return_params.get("end_date")
         horizons = self.return_params.get("horizons")
         cumulative = self.return_params.get("cumulative")
+        append_start = self.return_params.get("append_start")
         
         # Retrieve levels
         levels = self._build_levels()
@@ -87,13 +89,16 @@ class Analyzer():
         if end_date != None:
             levels = levels[levels.index<=end_date]
 
-        result = log_ma_returns(levels=levels, horizons=horizons, cumulative=cumulative)
+        result = log_ma_returns(levels=levels, horizons=horizons, cumulative=cumulative, append_start=append_start)
         
         return result
         
 
 
-    def plot_returns_timeseries(self, save:bool=False, name:str="returns_plot", show:bool=True):
+    def plot_returns_timeseries(self, save:bool=False, 
+                                name:str="returns_plot.png", 
+                                title:str="Rolling Market vs Retail Returns Across Horizons", 
+                                show:bool=True):
         # Retrieve Returns 
         returns, horizons = self.build_returns()
 
@@ -106,7 +111,7 @@ class Analyzer():
         if rows > 1:
             fig, axes = plt.subplots(rows, 2, figsize=(18, 12), sharex=True)
         else:
-            fig, axes = plt.subplots(2, 1, figsize=(18, 8), sharex=True)
+            fig, axes = plt.subplots(2, 1, figsize=(14, 8), sharex=True)
         
         axes = axes.flatten()
 
@@ -150,13 +155,13 @@ class Analyzer():
             ax.legend(loc="upper left")
 
         # Set main figure title
-        fig.suptitle("Rolling Market vs Retail Returns Across Horizons", fontsize=16)
+        fig.suptitle(title, fontsize=16)
 
         # Adjust layout
         plt.tight_layout(rect=[0, 0, 1, 0.96])
 
         if save:
-            out_dir = f"{self.images_dir}/{name}.png"
+            out_dir = f"{self.images_dir}/{name}"
             plt.savefig(out_dir, dpi=400, bbox_inches='tight')
             print(f"file saved at {out_dir}")
 
@@ -164,7 +169,7 @@ class Analyzer():
             # Show plot
             plt.show()
 
-    def plot_returns_kdes(self, save=False, name:str="cdf_plot", show:bool=True):
+    def plot_returns_kdes(self, save=False, name:str="kde_plot.png", title:str="Rolling Market vs Retail Returns Distribution Across Horizons", show:bool=True):
         # Retrieve Returns 
         returns, horizons = self.build_returns()
 
@@ -212,13 +217,13 @@ class Analyzer():
             ax.legend()
 
         # Set main figure title
-        fig.suptitle("Rolling Market vs Retail Returns Distribution Across Horizons", fontsize=16)
+        fig.suptitle(title, fontsize=16)
 
         # Adjust layout
         plt.tight_layout(rect=[0, 0, 1, 0.96])
 
         if save:
-            out_dir = f"{self.images_dir}/{name}.png"
+            out_dir = f"{self.images_dir}/{name}"
             plt.savefig(out_dir, dpi=600, bbox_inches='tight')
             print(f"file saved at {out_dir}")
 
@@ -226,7 +231,7 @@ class Analyzer():
             # Show plot
             plt.show()
 
-    def plot_returns_cdfs(self, save=False, name:str="cdf_plot", show:bool=True):
+    def plot_returns_cdfs(self, save=False, name:str="cdf_plot.png", title:str="Empirical CDF of Returns Across Horizons", show:bool=True):
         # Retrieve Returns 
         returns, horizons = self.build_returns()
         
@@ -237,7 +242,7 @@ class Analyzer():
         cols = int(np.ceil(len(horizons)/2))
         
         if cols > 1:
-            fig, axes = plt.subplots(2, cols, figsize=(18, 10), sharex=True)
+            fig, axes = plt.subplots(2, cols, figsize=(18, 10))
         else:
             fig, axes = plt.subplots(2, 1, figsize=(14, 8))
         
@@ -274,13 +279,13 @@ class Analyzer():
             ax.legend()
         
         # Set main figure title
-        fig.suptitle("Empirical CDF of Returns Across Horizons", fontsize=16)
+        fig.suptitle(title, fontsize=16)
         
         # Adjust layout
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         
         if save:
-            out_dir = f"{self.images_dir}/{name}.png"
+            out_dir = f"{self.images_dir}/{name}"
             plt.savefig(out_dir, dpi=600, bbox_inches='tight')
             print(f"file saved at {out_dir}")
         
@@ -293,4 +298,154 @@ class Analyzer():
         sorted_data = np.sort(data)
         cdf = np.arange(1, len(sorted_data) + 1) / len(sorted_data)
         ax.plot(sorted_data, cdf, label=label, color=color, linewidth=1.0)
+
+
+    def test_second_order_stochastic_dominance(self, col_a:str, col_b:str, df:pd.DataFrame=None):
+        """
+        Test for second-order stochastic dominance between two return series from a DataFrame.
         
+        Parameters:
+        - col_a : str
+            Column name for the first return series
+        - col_b : str
+            Column name for the second return series
+        - df : pandas.DataFrame, optional
+            DataFrame containing the return series, calls `build_returns()` if omitted
+            
+        Returns:
+        - tuple:
+            - dominance: bool, True if series A dominates series B
+            - integrated_cdf_a: numpy.array, integrated CDF values for series A
+            - integrated_cdf_b: numpy.array, integrated CDF values for series B
+            - x_grid: numpy.array, common x-axis values for the integrated CDFs
+            - dominance_confidence: float, percentage of points where the dominance relation holds
+        """    
+        # Obtain return df if no df is provided
+        if not df:
+            df = self.build_returns()
+
+        # Extract and drop NaN values
+        returns_a = df[col_a].dropna().values
+        returns_b = df[col_b].dropna().values
+        
+        # Normalize returns (using standardization)
+        #returns_a = (returns_a - np.mean(returns_a)) / np.std(returns_a)
+        #returns_b = (returns_b - np.mean(returns_b)) / np.std(returns_b)
+        
+        # Create sorted arrays and CDFs
+        x_a = np.sort(returns_a)
+        x_b = np.sort(returns_b)
+
+        # Go over each item in the array and get the cumulative probability
+        cdf_a = np.arange(1, len(x_a) + 1) / len(x_a)
+        cdf_b = np.arange(1, len(x_b) + 1) / len(x_b)
+        
+        # Create integrated CDFs (need to use common x-grid)
+        x_grid = np.unique(np.concatenate([x_a, x_b]))
+        x_grid.sort()  # Ensure the grid is sorted
+        
+        # Interpolate CDFs onto common grid
+        cdf_a_interp = np.interp(x_grid, x_a, cdf_a, left=0)
+        cdf_b_interp = np.interp(x_grid, x_b, cdf_b, left=0)
+        
+        # Calculate integrated CDFs
+        dx = np.diff(x_grid, prepend=x_grid[0] - (x_grid[1] - x_grid[0]))
+        integrated_cdf_a = np.cumsum(cdf_a_interp * dx)
+        integrated_cdf_b = np.cumsum(cdf_b_interp * dx)
+        
+        # Test for SSD: A dominates B if integrated_cdf_a <= integrated_cdf_b for all points
+        dominance_points = integrated_cdf_a <= integrated_cdf_b
+        dominance = np.all(dominance_points)
+        dominance_confidence = np.mean(dominance_points) * 100
+        
+        return dominance, integrated_cdf_a, integrated_cdf_b, x_grid, dominance_confidence
+
+    def plot_ssd_comparison(self, col_a, col_b, df:pd.DataFrame=None, save:bool=False, name:str="SSD", title=None, show:bool=True):
+        """
+        Test for second-order stochastic dominance and visualize the results.
+        
+        Parameters:
+        col_a : str
+            Column name for the first return series
+        col_b : str
+            Column name for the second return series
+        df : pandas.DataFrame, optional
+            DataFrame containing the return series, calls `build_returns()` if omitted
+        save : bool, optional
+            Whether to save the plot
+        name : str, optional
+            Name of the saved file
+        title : str, optional
+            Plot title
+        show : bool, optional
+            Whether to show the plot
+            
+        Returns:
+        dominance: bool
+            True if series A dominates series B
+        """
+
+        # Obtain return df if no df is provided
+        if not df:
+            df = self.build_returns()
+
+        
+        # Run the SSD test
+        dominance, int_cdf_a, int_cdf_b, x_grid, confidence = self.test_second_order_stochastic_dominance(df, col_a, col_b)
+        
+        # Create figure with two subplots
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+        
+        # Plot 1: Original normalized CDFs
+        returns_a = df[col_a].dropna().values
+        returns_b = df[col_b].dropna().values
+        
+        # Memorize colors to access them when plotting
+        colors = sns.color_palette()
+        
+        x_a = np.sort(returns_a)
+        x_b = np.sort(returns_b)
+        cdf_a = np.arange(1, len(x_a) + 1) / len(x_a)
+        cdf_b = np.arange(1, len(x_b) + 1) / len(x_b)
+        
+        ax1.plot(x_a, cdf_a, label=f"{col_a} CDF", linewidth=1, color=colors[0])
+        ax1.plot(x_b, cdf_b, label=f"{col_b} CDF", linewidth=1, color=colors[1])
+        ax1.set_title("Normalized CDFs")
+        ax1.set_xlabel("Normalized Returns")
+        ax1.set_ylabel("Cumulative Probability")
+        ax1.grid(True, alpha=0.3)
+        ax1.legend()
+        
+        # Plot 2: Integrated CDFs
+        ax2.plot(x_grid, int_cdf_a, label=f"{col_a} Integrated CDF", linewidth=1, color=colors[0])
+        ax2.plot(x_grid, int_cdf_b, label=f"{col_b} Integrated CDF", linewidth=1, color=colors[1])
+        ax2.set_title("Integrated CDFs")
+        ax2.set_xlabel("Normalized Returns")
+        ax2.set_ylabel("Integrated CDF Value")
+        ax2.grid(True, alpha=0.3)
+        ax2.legend()
+        
+        # Add dominance message
+        if dominance:
+            dom_msg = f"{col_a} dominates {col_b} (SSD)"
+        else:
+            dom_msg = f"{col_a} does not dominate {col_b} (SSD), {confidence:.1f}% of points support dominance"
+        
+        if title:
+            fig.suptitle(f"{title}\n{dom_msg}", fontsize=14)
+        else:
+            fig.suptitle(dom_msg, fontsize=14)
+        
+        plt.tight_layout()
+        plt.subplots_adjust(top=0.88)
+
+        # Save with the name
+        if save:
+            out_dir = f"{self.images_dir}/{name}"
+            plt.savefig(out_dir, dpi=400, bbox_inches='tight')
+            print(f"file saved at {out_dir}")
+
+        if show:
+            plt.show()
+        
+        return dominance
