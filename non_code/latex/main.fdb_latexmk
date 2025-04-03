@@ -1,20 +1,20 @@
 # Fdb version 4
-["bibtex main"] 1743423418 "main.aux" "main.bbl" "main" 1743423446 0
+["bibtex main"] 1743423773 "main.aux" "main.bbl" "main" 1743424060 0
   "./references.bib" 1743422316 2163 7b486c483316845a1843525d01ceca9c ""
-  "Sections/appendix.aux" 1743423445 2877 c1d094e7eedcaab622bbd3405d33f13d "pdflatex"
-  "Sections/lit_review.aux" 1743423445 2018 42c29d1952eb78eb1915fa28cd55a423 "pdflatex"
+  "Sections/appendix.aux" 1743424059 2877 c1d094e7eedcaab622bbd3405d33f13d "pdflatex"
+  "Sections/lit_review.aux" 1743424059 2018 42c29d1952eb78eb1915fa28cd55a423 "pdflatex"
   "d:/texlive/2023/texmf-dist/bibtex/bst/base/apalike.bst" 1700058237 24635 604dafcc79f521a11ea73e506e1fbd98 ""
-  "main.aux" 1743423445 3407 19ddb860a2f87f87006afa009a7344dc "pdflatex"
+  "main.aux" 1743424059 3407 19ddb860a2f87f87006afa009a7344dc "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1743423418 "d:/Uni/Bocconi/Thesis/Robinhood_data/non_code/latex/main.tex" "main.pdf" "main" 1743423446 0
-  "Sections/appendix.aux" 1743423445 2877 c1d094e7eedcaab622bbd3405d33f13d "pdflatex"
+["pdflatex"] 1743424032 "d:/Uni/Bocconi/Thesis/Robinhood_data/non_code/latex/main.tex" "main.pdf" "main" 1743424060 0
+  "Sections/appendix.aux" 1743424059 2877 c1d094e7eedcaab622bbd3405d33f13d "pdflatex"
   "Sections/appendix.tex" 1743418547 17341 0be1f5ab3d3a4e5fde19b454ae2d53aa ""
-  "Sections/lit_review.aux" 1743423445 2018 42c29d1952eb78eb1915fa28cd55a423 "pdflatex"
+  "Sections/lit_review.aux" 1743424059 2018 42c29d1952eb78eb1915fa28cd55a423 "pdflatex"
   "Sections/lit_review.tex" 1743422100 2931 02eff8491e720b010eef47ff0c2a54c9 ""
-  "Sections/returns.tex" 1743423392 13142 67bf7bbe05f1f19e06a840b39be4568b ""
+  "Sections/returns.tex" 1743424008 13157 ffb9b2dd3500abb15d4050420e73252c ""
   "Sections/robinhood_dataset.tex" 1743335668 8751 fe64d3fbcf6e9d86564521a317c5c1f2 ""
   "d:/Uni/Bocconi/Thesis/Robinhood_data/non_code/latex/main.tex" 1743335903 7965 c3b8d69c340f014a97df70989da9f28b ""
   "d:/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc" 1700060166 3486 c7eadf5dcc57b3b2d11736679f6636ba ""
@@ -198,9 +198,9 @@
   "images/returns_comparison.png" 1743413945 2412044 1763382b1e69a2429793288f7f97001b ""
   "images/returns_comparison_pandemic.png" 1743413752 2020174 fbcd9068e733a50574c7c4d1701a4594 ""
   "images/ts_including_1_5.png" 1743415060 1295992 e40bf5dd27c5e0fc084f3def3414da78 ""
-  "main.aux" 1743423445 3407 19ddb860a2f87f87006afa009a7344dc "pdflatex"
-  "main.bbl" 1743423418 1107 451708270108e79a5043580ffb0dc246 "bibtex main"
-  "main.out" 1743423445 4364 cd0624ebd3d36dcc8a8a2b44b379d88d "pdflatex"
+  "main.aux" 1743424059 3407 19ddb860a2f87f87006afa009a7344dc "pdflatex"
+  "main.bbl" 1743423774 1107 451708270108e79a5043580ffb0dc246 "bibtex main"
+  "main.out" 1743424059 4364 cd0624ebd3d36dcc8a8a2b44b379d88d "pdflatex"
   "main.tex" 1743335903 7965 c3b8d69c340f014a97df70989da9f28b ""
   (generated)
   "Sections/appendix.aux"

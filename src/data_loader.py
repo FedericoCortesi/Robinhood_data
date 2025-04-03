@@ -9,7 +9,6 @@ CURRENT_DIR = Path(__file__).resolve().parent
 
 class DataLoader:
     def __init__(self, df_robinhood_path:str="df_rh.csv", df_crsp_path:str="df_crsp.csv", handle_nans:str="drop", load_merged:bool=True, load_other_dfs:bool=False):
-
         # Check if value is ok
         assert handle_nans in ["fill", "drop", "keep"], "only 'fill', 'drop', and 'keep' are possible values for handle_nans"
         self.handle_nans = handle_nans
@@ -21,7 +20,7 @@ class DataLoader:
         # Build the absolute paths
         self.df_robinhood_path = CURRENT_DIR.parents[0] / "data" / df_robinhood_path
         self.df_crsp_path = CURRENT_DIR.parents[0] / "data" / df_crsp_path
-        self.df_crsp_path = CURRENT_DIR.parents[0] / "data" / f"df_merged{handle_nans}.csv"
+        self.df_merged_path = CURRENT_DIR.parents[0] / "data" / f"df_merged_{handle_nans}.parquet"
 
         # Load the other dfs only in case its specificied (saves time in case you are just reading the csv)
         if load_other_dfs:
@@ -140,9 +139,12 @@ class DataLoader:
         return df_crsp
     
 
-    def merge_dfs(self):
+    def merge_dfs(self, columns:list=None):
         if self.load_merged: # Access just read the file
-            df = pd.read_csv("../data/df_merged_drop.csv", index_col=0)
+            if columns:
+                df = pd.read_parquet(self.df_merged_path, columns=columns)
+            else:
+                df = pd.read_parquet(self.df_merged_path)
             return df
         else:
             if not self.load_other_dfs: # Build the necessary files if not built in __init__

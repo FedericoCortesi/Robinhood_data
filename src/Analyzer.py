@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 from . import DataLoader
-from .utils import log_ma_returns
+from .utils import log_ma_returns, setup_custom_logger
 
 class Analyzer():
     def __init__(self, compare_tickers:list=["VOO"], 
                  dl_kwargs:dict={"handle_nans":"drop"}, 
-                 return_params:dict={"horizons":[5,15,30, 60, 120], 
+                 return_params:dict={"horizons":{5,15,30, 60, 120}, 
                                      "start_date":None, 
                                      "end_date":None, 
                                      "cumulative":True,
@@ -25,10 +25,14 @@ class Analyzer():
         self.return_params = return_params
 
         # Memorize important dfs
-        self.df_merged = self.dl.merge_dfs()
+        self.df_merged = self.dl.merge_dfs(columns=["date", "mc", "prc_adj", "popularity", "ticker"])
+
+        # Define self.colors using Seaborn palette
+        self.colors = sns.color_palette("muted")
 
         # Define images directory
         self.images_dir = "../non_code/latex/images"
+
 
 
 
@@ -115,9 +119,6 @@ class Analyzer():
         
         axes = axes.flatten()
 
-        # Define colors using Seaborn palette
-        colors = sns.color_palette()
-
         # Iterate through horizons and create subplots
         for i, d in enumerate(horizons):
             ax = axes[i]
@@ -128,12 +129,12 @@ class Analyzer():
                 ax.axvline(returns.index[d], color="black", alpha=0.5, linewidth=1)
 
             # Plot Market Cap returns
-            sns.lineplot(x=returns.index, y=returns[f"mc_{d}_return"], label=f"Market returns", ax=ax, color=colors[0], markers=True, markersize=5, linewidth=1.0)
+            sns.lineplot(x=returns.index, y=returns[f"mc_{d}_return"], label=f"Market returns", ax=ax, color=self.colors[0], markers=True, markersize=5, linewidth=1.0)
             # Plot Retail Market Cap returns
-            sns.lineplot(x=returns.index, y=returns[f"rh_portfolio_{d}_return"], label=f"RH returns", ax=ax, color=colors[1], markers=True, markersize=5, linewidth=1.0)
+            sns.lineplot(x=returns.index, y=returns[f"rh_portfolio_{d}_return"], label=f"RH returns", ax=ax, color=self.colors[1], markers=True, markersize=5, linewidth=1.0)
             # Plot ticker returns
             for i, ticker in enumerate(self.compare_tickers):
-                sns.lineplot(x=returns.index, y=returns[f"{ticker}_{d}_return"], label=f"{ticker} returns", ax=ax, color=colors[2+i], markers=True, markersize=5, linewidth=1.0)
+                sns.lineplot(x=returns.index, y=returns[f"{ticker}_{d}_return"], label=f"{ticker} returns", ax=ax, color=self.colors[2+i], markers=True, markersize=5, linewidth=1.0)
 
 
             # Set subplot title
@@ -186,18 +187,14 @@ class Analyzer():
 
         axes = axes.flatten()
 
-        # Define colors using Seaborn palette
-        colors = sns.color_palette()
-
-
         # Iterate through horizons and create subplots
         for i, d in enumerate(horizons):
             ax = axes[i]
 
-            sns.kdeplot(data=returns[f"mc_{d}_return"], label=f"Market Distribution",  ax=ax, color=colors[0], linewidth=1.0)
-            sns.kdeplot(data=returns[f"rh_portfolio_{d}_return"], label=f"RH Distribution", ax=ax, color=colors[1], linewidth=1.0)
+            sns.kdeplot(data=returns[f"mc_{d}_return"], label=f"Market Distribution",  ax=ax, color=self.colors[0], linewidth=1.0)
+            sns.kdeplot(data=returns[f"rh_portfolio_{d}_return"], label=f"RH Distribution", ax=ax, color=self.colors[1], linewidth=1.0)
             for i, ticker in enumerate(self.compare_tickers):
-                sns.kdeplot(data=returns[f"{ticker}_{d}_return"], label=f"{ticker} Distribution",  ax=ax, color=colors[2+i], linewidth=1.0)
+                sns.kdeplot(data=returns[f"{ticker}_{d}_return"], label=f"{ticker} Distribution",  ax=ax, color=self.colors[2+i], linewidth=1.0)
 
             # Set subplot title
             ax.set_title(f"Horizon: {d}")
@@ -248,19 +245,17 @@ class Analyzer():
         
         axes = axes.flatten()
         
-        # Define colors using Seaborn palette
-        colors = sns.color_palette()
         
         # Iterate through horizons and create subplots
         for i, d in enumerate(horizons):
             ax = axes[i]
             
             # Plot CDF for each column
-            self._plot_cdf(returns[f"mc_{d}_return"], "Market CDF", ax, colors[0])
-            self._plot_cdf(returns[f"rh_portfolio_{d}_return"], "RH CDF", ax, colors[1])
+            self._plot_cdf(returns[f"mc_{d}_return"], "Market CDF", ax, self.colors[0])
+            self._plot_cdf(returns[f"rh_portfolio_{d}_return"], "RH CDF", ax, self.colors[1])
             
             for j, ticker in enumerate(self.compare_tickers):
-                self._plot_cdf(returns[f"{ticker}_{d}_return"], f"{ticker} CDF", ax, colors[2+j])
+                self._plot_cdf(returns[f"{ticker}_{d}_return"], f"{ticker} CDF", ax, self.colors[2+j])
             
             # Set subplot title
             ax.set_title(f"Horizon: {d}")
@@ -321,17 +316,14 @@ class Analyzer():
             - dominance_confidence: float, percentage of points where the dominance relation holds
         """    
         # Obtain return df if no df is provided
-        if not df:
-            df = self.build_returns()
+        if df is None:
+            df = self.build_returns()[0]
+
 
         # Extract and drop NaN values
         returns_a = df[col_a].dropna().values
         returns_b = df[col_b].dropna().values
-        
-        # Normalize returns (using standardization)
-        #returns_a = (returns_a - np.mean(returns_a)) / np.std(returns_a)
-        #returns_b = (returns_b - np.mean(returns_b)) / np.std(returns_b)
-        
+                
         # Create sorted arrays and CDFs
         x_a = np.sort(returns_a)
         x_b = np.sort(returns_b)
@@ -360,6 +352,8 @@ class Analyzer():
         
         return dominance, integrated_cdf_a, integrated_cdf_b, x_grid, dominance_confidence
 
+    
+
     def plot_ssd_comparison(self, col_a, col_b, df:pd.DataFrame=None, save:bool=False, name:str="SSD", title=None, show:bool=True):
         """
         Test for second-order stochastic dominance and visualize the results.
@@ -386,12 +380,11 @@ class Analyzer():
         """
 
         # Obtain return df if no df is provided
-        if not df:
-            df = self.build_returns()
+        if df is None:
+            df = self.build_returns()[0]
 
-        
         # Run the SSD test
-        dominance, int_cdf_a, int_cdf_b, x_grid, confidence = self.test_second_order_stochastic_dominance(df, col_a, col_b)
+        dominance, int_cdf_a, int_cdf_b, x_grid, confidence = self.test_second_order_stochastic_dominance(col_a=col_a, col_b=col_b, df=df)
         
         # Create figure with two subplots
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
@@ -399,17 +392,15 @@ class Analyzer():
         # Plot 1: Original normalized CDFs
         returns_a = df[col_a].dropna().values
         returns_b = df[col_b].dropna().values
-        
-        # Memorize colors to access them when plotting
-        colors = sns.color_palette()
-        
+
+        # Build cdf        
         x_a = np.sort(returns_a)
         x_b = np.sort(returns_b)
         cdf_a = np.arange(1, len(x_a) + 1) / len(x_a)
         cdf_b = np.arange(1, len(x_b) + 1) / len(x_b)
         
-        ax1.plot(x_a, cdf_a, label=f"{col_a} CDF", linewidth=1, color=colors[0])
-        ax1.plot(x_b, cdf_b, label=f"{col_b} CDF", linewidth=1, color=colors[1])
+        ax1.plot(x_a, cdf_a, label=f"{col_a} CDF", linewidth=1, color=self.colors[0])
+        ax1.plot(x_b, cdf_b, label=f"{col_b} CDF", linewidth=1, color=self.colors[1])
         ax1.set_title("Normalized CDFs")
         ax1.set_xlabel("Normalized Returns")
         ax1.set_ylabel("Cumulative Probability")
@@ -417,8 +408,8 @@ class Analyzer():
         ax1.legend()
         
         # Plot 2: Integrated CDFs
-        ax2.plot(x_grid, int_cdf_a, label=f"{col_a} Integrated CDF", linewidth=1, color=colors[0])
-        ax2.plot(x_grid, int_cdf_b, label=f"{col_b} Integrated CDF", linewidth=1, color=colors[1])
+        ax2.plot(x_grid, int_cdf_a, label=f"{col_a} Integrated CDF", linewidth=1, color=self.colors[0])
+        ax2.plot(x_grid, int_cdf_b, label=f"{col_b} Integrated CDF", linewidth=1, color=self.colors[1])
         ax2.set_title("Integrated CDFs")
         ax2.set_xlabel("Normalized Returns")
         ax2.set_ylabel("Integrated CDF Value")
