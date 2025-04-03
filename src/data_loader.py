@@ -1,36 +1,56 @@
 import numpy as np
 import pandas as pd
+import logging
+from pathlib import Path
 import warnings
+
 warnings.simplefilter(action='ignore', category=Warning)
 
-from pathlib import Path
-CURRENT_DIR = Path(__file__).resolve().parent
+from .utils import setup_custom_logger, load_data_paths
 
-import logging
-from .utils import setup_custom_logger
 # Setup logger
 logger = setup_custom_logger(__name__, level=logging.DEBUG)
 
+CURRENT_DIR = Path(__file__).resolve().parent
+
 class DataLoader:
-    def __init__(self, df_robinhood_path:str="df_rh.csv", df_crsp_path:str="df_crsp.csv", handle_nans:str="drop", load_merged:bool=True, load_other_dfs:bool=False):
-        # Check if value is ok
-        assert handle_nans in ["fill", "drop", "keep"], "only 'fill', 'drop', and 'keep' are possible values for handle_nans"
+    """Loads and preprocesses financial data from specified paths."""
+
+    def __init__(self, handle_nans: str = "drop", load_merged: bool = True, load_other_dfs: bool = False):
+        """
+        Initializes the DataLoader with data paths and processing options.
+
+        Args:
+            handle_nans (str): Strategy for handling NaNs ('fill', 'drop', 'keep').
+            load_merged (bool): Whether to load the merged DataFrame.
+            load_other_dfs (bool): Whether to load other DataFrames.
+        """
+        self._validate_handle_nans(handle_nans)
         self.handle_nans = handle_nans
-    
-        # Memorize the variables
         self.load_merged = load_merged
         self.load_other_dfs = load_other_dfs
 
-        # Build the absolute paths
-        self.df_robinhood_path = CURRENT_DIR.parents[0] / "data" / df_robinhood_path
-        self.df_crsp_path = CURRENT_DIR.parents[0] / "data" / df_crsp_path
-        self.df_merged_path = CURRENT_DIR.parents[0] / "data" / f"df_merged_{handle_nans}.parquet"
-        logger.debug(f"self.df_merged_path: {self.df_merged_path}")
+        self.data_paths = load_data_paths()
+        self._set_file_paths()
 
         # Load the other dfs only in case its specificied (saves time in case you are just reading the csv)
         if load_other_dfs:
             self._load_robinhood_data()
             self._load_crsp_data()
+
+    def _validate_handle_nans(self, handle_nans: str):
+        """Validates the handle_nans parameter."""
+        if handle_nans not in ["fill", "drop", "keep"]:
+            raise ValueError("handle_nans must be one of 'fill', 'drop', or 'keep'.")
+
+    def _set_file_paths(self):
+        """Sets the absolute file paths for the DataFrames."""
+        parent_dir = CURRENT_DIR.parents[0]
+        self.df_robinhood_path = parent_dir / self.data_paths["df_robinhood_path"]
+        self.df_crsp_path = parent_dir / self.data_paths["df_crsp_path"]
+        self.df_merged_path = parent_dir / self.data_paths["df_merged_path"].format(self.handle_nans)
+
+
 
     def _load_robinhood_data(self):
         """"

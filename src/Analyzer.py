@@ -29,7 +29,9 @@ class Analyzer():
         self.return_params = return_params
  
         # Memorize important dfs
-        self.df_merged = self.dl.merge_dfs(columns=["date", "mc", "prc_adj", "popularity", "ticker"])
+        # "mc" variable used to be here, decided to delete it as i don't care about the "market index" built on RH data.
+        # Previously, the "market index"_t was just \sum_{i=1}^N P_{i,t}\cdot S_{i,t}
+        self.df_merged = self.dl.merge_dfs(columns=["date", "prc_adj", "popularity", "ticker"])
 
         # Define self.colors using Seaborn palette
         self.colors = sns.color_palette("muted")
@@ -46,8 +48,8 @@ class Analyzer():
         df_merged = self.df_merged.copy()
 
         # Extract only relevant tickers
-        df_clean = df_merged[df_merged["ticker"].isin(self.compare_tickers)]
-        df_clean = df_clean[["prc_adj", "date", "ticker"]]
+        df_clean = df_merged[["prc_adj", "date", "ticker"]][df_merged["ticker"].isin(self.compare_tickers)]
+        df_clean = df_clean
 
         # Iterate over each ticker to create a dataframe 
         for i, col in enumerate(self.compare_tickers):
@@ -75,8 +77,9 @@ class Analyzer():
         # Obtain the dataframe with relevant tickers
         df_tickers = self._extract_relevant_tickers()
 
-        # merge the levels
-        levels = self.df_merged[["date", "rh_portfolio", "mc"]].groupby("date").sum()
+        # Merge the levels
+        # Using the sun and including "mc" would build the "market index". Excluded as it's not very relevant 
+        levels = self.df_merged[["date", "rh_portfolio"]].groupby("date").sum()
         levels = levels.merge(df_tickers, on="date")
         
         return levels        
@@ -136,7 +139,7 @@ class Analyzer():
                 ax.axvline(returns.index[d], color="black", alpha=0.5, linewidth=1)
 
             # Plot Market Cap returns
-            sns.lineplot(x=returns.index, y=returns[f"mc_{d}_return"], label=f"Market returns", ax=ax, color=self.colors[0], markers=True, markersize=5, linewidth=1.0)
+            #sns.lineplot(x=returns.index, y=returns[f"mc_{d}_return"], label=f"Market returns", ax=ax, color=self.colors[0], markers=True, markersize=5, linewidth=1.0)
             # Plot Retail Market Cap returns
             sns.lineplot(x=returns.index, y=returns[f"rh_portfolio_{d}_return"], label=f"RH returns", ax=ax, color=self.colors[1], markers=True, markersize=5, linewidth=1.0)
             # Plot ticker returns
@@ -198,7 +201,7 @@ class Analyzer():
         for i, d in enumerate(horizons):
             ax = axes[i]
 
-            sns.kdeplot(data=returns[f"mc_{d}_return"], label=f"Market Distribution",  ax=ax, color=self.colors[0], linewidth=1.0)
+            #sns.kdeplot(data=returns[f"mc_{d}_return"], label=f"Market Distribution",  ax=ax, color=self.colors[0], linewidth=1.0)
             sns.kdeplot(data=returns[f"rh_portfolio_{d}_return"], label=f"RH Distribution", ax=ax, color=self.colors[1], linewidth=1.0)
             for i, ticker in enumerate(self.compare_tickers):
                 sns.kdeplot(data=returns[f"{ticker}_{d}_return"], label=f"{ticker} Distribution",  ax=ax, color=self.colors[2+i], linewidth=1.0)
@@ -258,7 +261,7 @@ class Analyzer():
             ax = axes[i]
             
             # Plot CDF for each column
-            self._plot_cdf(returns[f"mc_{d}_return"], "Market CDF", ax, self.colors[0])
+            #self._plot_cdf(returns[f"mc_{d}_return"], "Market CDF", ax, self.colors[0])
             self._plot_cdf(returns[f"rh_portfolio_{d}_return"], "RH CDF", ax, self.colors[1])
             
             for j, ticker in enumerate(self.compare_tickers):
