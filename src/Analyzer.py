@@ -3,14 +3,18 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import logging
 
 from . import DataLoader
 from .utils import log_ma_returns, setup_custom_logger
 
+# Setup logger
+logger = setup_custom_logger(__name__, level=logging.DEBUG)
+
 class Analyzer():
     def __init__(self, compare_tickers:list=["VOO"], 
                  dl_kwargs:dict={"handle_nans":"drop"}, 
-                 return_params:dict={"horizons":{5,15,30, 60, 120}, 
+                 return_params:dict={"horizons":{5,15,30, 60, 120}, # Set so it doesn't go on indefinitely
                                      "start_date":None, 
                                      "end_date":None, 
                                      "cumulative":True,
@@ -23,7 +27,7 @@ class Analyzer():
         # Memorize tickers to compare and return params
         self.compare_tickers = compare_tickers
         self.return_params = return_params
-
+ 
         # Memorize important dfs
         self.df_merged = self.dl.merge_dfs(columns=["date", "mc", "prc_adj", "popularity", "ticker"])
 
@@ -32,6 +36,8 @@ class Analyzer():
 
         # Define images directory
         self.images_dir = "../non_code/latex/images"
+
+        logger.info("Analyzer instantiated!")
 
 
 
@@ -80,7 +86,7 @@ class Analyzer():
         # Get params
         start_date = self.return_params.get("start_date")
         end_date = self.return_params.get("end_date")
-        horizons = self.return_params.get("horizons")
+        horizons = set(self.return_params.get("horizons")) # Ensure consistency and remove double entries
         cumulative = self.return_params.get("cumulative")
         append_start = self.return_params.get("append_start")
         
@@ -99,7 +105,8 @@ class Analyzer():
         
 
 
-    def plot_returns_timeseries(self, save:bool=False, 
+    def plot_returns_timeseries(self, 
+                                save:bool=False, 
                                 name:str="returns_plot.png", 
                                 title:str="Rolling Market vs Retail Returns Across Horizons", 
                                 show:bool=True):
@@ -378,6 +385,8 @@ class Analyzer():
         dominance: bool
             True if series A dominates series B
         """
+        # Ensure sns is used
+        sns.set_style("whitegrid")
 
         # Obtain return df if no df is provided
         if df is None:

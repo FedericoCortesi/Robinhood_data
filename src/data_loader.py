@@ -4,8 +4,12 @@ import warnings
 warnings.simplefilter(action='ignore', category=Warning)
 
 from pathlib import Path
-
 CURRENT_DIR = Path(__file__).resolve().parent
+
+import logging
+from .utils import setup_custom_logger
+# Setup logger
+logger = setup_custom_logger(__name__, level=logging.DEBUG)
 
 class DataLoader:
     def __init__(self, df_robinhood_path:str="df_rh.csv", df_crsp_path:str="df_crsp.csv", handle_nans:str="drop", load_merged:bool=True, load_other_dfs:bool=False):
@@ -21,6 +25,7 @@ class DataLoader:
         self.df_robinhood_path = CURRENT_DIR.parents[0] / "data" / df_robinhood_path
         self.df_crsp_path = CURRENT_DIR.parents[0] / "data" / df_crsp_path
         self.df_merged_path = CURRENT_DIR.parents[0] / "data" / f"df_merged_{handle_nans}.parquet"
+        logger.debug(f"self.df_merged_path: {self.df_merged_path}")
 
         # Load the other dfs only in case its specificied (saves time in case you are just reading the csv)
         if load_other_dfs:
@@ -32,7 +37,7 @@ class DataLoader:
         Loads the dataframe of all available robinhood securities.
         Nans are filled with zero and then deleted because some stocks have zeros instead of nans in the original data.
         """
-        print("Loading Robinhood data")
+        logger.info("Loading Robinhood data")
         
         # Load csv
         df_rh = pd.read_csv(self.df_robinhood_path, index_col=0, parse_dates=[0])
@@ -73,7 +78,7 @@ class DataLoader:
         """
         Loads CRSP Data
         """
-        print("Loading CRSP data")
+        logger.info("Loading CRSP data")
 
         # Load csv
         df_crsp = pd.read_csv(self.df_crsp_path, index_col=[0], parse_dates=[1])
@@ -155,7 +160,7 @@ class DataLoader:
 
 
     def _build_merged_df_from_crsp_rh(self, users:bool=False, start_date:str=None, end_date:str=None):
-        print("Merging...")
+        logger.info("Merging...")
         # Filter dataframes
         self._filter_dfs_common_tickers()
 
