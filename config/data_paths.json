@@ -1,5 +1,5 @@
 {
     "df_merged_path": "data/df_merged_{}.parquet",
-    "df_crsp_path": "data/df_crsp.csv",
-    "df_robinhood_path": "data/df_rh.csv"
+    "df_crsp_path": "data/df_crsp_new.parquet",
+    "df_robinhood_path": "data/df_rh.parquet"
 }

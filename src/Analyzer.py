@@ -12,7 +12,8 @@ from .utils import log_ma_returns, setup_custom_logger
 logger = setup_custom_logger(__name__, level=logging.DEBUG)
 
 class Analyzer():
-    def __init__(self, compare_tickers:list=["VOO"], 
+    def __init__(self, 
+                 compare_tickers:list=["VOO"], 
                  dl_kwargs:dict={"handle_nans":"drop"}, 
                  return_params:dict={"horizons":{5,15,30, 60, 120}, # Set so it doesn't go on indefinitely
                                      "start_date":None, 
@@ -21,8 +22,7 @@ class Analyzer():
                                      "append_start":True}):
         
         # Instantiate Dataloader
-        handle_nans = dl_kwargs.get("handle_nans", None)
-        self.dl = DataLoader(handle_nans=handle_nans)
+        self.dl = DataLoader(**dl_kwargs)
         
         # Memorize tickers to compare and return params
         self.compare_tickers = compare_tickers
@@ -38,10 +38,6 @@ class Analyzer():
 
         # Define images directory
         self.images_dir = "../non_code/latex/images"
-
-        logger.info("Analyzer instantiated!")
-
-
 
 
     def _extract_relevant_tickers(self):
@@ -69,8 +65,10 @@ class Analyzer():
         df_out = df_out.set_index("date")
 
         return df_out
+    
+    
 
-    def _build_levels(self):
+    def build_levels(self):
         # Build Portfolio using Popularity
         self.df_merged["rh_portfolio"] = self.df_merged["popularity"] * self.df_merged["prc_adj"]
 
@@ -94,7 +92,7 @@ class Analyzer():
         append_start = self.return_params.get("append_start")
         
         # Retrieve levels
-        levels = self._build_levels()
+        levels = self.build_levels()
 
         # Filter
         if start_date != None:
@@ -123,7 +121,7 @@ class Analyzer():
         rows = int(np.ceil(len(horizons)/2))
         
         if rows > 1:
-            fig, axes = plt.subplots(rows, 2, figsize=(18, 12), sharex=True)
+            fig, axes = plt.subplots(rows, 2, figsize=(18, 4*rows), sharex=True)
         else:
             fig, axes = plt.subplots(2, 1, figsize=(14, 8), sharex=True)
         
@@ -136,7 +134,7 @@ class Analyzer():
             # Draw horizontal line at 0
             ax.axhline(0, color="black", alpha=0.5, linewidth=1)
             if d < len(returns):
-                ax.axvline(returns.index[d], color="black", alpha=0.5, linewidth=1)
+                ax.axvline(returns.index[d-1], color="black", alpha=0.5, linewidth=1)
 
             # Plot Market Cap returns
             #sns.lineplot(x=returns.index, y=returns[f"mc_{d}_return"], label=f"Market returns", ax=ax, color=self.colors[0], markers=True, markersize=5, linewidth=1.0)

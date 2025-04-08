@@ -37,9 +37,10 @@ def setup_custom_logger(name, level=logging.INFO):
     logger = logging.getLogger(name)
     logger.setLevel(level)
 
-    ch = logging.StreamHandler()
-    ch.setLevel(level)
-    ch.setFormatter(CustomFormatter())
+    if not logger.handlers:
+        ch = logging.StreamHandler()
+        ch.setLevel(level)
+        ch.setFormatter(CustomFormatter())
+        logger.addHandler(ch)
 
-    logger.addHandler(ch)
     return logger

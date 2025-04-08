@@ -50,6 +50,14 @@ class DataLoader:
         self.df_crsp_path = parent_dir / self.data_paths["df_crsp_path"]
         self.df_merged_path = parent_dir / self.data_paths["df_merged_path"].format(self.handle_nans)
 
+        logger.debug(f"self.df_robinhood_path: {self.df_robinhood_path}")
+        logger.debug(f"self.df_crsp_path: {self.df_crsp_path}")
+        logger.debug(f"self.df_merged_path: {self.df_merged_path}")
+
+        # Check if the directory exists
+        if not self.df_merged_path.exists():
+            # if it doesnt exist force building the dataframe from scractch
+            self.load_merged = False    
 
 
     def _load_robinhood_data(self):
@@ -60,7 +68,7 @@ class DataLoader:
         logger.info("Loading Robinhood data")
         
         # Load csv
-        df_rh = pd.read_csv(self.df_robinhood_path, index_col=0, parse_dates=[0])
+        df_rh = pd.read_parquet(self.df_robinhood_path)
 
         # Handle nans
         #df_rh = df_rh.fillna(0)
@@ -101,35 +109,13 @@ class DataLoader:
         logger.info("Loading CRSP data")
 
         # Load csv
-        df_crsp = pd.read_csv(self.df_crsp_path, index_col=[0], parse_dates=[1])
-
-        if False:
-            # Build additional features
-            # Adjust cfacshr to be constant in the period, it's a cumulative measure
-            last_cf_dict = df_crsp.groupby("ticker").last()["cfacshr"].to_dict()
-            df_crsp.loc[:,"cfacshr_last"] = df_crsp["ticker"].map(last_cf_dict)
-            df_crsp.loc[:,"cfacshr_adj"] = df_crsp["cfacshr"] / df_crsp["cfacshr_last"] 
-
-            # Adjust cfacpr to be constant in the period
-            last_cf_dict = df_crsp.groupby("ticker").last()["cfacpr"].to_dict()
-            df_crsp.loc[:, "cfacpr_last"] = df_crsp["ticker"].map(last_cf_dict)
-            df_crsp.loc[:, "cfacpr_adj"] = df_crsp["cfacpr"] / df_crsp["cfacpr_last"] 
-
-            # Adjust for negative prices, happens when the volume is 0
-            df_crsp.loc[:, "prc"] = [-x if x < 0 else x for x in df_crsp["prc"].to_list()]
-
-            # Adjust price and shares outstanding 
-            df_crsp.loc[:,"prc_adj"] = df_crsp["prc"]/df_crsp["cfacpr_adj"] 
-            df_crsp.loc[:,"shrout_adj"] = df_crsp["shrout"]*1000*df_crsp["cfacshr_adj"] 
-
-            # Drop other variables
-            df_crsp = df_crsp.drop(columns=["cfacpr_last", "cfacshr_last", "facpr", "facshr"])
-            
-            # Prune eliminate instances that don't have shares outstanding
-            df_crsp = df_crsp[df_crsp["shrout_adj"]!=0]
+        df_crsp = pd.read_parquet(self.df_crsp_path)
 
         # Save
-        df_crsp = df_crsp.drop(columns=["cfacshr_adj", "cfacpr_adj", "cfacshr", "cfacpr", "sprtrn"])
+        #cols_to_drop = ["cfacshr_adj", "cfacpr_adj", "cfacshr", "cfacpr", "sprtrn"]
+        #cols_to_drop = []
+        #cols_to_drop = [col for col in df_crsp.columns if col in cols_to_drop]
+        #df_crsp = df_crsp.drop(columns=cols_to_drop)
         self.df_crsp = df_crsp
         
         return
@@ -150,7 +136,7 @@ class DataLoader:
         df_crsp.loc[:, "cfacpr_adj"] = df_crsp["cfacpr"] / df_crsp["cfacpr_last"] 
 
         # Adjust for negative prices, happens when the volume is 0
-        df_crsp.loc[:, "prc"] = [-x if x < 0 else x for x in df_crsp["prc"].to_list()]
+        df_crsp.loc[:, "prc"] = df_crsp["prc"].abs()
 
         # Adjust price and shares outstanding 
         df_crsp.loc[:,"prc_adj"] = df_crsp["prc"]/df_crsp["cfacpr_adj"] 
@@ -164,19 +150,44 @@ class DataLoader:
         return df_crsp
     
 
-    def merge_dfs(self, columns:list=None):
+    def merge_dfs(self, columns:list=None, stocks_only:bool=False):
+        """
+        Merges the CRSP and RH dataframe, either by loading from the data directory or by building it.
+        """
         if self.load_merged: # Access just read the file
             if columns:
                 df = pd.read_parquet(self.df_merged_path, columns=columns)
             else:
                 df = pd.read_parquet(self.df_merged_path)
-            return df
         else:
             if not self.load_other_dfs: # Build the necessary files if not built in __init__
                 self._load_robinhood_data()
                 self._load_crsp_data()
+            
+            # Call the internal method to build the merged dataframe
             df = self._build_merged_df_from_crsp_rh()
-            return df
+
+        # If stock_only is true filter by the corresponding code before returning
+        if stocks_only:
+            df = df[(df["shrcd"]==11)|(df["shrcd"]==11)]
+            df["ticker"] = df["ticker"].cat.remove_unused_categories() # otherwise it keeps the old values for ticker in memory and is a problem for grouping etc
+            df = df.reset_index(drop=True) # Ensure consistent index
+
+
+        return df
+
+    def _compute_gross_returns(self, df:pd.DataFrame) -> pd.Series:
+        """
+        Given a pandas dataframe with tickers it groups by tickers and returns the gross returns by ticker.
+        """
+        # Get the first values for each ticker and paste them for every date
+        firsts = (df[["ticker", "prc_adj"]].groupby('ticker').transform('first'))
+        
+        # Divide the column by the first value to compute gross returns
+        result = df["prc_adj"] / firsts["prc_adj"]
+
+        return result
+
 
 
     def _build_merged_df_from_crsp_rh(self, users:bool=False, start_date:str=None, end_date:str=None):
@@ -208,6 +219,7 @@ class DataLoader:
         self.df_rh_long['date'] = pd.to_datetime(self.df_rh_long['date'])
         self.df_crsp['date'] = pd.to_datetime(self.df_crsp['date'])
 
+        # Filter if start/end date are passed
         if start_date:
             self.df_rh_long = self.df_rh_long[self.df_rh_long["date"]>=start_date]
             self.df_crsp = self.df_crsp[self.df_crsp["date"]>=start_date]
@@ -215,7 +227,6 @@ class DataLoader:
         if end_date:
             self.df_rh_long = self.df_rh_long[self.df_rh_long["date"]<=end_date]
             self.df_crsp = self.df_crsp[self.df_crsp["date"]<=end_date]
-
 
         # Merge both dataframes on 'date' and 'ticker'
         df_merged = self.df_rh_long.merge(self.df_crsp, on=['date', 'ticker'], how='inner')
@@ -226,31 +237,41 @@ class DataLoader:
         df_merged = df_merged[df_merged["ticker"].isin(tickers_to_keep)]
 
         # Drop columns
-        df_merged = df_merged.drop(columns=["prc", "shrout", "permno"])
+        df_merged = df_merged.drop(columns=["permno"])
 
 
-        # Build additional features
+        #-- Build additional features --#
+
+        # Return measures
+        df_merged["log_retuns"] = df_merged["ret"].apply(lambda x: np.log(x+1))
         #df_merged["daily_returns"] = df_merged.groupby("ticker")["prc_adj"].apply(lambda x: np.log(x / x.shift(1))).reset_index(level=0, drop=True).fillna(0)
         #df_merged["cumulative_returns"] = df_merged.groupby("ticker")["daily_returns"].cumsum()
-        df_merged['mc'] = df_merged['prc_adj'] * df_merged['shrout_adj']
-        df_merged['mc_retail'] = df_merged['prc_adj'] * df_merged["holders"]
+        
+        # Market cap
+        df_merged['mc'] = df_merged['prc'] * df_merged['shrout']
+        #df_merged['mc'] = df_merged['prc_adj'] * df_merged['shrout_adj']
+        #df_merged['mc_retail'] = df_merged['prc_adj'] * df_merged["holders"]
+        df_merged['market_weight'] = df_merged['mc'] / df_merged[["date", "mc"]].groupby("date")["mc"].transform("sum")
+        #df_merged['retail_weight'] = df_merged['mc_retail'] / df_merged[["date", "mc_retail"]].groupby("date")["mc_retail"].transform("sum")
+        
+        # Measures with holders
         #df_merged["retail_ownership"] = df_merged["holders"] / df_merged["shrout_adj"]
         #df_merged["holders_change_pct"] = df_merged.groupby("ticker")["holders"].pct_change()
         df_merged["holders_change_pct"] = df_merged.groupby("ticker")["holders"].apply(lambda x: np.log(x / x.shift(1))).reset_index(level=0, drop=True)
         df_merged["holders_change_diff"] = df_merged.groupby("ticker")["holders"].diff()
         df_merged["total_holders"] = df_merged[["date", "holders"]].groupby("date").transform("sum")
         df_merged["popularity"] = df_merged["holders"] / df_merged[["date", "holders"]].groupby("date")["holders"].transform("sum")
-        df_merged['market_weight'] = df_merged['mc'] / df_merged[["date", "mc"]].groupby("date")["mc"].transform("sum")
-        df_merged['retail_weight'] = df_merged['mc_retail'] / df_merged[["date", "mc_retail"]].groupby("date")["mc_retail"].transform("sum")
-
+        
         # Create total holders change
         total_holders_series = df_merged.drop_duplicates("date")[["date", "total_holders"]].set_index("date").sort_index()
         total_holders_change_pct = total_holders_series.pct_change().rename(columns={"total_holders": "total_holders_change_pct"})
         total_holders_change_diff = total_holders_series.diff().rename(columns={"total_holders": "total_holders_change_diff"})
-
         # Merge back to df_merged
         df_merged = df_merged.merge(total_holders_change_pct, on="date", how="left")
         df_merged = df_merged.merge(total_holders_change_diff, on="date", how="left")
+
+        # Make ticker a category for faster parsing
+        df_merged["ticker"] = df_merged["ticker"].astype("category")
 
         # Sort
         df_merged = df_merged.sort_values(by=["ticker", "date"])
