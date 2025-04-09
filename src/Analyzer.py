@@ -12,15 +12,62 @@ from .utils import log_ma_returns, setup_custom_logger
 logger = setup_custom_logger(__name__, level=logging.DEBUG)
 
 class Analyzer():
-    def __init__(self, 
-                 compare_tickers:list=["VOO"], 
-                 dl_kwargs:dict={"handle_nans":"drop"}, 
-                 return_params:dict={"horizons":{5,15,30, 60, 120}, # Set so it doesn't go on indefinitely
-                                     "start_date":None, 
-                                     "end_date":None, 
-                                     "cumulative":True,
-                                     "append_start":True}):
+    def __init__(self,
+                weights_method:str="stocks",
+                stocks_only:bool=False,
+                compare_tickers:list=["VOO"], 
+                dl_kwargs:dict={"handle_nans":"drop"}, 
+                return_params:dict={"horizons":{5,15,30, 60, 120}, 
+                                    "start_date":None, 
+                                    "end_date":None, 
+                                    "cumulative":True,
+                                    "append_start":True}):
+        """
+        Initialize the Analyzer object for comparing performance metrics between tickers.
         
+        Parameters
+        ----------
+        weights_methods : str {stocks, wealth}, default="Stocks"
+            String to build the rh portfolio weights based on wealth or stocks imputation. 
+            - stocks: assumes each holding in the dataframe represents one stock
+            - wealth: assumes `popularity` is a proxy for percentage of welath held in a certain stock
+
+        stocks_only : bool, default=False
+            Bool to build the merged dataframe taking into account only stocks (shrcd=10 or shrcd=11) or not. 
+
+        compare_tickers : list, default=["VOO"]
+            List of ticker symbols to compare against the Robinhood portfolio.
+        
+        dl_kwargs : dict, default={"handle_nans":"drop"}
+            Dictionary of keyword arguments to pass to the DataLoader.
+            
+        return_params : dict, default parameters include:
+            Dictionary of parameters for calculating returns:
+            - horizons : set, default={5,15,30,60,120}
+                Time horizons (in days) for calculating returns.
+            - start_date : str or None, default=None
+                Start date for the analysis period. If None, uses all available data.
+            - end_date : str or None, default=None
+                End date for the analysis period. If None, uses all available data.
+            - cumulative : bool, default=True
+                If True, returns are calculated as cumulative over the horizon.
+            - append_start : bool, default=True
+                If True, includes the starting point in the return series.
+        
+        Returns
+        -------
+        None
+        
+        Notes
+        -----
+        This class merges dataframes containing price and popularity data and 
+        provides methods for analyzing returns distribution and stochastic dominance.
+        """     
+        # Save attributes
+        self._validate_weights_method(weights_method)
+        self.weights_method = weights_method
+        self.stocks_only = stocks_only
+
         # Instantiate Dataloader
         self.dl = DataLoader(**dl_kwargs)
         
@@ -31,7 +78,8 @@ class Analyzer():
         # Memorize important dfs
         # "mc" variable used to be here, decided to delete it as i don't care about the "market index" built on RH data.
         # Previously, the "market index"_t was just \sum_{i=1}^N P_{i,t}\cdot S_{i,t}
-        self.df_merged = self.dl.merge_dfs(columns=["date", "prc_adj", "popularity", "ticker"])
+        cols_to_keep = ["date", "prc_adj", "prc_adj_div", "popularity", "ticker"]
+        self.df_merged = self.dl.merge_dfs(columns=cols_to_keep, stocks_only=self.stocks_only)
 
         # Define self.colors using Seaborn palette
         self.colors = sns.color_palette("muted")
@@ -39,13 +87,22 @@ class Analyzer():
         # Define images directory
         self.images_dir = "../non_code/latex/images"
 
+    def _validate_weights_method(self, weights_method: str):
+        """Validates the handle_nans parameter."""
+        if weights_method not in ["stocks", "wealth"]:
+            raise ValueError("weights_method must be one of 'stocks', 'wealth'.")
 
     def _extract_relevant_tickers(self):
+        inner_compare = self.compare_tickers.copy()
+
         df_merged = self.df_merged.copy()
 
         # Extract only relevant tickers
         df_clean = df_merged[["prc_adj", "date", "ticker"]][df_merged["ticker"].isin(self.compare_tickers)]
         df_clean = df_clean
+
+        # Initialize df_out
+        df_out = None
 
         # Iterate over each ticker to create a dataframe 
         for i, col in enumerate(self.compare_tickers):
@@ -54,13 +111,32 @@ class Analyzer():
             df_etf = df_etf.rename(columns={"prc_adj":col})
             df_etf = df_etf[[col, "date"]]
 
-            if i<1:
+            if df_etf.shape[0] == 0:
+                message = "Empty dataframe produced for ticker: {col}." 
+                message = message + f" Maybe {col} is not a stock?" if self.stocks_only else message
+                logger.warning(message)
+
+                # Remove it from tickers to avoid problems when plotting 
+                message = f"Removing {col} from {inner_compare}"
+                logger.warning(message)
+                inner_compare.remove(col)
+                continue
+
+            if df_out is None:
                 df_out = df_etf
 
             # Merge in case you have more than one ticker
             else:
                 df_out = df_out.merge(df_etf, on="date")
 
+
+        if df_out is None:
+            logger.warning(f"Empty dataframe produced for tickers: {self.compare_tickers}")
+
+            # Now set compare tickers to found tickers
+            self.compare_tickers = inner_compare
+            return
+        
         # Set index
         df_out = df_out.set_index("date")
 
@@ -68,18 +144,43 @@ class Analyzer():
     
     
 
-    def build_levels(self):
-        # Build Portfolio using Popularity
-        self.df_merged["rh_portfolio"] = self.df_merged["popularity"] * self.df_merged["prc_adj"]
+    def build_levels(self)->pd.DataFrame:
+        """
+        Build a dataframe with the daily price of `self.compare_tickers` and the robinhood portfolio.
+        
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        levels : pd.DataFrame, a dataframe containing the daily value of the tickers and reference index (if `self.weights_method` is set to `stocks`)
+        """
+        
+        if self.weights_method == "stocks":
+            # Build Portfolio using Popularity
+            self.df_merged["rh_portfolio"] = self.df_merged["popularity"] * self.df_merged["prc_adj"]
+            # Include dividends
+            if "prc_adj_div" in self.df_merged.columns:
+                self.df_merged["rh_portfolio_div"] = self.df_merged["popularity"] * self.df_merged["prc_adj_div"]
+        else:
+            self.df_merged["rh_portfolio"] = self.df_merged["popularity"] * self.df_merged["log_returns"]
+        
+
+        # Using the sum and including "mc" would build the "market index". Excluded as it's not very relevant 
+        if "prc_adj_div" in self.df_merged.columns:
+            levels = self.df_merged[["date", "rh_portfolio", "rh_portfolio_div"]].groupby("date").sum()
+        else:
+            levels = self.df_merged[["date", "rh_portfolio"]].groupby("date").sum()
+
 
         # Obtain the dataframe with relevant tickers
         df_tickers = self._extract_relevant_tickers()
 
         # Merge the levels
-        # Using the sun and including "mc" would build the "market index". Excluded as it's not very relevant 
-        levels = self.df_merged[["date", "rh_portfolio"]].groupby("date").sum()
-        levels = levels.merge(df_tickers, on="date")
-        
+        if df_tickers is not None:
+            levels = levels.merge(df_tickers, on="date")
+
         return levels        
 
 
@@ -95,9 +196,9 @@ class Analyzer():
         levels = self.build_levels()
 
         # Filter
-        if start_date != None:
+        if start_date is not None:
             levels = levels[levels.index>=start_date]
-        if end_date != None:
+        if end_date is not None:
             levels = levels[levels.index<=end_date]
 
         result = log_ma_returns(levels=levels, horizons=horizons, cumulative=cumulative, append_start=append_start)
@@ -136,13 +237,16 @@ class Analyzer():
             if d < len(returns):
                 ax.axvline(returns.index[d-1], color="black", alpha=0.5, linewidth=1)
 
-            # Plot Market Cap returns
-            #sns.lineplot(x=returns.index, y=returns[f"mc_{d}_return"], label=f"Market returns", ax=ax, color=self.colors[0], markers=True, markersize=5, linewidth=1.0)
-            # Plot Retail Market Cap returns
-            sns.lineplot(x=returns.index, y=returns[f"rh_portfolio_{d}_return"], label=f"RH returns", ax=ax, color=self.colors[1], markers=True, markersize=5, linewidth=1.0)
+            # Plot RH returns
+            sns.lineplot(x=returns.index, y=returns[f"rh_portfolio_{d}_return"], label=f"RH returns", ax=ax, color=self.colors[0], markers=True, markersize=5, linewidth=1.0)
+            
+            # Plot div rh if it is present
+            if f"rh_portfolio_div_{d}_return" in returns.columns:
+                sns.lineplot(x=returns.index, y=returns[f"rh_portfolio_div_{d}_return"], label=f"RH returns Div", ax=ax, color=self.colors[1], markers=True, markersize=5, linewidth=1.0)
+
             # Plot ticker returns
-            for i, ticker in enumerate(self.compare_tickers):
-                sns.lineplot(x=returns.index, y=returns[f"{ticker}_{d}_return"], label=f"{ticker} returns", ax=ax, color=self.colors[2+i], markers=True, markersize=5, linewidth=1.0)
+            for j, ticker in enumerate(self.compare_tickers):
+                sns.lineplot(x=returns.index, y=returns[f"{ticker}_{d}_return"], label=f"{ticker} returns", ax=ax, color=self.colors[2+j], markers=True, markersize=5, linewidth=1.0)
 
 
             # Set subplot title
@@ -199,10 +303,14 @@ class Analyzer():
         for i, d in enumerate(horizons):
             ax = axes[i]
 
-            #sns.kdeplot(data=returns[f"mc_{d}_return"], label=f"Market Distribution",  ax=ax, color=self.colors[0], linewidth=1.0)
-            sns.kdeplot(data=returns[f"rh_portfolio_{d}_return"], label=f"RH Distribution", ax=ax, color=self.colors[1], linewidth=1.0)
-            for i, ticker in enumerate(self.compare_tickers):
-                sns.kdeplot(data=returns[f"{ticker}_{d}_return"], label=f"{ticker} Distribution",  ax=ax, color=self.colors[2+i], linewidth=1.0)
+            sns.kdeplot(data=returns[f"rh_portfolio_{d}_return"], label=f"RH Distribution", ax=ax, color=self.colors[0], linewidth=1.0)
+
+            # Plot div rh if it is present
+            if f"rh_portfolio_div_{d}_return" in returns.columns:
+                sns.kdeplot(data=returns[f"rh_portfolio_div_{d}_return"], label=f"RH Distribution Div", ax=ax, color=self.colors[0], linewidth=1.0)
+
+            for j, ticker in enumerate(self.compare_tickers):
+                sns.kdeplot(data=returns[f"{ticker}_{d}_return"], label=f"{ticker} Distribution",  ax=ax, color=self.colors[2+j], linewidth=1.0)
 
             # Set subplot title
             ax.set_title(f"Horizon: {d}")
@@ -260,10 +368,14 @@ class Analyzer():
             
             # Plot CDF for each column
             #self._plot_cdf(returns[f"mc_{d}_return"], "Market CDF", ax, self.colors[0])
-            self._plot_cdf(returns[f"rh_portfolio_{d}_return"], "RH CDF", ax, self.colors[1])
+            self._plot_cdf(returns[f"rh_portfolio_{d}_return"], "RH CDF", ax, self.colors[0])
+
+            # Plot timeseries if its present
+            if f"rh_portfolio_div_{d}_return" in returns.columns:
+                self._plot_cdf(returns[f"rh_portfolio_div_{d}_return"], "RH Div CDF", ax, self.colors[0])
             
             for j, ticker in enumerate(self.compare_tickers):
-                self._plot_cdf(returns[f"{ticker}_{d}_return"], f"{ticker} CDF", ax, self.colors[2+j])
+                self._plot_cdf(returns[f"{ticker}_{d}_return"], f"{ticker} CDF", ax, self.colors[1+j])
             
             # Set subplot title
             ax.set_title(f"Horizon: {d}")

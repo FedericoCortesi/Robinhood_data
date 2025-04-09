@@ -38,19 +38,23 @@ class DataLoader:
             self._load_robinhood_data()
             self._load_crsp_data()
 
+    # Validate categorical inputs
     def _validate_handle_nans(self, handle_nans: str):
         """Validates the handle_nans parameter."""
         if handle_nans not in ["fill", "drop", "keep"]:
             raise ValueError("handle_nans must be one of 'fill', 'drop', or 'keep'.")
 
+    # Retrieves data paths from data_paths.json
     def _set_file_paths(self):
         """Sets the absolute file paths for the DataFrames."""
         parent_dir = CURRENT_DIR.parents[0]
         self.df_robinhood_path = parent_dir / self.data_paths["df_robinhood_path"]
+        self.df_wrds_path = parent_dir / self.data_paths["df_wrds_path"].format(self.handle_nans)
         self.df_crsp_path = parent_dir / self.data_paths["df_crsp_path"]
         self.df_merged_path = parent_dir / self.data_paths["df_merged_path"].format(self.handle_nans)
 
         logger.debug(f"self.df_robinhood_path: {self.df_robinhood_path}")
+        logger.debug(f"self.df_wrds_path: {self.df_wrds_path}")
         logger.debug(f"self.df_crsp_path: {self.df_crsp_path}")
         logger.debug(f"self.df_merged_path: {self.df_merged_path}")
 
@@ -65,7 +69,6 @@ class DataLoader:
         Loads the dataframe of all available robinhood securities.
         Nans are filled with zero and then deleted because some stocks have zeros instead of nans in the original data.
         """
-        logger.info("Loading Robinhood data")
         
         # Load csv
         df_rh = pd.read_parquet(self.df_robinhood_path)
@@ -88,10 +91,10 @@ class DataLoader:
             new_cols.append(n_col)
         df_rh.columns = new_cols
 
-        # Count the number of non-nan stocks
+        # Count the number of non-nan stocks for each days
         df_rh.loc[:,"num_stocks"] = len(df_rh.columns) - df_rh.isna().sum(axis=1)
 
-        # Save
+        # Handle nans
         if self.handle_nans == "fill":
             df_rh = df_rh.bfill(axis=0)
             df_rh = df_rh.ffill(axis=0)
@@ -99,14 +102,18 @@ class DataLoader:
             df_rh = df_rh.dropna(axis=1)
         else:
             pass
+
+        # Save as attribute
         self.df_rh = df_rh
+        
+        logger.info("Robinhood data loaded")
+        
         return
     
     def _load_crsp_data(self):
         """
         Loads CRSP Data
         """
-        logger.info("Loading CRSP data")
 
         # Load csv
         df_crsp = pd.read_parquet(self.df_crsp_path)
@@ -118,11 +125,20 @@ class DataLoader:
         #df_crsp = df_crsp.drop(columns=cols_to_drop)
         self.df_crsp = df_crsp
         
+        logger.info("CRSP data loaded")
         return
     
+    
     def _build_df_crsp(self):
+        """
+        Loads the unedited WRDS file from memory and cleans it.
+
+        Returns
+        -----
+        df_crsp : pd.DataFrame, the cleaned dataframe
+        """
         # Load csv
-        df_crsp = pd.read_csv("./Data/tickers_volume.csv", index_col=[0], parse_dates=[1])
+        df_crsp = pd.read_parquet(self.df_wrds_path)
 
         # Build additional features
         # Adjust cfacshr to be constant in the period, it's a cumulative measure
@@ -142,10 +158,23 @@ class DataLoader:
         df_crsp.loc[:,"prc_adj"] = df_crsp["prc"]/df_crsp["cfacpr_adj"] 
         df_crsp.loc[:,"shrout_adj"] = df_crsp["shrout"]*1000*df_crsp["cfacshr_adj"] 
 
-        # Drop other variables
+        if "divamt" in df_crsp.columns:
+            logger.debug("Handling dividends")
+            df_crsp["divamt"] = df_crsp["divamt"].fillna(0) # Handle nans
+            
+            # Get the cumulative dividend amount for each ticker
+            df_crsp["div_cum"] = df_crsp[["ticker", "divamt"]].groupby("ticker").cumsum()
 
-        # Prune eliminate instances that don't have shares outstanding
+            # Get the price with dividends ()
+            df_crsp["prc_adj_div"] = df_crsp["prc_adj"] + df_crsp["div_cum"]
+
+
+        # Prune instances that don't have shares outstanding
         df_crsp = df_crsp[df_crsp["shrout_adj"]!=0]
+
+        # clean columns
+        cols_to_drop = ["cfacshr", "cfacshr_last", "cfacpr", "cfacpr_last"]
+        df_crsp = df_crsp.drop(columns=cols_to_drop)
 
         return df_crsp
     
@@ -154,6 +183,7 @@ class DataLoader:
         """
         Merges the CRSP and RH dataframe, either by loading from the data directory or by building it.
         """
+
         if self.load_merged: # Access just read the file
             if columns:
                 df = pd.read_parquet(self.df_merged_path, columns=columns)
@@ -169,9 +199,18 @@ class DataLoader:
 
         # If stock_only is true filter by the corresponding code before returning
         if stocks_only:
+            # filter the codes correspondign to stocks
             df = df[(df["shrcd"]==11)|(df["shrcd"]==11)]
+
+            # Compute popularity again
+            df["popularity"] = df["holders"] / df[["date", "holders"]].groupby("date")["holders"].transform("sum")
+
             df["ticker"] = df["ticker"].cat.remove_unused_categories() # otherwise it keeps the old values for ticker in memory and is a problem for grouping etc
             df = df.reset_index(drop=True) # Ensure consistent index
+
+        # Filter columns
+        columns = columns if columns else df.columns 
+        df = df[columns]
 
 
         return df
@@ -191,7 +230,6 @@ class DataLoader:
 
 
     def _build_merged_df_from_crsp_rh(self, users:bool=False, start_date:str=None, end_date:str=None):
-        logger.info("Merging...")
         # Filter dataframes
         self._filter_dfs_common_tickers()
 
@@ -239,17 +277,18 @@ class DataLoader:
         # Drop columns
         df_merged = df_merged.drop(columns=["permno"])
 
-
         #-- Build additional features --#
 
         # Return measures
-        df_merged["log_retuns"] = df_merged["ret"].apply(lambda x: np.log(x+1))
-        #df_merged["daily_returns"] = df_merged.groupby("ticker")["prc_adj"].apply(lambda x: np.log(x / x.shift(1))).reset_index(level=0, drop=True).fillna(0)
-        #df_merged["cumulative_returns"] = df_merged.groupby("ticker")["daily_returns"].cumsum()
+        if "ret" in df_merged.columns: # Perform this operation only if the column is present in the downloaded df
+            df_merged["log_retuns"] = df_merged["ret"].apply(lambda x: np.log(x+1))
+        else:
+            #df_merged["daily_returns"] = df_merged.groupby("ticker")["prc_adj"].apply(lambda x: np.log(x / x.shift(1))).reset_index(level=0, drop=True).fillna(0)
+            #df_merged["cumulative_returns"] = df_merged.groupby("ticker")["daily_returns"].cumsum()
+            pass
         
         # Market cap
-        df_merged['mc'] = df_merged['prc'] * df_merged['shrout']
-        #df_merged['mc'] = df_merged['prc_adj'] * df_merged['shrout_adj']
+        df_merged['mc'] = df_merged['prc_adj'] * df_merged['shrout_adj']
         #df_merged['mc_retail'] = df_merged['prc_adj'] * df_merged["holders"]
         df_merged['market_weight'] = df_merged['mc'] / df_merged[["date", "mc"]].groupby("date")["mc"].transform("sum")
         #df_merged['retail_weight'] = df_merged['mc_retail'] / df_merged[["date", "mc_retail"]].groupby("date")["mc_retail"].transform("sum")
@@ -277,6 +316,7 @@ class DataLoader:
         df_merged = df_merged.sort_values(by=["ticker", "date"])
         df_merged = df_merged.reset_index(drop=True)
 
+        logger.info("DataFrames merged")
         return df_merged
 
 
@@ -333,11 +373,11 @@ class DataLoader:
         return
     
 
+    # TODO: Make this an Analyzer method
     def compute_distances(self, df_merged:pd.DataFrame=None, n:int=100, by:str='mc_retail'):
-        if not hasattr(self, "df_merged"):  # Check if attribute exists
-            self.merge_dfs()
-        else:
-            pass
+        # Build merged df
+        df_merged = self.merge_dfs()
+
         # Extract required columns first (avoids unnecessary memory usage)
         df = df_merged[['date', 'ticker', 'mc', "popularity", 'mc_retail', 'holders', 'prc_adj', 'shrcd', "vol"]].copy()
 
