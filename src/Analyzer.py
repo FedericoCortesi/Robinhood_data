@@ -1,33 +1,37 @@
 import pandas as pd
 import numpy as np
+
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+
+from typing import Optional
 import logging
 
 from . import DataLoader
-from .utils import log_ma_returns, setup_custom_logger
+from .utils.metrics import log_ma_returns, setup_custom_logger
+from .utils.params import ReturnParams
+from .utils.weights import WeightsMethod
 
 # Setup logger
 logger = setup_custom_logger(__name__, level=logging.DEBUG)
 
-class Analyzer():
+from . import DataLoader
+
+class Analyzer:
     def __init__(self,
-                weights_method:str="stocks",
-                stocks_only:bool=False,
-                compare_tickers:list=["VOO"], 
-                dl_kwargs:dict={"handle_nans":"drop"}, 
-                return_params:dict={"horizons":{5,15,30, 60, 120}, 
-                                    "start_date":None, 
-                                    "end_date":None, 
-                                    "cumulative":True,
-                                    "append_start":True}):
+                 weights_method: str | WeightsMethod = "stocks",
+                 stocks_only: bool = False,
+                 compare_tickers: Optional[list[str]] = None,
+                 dl_kwargs: Optional[dict] = None,
+                 return_params: Optional[ReturnParams] = None):
         """
         Initialize the Analyzer object for comparing performance metrics between tickers.
         
         Parameters
         ----------
-        weights_methods : str {stocks, wealth}, default="Stocks"
+        
+        weights_methods : str {stocks, wealth}, default="stocks"
             String to build the rh portfolio weights based on wealth or stocks imputation. 
             - stocks: assumes each holding in the dataframe represents one stock
             - wealth: assumes `popularity` is a proxy for percentage of welath held in a certain stock
@@ -38,7 +42,7 @@ class Analyzer():
         compare_tickers : list, default=["VOO"]
             List of ticker symbols to compare against the Robinhood portfolio.
         
-        dl_kwargs : dict, default={"handle_nans":"drop"}
+        dl_kwargs : dict, default=None
             Dictionary of keyword arguments to pass to the DataLoader.
             
         return_params : dict, default parameters include:
@@ -63,12 +67,22 @@ class Analyzer():
         This class merges dataframes containing price and popularity data and 
         provides methods for analyzing returns distribution and stochastic dominance.
         """     
-        # Save attributes
-        self._validate_weights_method(weights_method)
-        self.weights_method = weights_method
-        self.stocks_only = stocks_only
+        # Safe Enum conversion
+        if isinstance(weights_method, str):
+            try:
+                weights_method = WeightsMethod(weights_method.lower())
+            except ValueError:
+                raise ValueError(f"`weights_method` must be one of {[m.value for m in WeightsMethod]}")
 
+        self.weights_method = weights_method
+        
+        # Save attributes
+        self.stocks_only = stocks_only
+        self.compare_tickers = compare_tickers if compare_tickers is not None else ["VOO"]
+
+        
         # Instantiate Dataloader
+        dl_kwargs = dl_kwargs if dl_kwargs is not None else {}
         self.dl = DataLoader(**dl_kwargs)
         
         # Memorize tickers to compare and return params
@@ -78,19 +92,18 @@ class Analyzer():
         # Memorize important dfs
         # "mc" variable used to be here, decided to delete it as i don't care about the "market index" built on RH data.
         # Previously, the "market index"_t was just \sum_{i=1}^N P_{i,t}\cdot S_{i,t}
-        cols_to_keep = ["date", "prc_adj", "prc_adj_div", "popularity", "ticker"]
-        self.df_merged = self.dl.merge_dfs(columns=cols_to_keep, stocks_only=self.stocks_only)
+        self.df_merged = self.dl.merge_dfs(stocks_only=self.stocks_only)
+        
+        # Filter columns
+        cols_to_keep = ["date", "prc_adj", "prc_adj_div", "popularity", "ticker", "ret"]
+        cols_to_keep = [col for col in cols_to_keep if col in self.df_merged]
+        self.df_merged = self.df_merged[cols_to_keep]
 
         # Define self.colors using Seaborn palette
         self.colors = sns.color_palette("muted")
 
         # Define images directory
         self.images_dir = "../non_code/latex/images"
-
-    def _validate_weights_method(self, weights_method: str):
-        """Validates the handle_nans parameter."""
-        if weights_method not in ["stocks", "wealth"]:
-            raise ValueError("weights_method must be one of 'stocks', 'wealth'.")
 
     def _extract_relevant_tickers(self):
         inner_compare = self.compare_tickers.copy()
@@ -106,12 +119,8 @@ class Analyzer():
 
         # Iterate over each ticker to create a dataframe 
         for i, col in enumerate(self.compare_tickers):
-            # Filter and rename
-            df_etf = df_clean[df_clean["ticker"]==col]
-            df_etf = df_etf.rename(columns={"prc_adj":col})
-            df_etf = df_etf[[col, "date"]]
 
-            if df_etf.shape[0] == 0:
+            if col not in df_clean["ticker"].unique():
                 message = "Empty dataframe produced for ticker: {col}." 
                 message = message + f" Maybe {col} is not a stock?" if self.stocks_only else message
                 logger.warning(message)
@@ -121,6 +130,11 @@ class Analyzer():
                 logger.warning(message)
                 inner_compare.remove(col)
                 continue
+            
+            # Filter and rename
+            df_etf = df_clean[df_clean["ticker"]==col]
+            df_etf = df_etf.rename(columns={"prc_adj":col})
+            df_etf = df_etf[[col, "date"]]
 
             if df_out is None:
                 df_out = df_etf
@@ -157,18 +171,22 @@ class Analyzer():
         levels : pd.DataFrame, a dataframe containing the daily value of the tickers and reference index (if `self.weights_method` is set to `stocks`)
         """
         
-        if self.weights_method == "stocks":
+        if self.weights_method == WeightsMethod.STOCKS:
             # Build Portfolio using Popularity
             self.df_merged["rh_portfolio"] = self.df_merged["popularity"] * self.df_merged["prc_adj"]
             # Include dividends
             if "prc_adj_div" in self.df_merged.columns:
                 self.df_merged["rh_portfolio_div"] = self.df_merged["popularity"] * self.df_merged["prc_adj_div"]
+
+        elif self.weights_method == WeightsMethod.WEALTH:
+            self.df_merged["rh_portfolio"] = self.df_merged["popularity"] * self.df_merged["ret"]
+            self.df_merged["rh_portfolio"] = self.df_merged["rh_portfolio"].apply(lambda x: np.log(x+1))
         else:
-            self.df_merged["rh_portfolio"] = self.df_merged["popularity"] * self.df_merged["log_returns"]
+            raise ValueError(f"Unsupported weights_method: {self.weights_method}")
         
 
         # Using the sum and including "mc" would build the "market index". Excluded as it's not very relevant 
-        if "prc_adj_div" in self.df_merged.columns:
+        if "rh_portfolio_div" in self.df_merged.columns:
             levels = self.df_merged[["date", "rh_portfolio", "rh_portfolio_div"]].groupby("date").sum()
         else:
             levels = self.df_merged[["date", "rh_portfolio"]].groupby("date").sum()
@@ -181,7 +199,14 @@ class Analyzer():
         if df_tickers is not None:
             levels = levels.merge(df_tickers, on="date")
 
+        # set a flag for returns
+        if self.weights_method == WeightsMethod.WEALTH:
+            self.returns_columns = ["rh_portfolio"]
+        else:
+            self.returns_columns = []
+
         return levels        
+
 
 
     def build_returns(self):
@@ -201,7 +226,13 @@ class Analyzer():
         if end_date is not None:
             levels = levels[levels.index<=end_date]
 
-        result = log_ma_returns(levels=levels, horizons=horizons, cumulative=cumulative, append_start=append_start)
+        # call function with the params
+        result = log_ma_returns(
+            levels=levels, 
+            horizons=horizons, 
+            cumulative=cumulative, 
+            append_start=append_start,
+            returns_columns=self.returns_columns)
         
         return result
         

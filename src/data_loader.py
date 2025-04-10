@@ -212,7 +212,6 @@ class DataLoader:
         columns = columns if columns else df.columns 
         df = df[columns]
 
-
         return df
 
     def _compute_gross_returns(self, df:pd.DataFrame) -> pd.Series:
@@ -281,7 +280,7 @@ class DataLoader:
 
         # Return measures
         if "ret" in df_merged.columns: # Perform this operation only if the column is present in the downloaded df
-            df_merged["log_retuns"] = df_merged["ret"].apply(lambda x: np.log(x+1))
+            df_merged["log_returns"] = df_merged["ret"].apply(lambda x: np.log(x+1))
         else:
             #df_merged["daily_returns"] = df_merged.groupby("ticker")["prc_adj"].apply(lambda x: np.log(x / x.shift(1))).reset_index(level=0, drop=True).fillna(0)
             #df_merged["cumulative_returns"] = df_merged.groupby("ticker")["daily_returns"].cumsum()

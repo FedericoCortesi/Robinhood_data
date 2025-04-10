@@ -11,12 +11,23 @@ logger = setup_custom_logger(__name__, level=logging.DEBUG)
 
 
 
-def log_ma_returns(levels, horizons:set={5,15,30, 60, 120}, cumulative:bool=True, append_start:bool=True):
+def log_ma_returns(levels:pd.DataFrame, horizons:set={5,15,30, 60, 120}, cumulative:bool=True, append_start:bool=True, returns_columns:list=[]):
     """
     Given a dataframe with daily prices the function returns moving averages of log returns and a list of the computed horizons.
     """
-    # Build returns df, applying logs ensures additivity of returns
-    returns = np.log(levels / levels.shift(1)).fillna(0)
+    # Initialize returns
+    returns = levels.copy()
+
+    # Iterate over columns in returns_columns
+    for col in levels.columns:
+        # check if returns are already present
+        if col not in returns_columns:
+            # Build returns df, applying logs ensures additivity of returns
+            returns[col] = np.log(levels[col] / levels[col].shift(1)).fillna(0)
+        else:
+            returns[col] = levels[col]
+
+    # ensure datetime format
     returns.index = pd.to_datetime(returns.index)
 
     # Add the cumulative returns for the whole period and keep smaller values
