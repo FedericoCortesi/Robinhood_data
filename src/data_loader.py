@@ -37,7 +37,6 @@ class DataLoader:
                 raise ValueError(f"`handle_nans` must be one of {[n.value for n in handle_nans]}")
 
         self.handle_nans = handle_nans
-        logger.debug(f"self.handle_nans: {self.handle_nans}")
         self.load_merged = load_merged
         self.load_other_dfs = load_other_dfs
 
@@ -53,10 +52,11 @@ class DataLoader:
     def _set_file_paths(self):
         """Sets the absolute file paths for the DataFrames."""
         parent_dir = CURRENT_DIR.parents[0]
+
         self.df_robinhood_path = parent_dir / self.data_paths["df_robinhood_path"]
-        self.df_wrds_path = parent_dir / self.data_paths["df_wrds_path"].format(self.handle_nans)
+        self.df_wrds_path = parent_dir / self.data_paths["df_wrds_path"]
         self.df_crsp_path = parent_dir / self.data_paths["df_crsp_path"]
-        self.df_merged_path = parent_dir / self.data_paths["df_merged_path"].format(self.handle_nans)
+        self.df_merged_path = parent_dir / self.data_paths["df_merged_path"].format(self.handle_nans.value)
 
         logger.debug(f"self.df_robinhood_path: {self.df_robinhood_path}")
         logger.debug(f"self.df_wrds_path: {self.df_wrds_path}")

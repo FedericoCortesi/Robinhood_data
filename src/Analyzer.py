@@ -124,31 +124,32 @@ class Analyzer:
         # Initialize df_out
         df_out = None
 
-        # Iterate over each ticker to create a dataframe 
-        for i, col in enumerate(self.compare_tickers):
+        if self.compare_tickers:
+            # Iterate over each ticker to create a dataframe 
+            for i, col in enumerate(self.compare_tickers):
 
-            if col not in df_clean["ticker"].unique():
-                message = "Empty dataframe produced for ticker: {col}." 
-                message = message + f" Maybe {col} is not a stock?" if self.stocks_only else message
-                logger.warning(message)
+                if col not in df_clean["ticker"].unique():
+                    message = "Empty dataframe produced for ticker: {col}." 
+                    message = message + f" Maybe {col} is not a stock?" if self.stocks_only else message
+                    logger.warning(message)
 
-                # Remove it from tickers to avoid problems when plotting 
-                message = f"Removing {col} from {inner_compare}"
-                logger.warning(message)
-                inner_compare.remove(col)
-                continue
-            
-            # Filter and rename
-            df_etf = df_clean[df_clean["ticker"]==col]
-            df_etf = df_etf.rename(columns={"prc_adj":col})
-            df_etf = df_etf[[col, "date"]]
+                    # Remove it from tickers to avoid problems when plotting 
+                    message = f"Removing {col} from {inner_compare}"
+                    logger.warning(message)
+                    inner_compare.remove(col)
+                    continue
+                
+                # Filter and rename
+                df_etf = df_clean[df_clean["ticker"]==col]
+                df_etf = df_etf.rename(columns={"prc_adj":col})
+                df_etf = df_etf[[col, "date"]]
 
-            if df_out is None:
-                df_out = df_etf
+                if df_out is None:
+                    df_out = df_etf
 
-            # Merge in case you have more than one ticker
-            else:
-                df_out = df_out.merge(df_etf, on="date")
+                # Merge in case you have more than one ticker
+                else:
+                    df_out = df_out.merge(df_etf, on="date")
 
 
         if df_out is None:
