@@ -4,17 +4,26 @@ from scipy.optimize import minimize_scalar
 from scipy.stats import skew, kurtosis
 
 import logging
+from typing import List
+
 from . import setup_custom_logger
+from .params import ReturnParams
 
 # Setup logger
 logger = setup_custom_logger(__name__, level=logging.DEBUG)
 
 
 
-def log_ma_returns(levels:pd.DataFrame, horizons:set={5,15,30, 60, 120}, cumulative:bool=True, append_start:bool=True, returns_columns:list=[]):
+def log_ma_returns(
+        levels:pd.DataFrame, 
+        return_params: ReturnParams, 
+        returns_columns:List[str]=[]):
     """
     Given a dataframe with daily prices the function returns moving averages of log returns and a list of the computed horizons.
     """
+    # Default rp
+    return_params = return_params if return_params is not None else ReturnParams()
+
     # Initialize returns
     returns = levels.copy()
 
@@ -31,13 +40,17 @@ def log_ma_returns(levels:pd.DataFrame, horizons:set={5,15,30, 60, 120}, cumulat
     returns.index = pd.to_datetime(returns.index)
 
     # Add the cumulative returns for the whole period and keep smaller values
+    cumulative = return_params.cumulative
+    horizons = return_params.horizons
     if cumulative:
         horizons.add(len(returns))
     
     # Ensure its bounded and sorted
+    horizons = return_params.horizons
     horizons = [h for h in horizons if h <= len(returns)]
     horizons = sorted(list(set(horizons)))
 
+    append_start = return_params.append_start
     for h in horizons: # delete min_periods if you want to start at date d and not before
         min_periods = 1 if append_start else h
         min_periods = min_periods if min_periods < len(returns) else 1

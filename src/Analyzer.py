@@ -9,14 +9,19 @@ from typing import Optional
 import logging
 
 from . import DataLoader
-from .utils.metrics import log_ma_returns, setup_custom_logger
+from .utils.metrics import log_ma_returns
+from .utils.custom_formatter import setup_custom_logger
+from .utils.helpers import load_data_paths
 from .utils.params import ReturnParams
-from .utils.weights import WeightsMethod
+from .utils.enums import WeightsMethod
 
 # Setup logger
 logger = setup_custom_logger(__name__, level=logging.DEBUG)
 
 from . import DataLoader
+
+from pathlib import Path
+CURRENT_DIR = Path(__file__).resolve().parent
 
 class Analyzer:
     def __init__(self,
@@ -78,16 +83,14 @@ class Analyzer:
         
         # Save attributes
         self.stocks_only = stocks_only
-        self.compare_tickers = compare_tickers if compare_tickers is not None else ["VOO"]
-
         
         # Instantiate Dataloader
         dl_kwargs = dl_kwargs if dl_kwargs is not None else {}
         self.dl = DataLoader(**dl_kwargs)
         
         # Memorize tickers to compare and return params
-        self.compare_tickers = compare_tickers
-        self.return_params = return_params
+        self.compare_tickers = compare_tickers if compare_tickers is not None else ["VOO"]
+        self.return_params = return_params if return_params is not None else ReturnParams()
  
         # Memorize important dfs
         # "mc" variable used to be here, decided to delete it as i don't care about the "market index" built on RH data.
@@ -103,6 +106,10 @@ class Analyzer:
         self.colors = sns.color_palette("muted")
 
         # Define images directory
+        parent_dir = CURRENT_DIR.parents[0]
+        self.data_paths = load_data_paths()
+
+        self.df_robinhood_path = parent_dir / self.data_paths["df_robinhood_path"]
         self.images_dir = "../non_code/latex/images"
 
     def _extract_relevant_tickers(self):
@@ -211,11 +218,8 @@ class Analyzer:
 
     def build_returns(self):
         # Get params
-        start_date = self.return_params.get("start_date")
-        end_date = self.return_params.get("end_date")
-        horizons = set(self.return_params.get("horizons")) # Ensure consistency and remove double entries
-        cumulative = self.return_params.get("cumulative")
-        append_start = self.return_params.get("append_start")
+        start_date = self.return_params.start_date
+        end_date = self.return_params.end_date
         
         # Retrieve levels
         levels = self.build_levels()
@@ -229,9 +233,7 @@ class Analyzer:
         # call function with the params
         result = log_ma_returns(
             levels=levels, 
-            horizons=horizons, 
-            cumulative=cumulative, 
-            append_start=append_start,
+            return_params=self.return_params,
             returns_columns=self.returns_columns)
         
         return result

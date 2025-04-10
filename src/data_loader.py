@@ -1,22 +1,26 @@
 import numpy as np
 import pandas as pd
-import logging
-from pathlib import Path
 import warnings
-
 warnings.simplefilter(action='ignore', category=Warning)
 
-from .utils import setup_custom_logger, load_data_paths
-
+import logging
+from .utils.custom_formatter import setup_custom_logger
 # Setup logger
 logger = setup_custom_logger(__name__, level=logging.DEBUG)
 
+from .utils.helpers import load_data_paths
+from pathlib import Path
 CURRENT_DIR = Path(__file__).resolve().parent
+
+from .utils.enums import NaNHandling
 
 class DataLoader:
     """Loads and preprocesses financial data from specified paths."""
 
-    def __init__(self, handle_nans: str = "drop", load_merged: bool = True, load_other_dfs: bool = False):
+    def __init__(self, 
+                 handle_nans: str | NaNHandling = "drop", 
+                 load_merged: bool = True, 
+                 load_other_dfs: bool = False):
         """
         Initializes the DataLoader with data paths and processing options.
 
@@ -25,8 +29,15 @@ class DataLoader:
             load_merged (bool): Whether to load the merged DataFrame.
             load_other_dfs (bool): Whether to load other DataFrames.
         """
-        self._validate_handle_nans(handle_nans)
+            # Safe Enum conversion
+        if isinstance(handle_nans, str):
+            try:
+                handle_nans = NaNHandling(handle_nans.lower())
+            except ValueError:
+                raise ValueError(f"`handle_nans` must be one of {[n.value for n in handle_nans]}")
+
         self.handle_nans = handle_nans
+        logger.debug(f"self.handle_nans: {self.handle_nans}")
         self.load_merged = load_merged
         self.load_other_dfs = load_other_dfs
 
@@ -37,12 +48,6 @@ class DataLoader:
         if load_other_dfs:
             self._load_robinhood_data()
             self._load_crsp_data()
-
-    # Validate categorical inputs
-    def _validate_handle_nans(self, handle_nans: str):
-        """Validates the handle_nans parameter."""
-        if handle_nans not in ["fill", "drop", "keep"]:
-            raise ValueError("handle_nans must be one of 'fill', 'drop', or 'keep'.")
 
     # Retrieves data paths from data_paths.json
     def _set_file_paths(self):

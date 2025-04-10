@@ -1,6 +1,7 @@
 {
     "df_merged_path": "data/df_merged_{}.parquet",
-    "df_wrds_path": "data/tests/df_wrds_test.parquet",
-    "df_crsp_path": "data/tests/df_crsp_test_div.parquet",
-    "df_robinhood_path": "data/df_rh.parquet"
+    "df_wrds_path": "data/df_wrds.parquet",
+    "df_crsp_path": "data/df_crsp_div.parquet",
+    "df_robinhood_path": "data/df_rh.parquet",
+    "images_dir": "non_code/latex/images"
 }
