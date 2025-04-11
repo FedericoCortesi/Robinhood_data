@@ -6,13 +6,12 @@ warnings.simplefilter(action='ignore', category=Warning)
 import logging
 from .utils.custom_formatter import setup_custom_logger
 # Setup logger
-logger = setup_custom_logger(__name__, level=logging.DEBUG)
+logger = setup_custom_logger(__name__, level=logging.INFO)
 
 from .utils.helpers import load_data_paths
-from pathlib import Path
-CURRENT_DIR = Path(__file__).resolve().parent
-
 from .utils.enums import NaNHandling
+
+from config import PROJECT_ROOT
 
 class DataLoader:
     """Loads and preprocesses financial data from specified paths."""
@@ -51,12 +50,11 @@ class DataLoader:
     # Retrieves data paths from data_paths.json
     def _set_file_paths(self):
         """Sets the absolute file paths for the DataFrames."""
-        parent_dir = CURRENT_DIR.parents[0]
 
-        self.df_robinhood_path = parent_dir / self.data_paths["df_robinhood_path"]
-        self.df_wrds_path = parent_dir / self.data_paths["df_wrds_path"]
-        self.df_crsp_path = parent_dir / self.data_paths["df_crsp_path"]
-        self.df_merged_path = parent_dir / self.data_paths["df_merged_path"].format(self.handle_nans.value)
+        self.df_robinhood_path = PROJECT_ROOT / self.data_paths["df_robinhood_path"]
+        self.df_wrds_path = PROJECT_ROOT / self.data_paths["df_wrds_path"]
+        self.df_crsp_path = PROJECT_ROOT / self.data_paths["df_crsp_path"]
+        self.df_merged_path = PROJECT_ROOT / self.data_paths["df_merged_path"].format(self.handle_nans.value)
 
         logger.debug(f"self.df_robinhood_path: {self.df_robinhood_path}")
         logger.debug(f"self.df_wrds_path: {self.df_wrds_path}")
@@ -188,7 +186,7 @@ class DataLoader:
         """
         Merges the CRSP and RH dataframe, either by loading from the data directory or by building it.
         """
-
+        logger.debug(f"load_merged:  {self.load_merged}")
         if self.load_merged: # Access just read the file
             if columns:
                 df = pd.read_parquet(self.df_merged_path, columns=columns)

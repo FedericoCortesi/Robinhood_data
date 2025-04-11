@@ -7,4 +7,4 @@ class ReturnParams:
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     cumulative: bool = True
-    append_start: bool = True
+    append_start: bool = False
