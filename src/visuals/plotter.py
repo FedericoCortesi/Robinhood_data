@@ -15,6 +15,7 @@ from typing import List
 from config import PROJECT_ROOT, CONFIG_DIR
 
 from src.utils.helpers import load_data_paths
+from src.utils.metrics import test_second_order_stochastic_dominance
 
 # Setup logger
 import logging
@@ -262,3 +263,103 @@ class Plotter:
         sorted_data = np.sort(data)
         cdf = np.arange(1, len(sorted_data) + 1) / len(sorted_data)
         ax.plot(sorted_data, cdf, label=label, color=color, linewidth=1.0)
+        
+
+    def plot_ssd_comparison(self, 
+                            series_a:pd.Series, 
+                            series_b:pd.Series,
+                            name_a:str=None,
+                            name_b:str=None,
+                            save:bool=False, 
+                            file_name:str="SSD", 
+                            title=None, 
+                            show:bool=True):
+        """
+        Test for second-order stochastic dominance and visualize the results.
+        
+        Parameters:
+        col_a : str
+            Column name for the first return series
+        col_b : str
+            Column name for the second return series
+        name_a : str, optional
+            name for series_a
+        name_b : str, optional
+            name for series_b
+        save : bool, optional
+            Whether to save the plot
+        name : str, optional
+            Name of the saved file
+        title : str, optional
+            Plot title
+        show : bool, optional
+            Whether to show the plot
+            
+        Returns:
+        dominance: bool
+            True if series A dominates series B
+        """
+        # Initialize names
+        name_a = name_a if name_a is not None else "series_a"
+        name_b = name_b if name_b is not None else "series_b"
+
+        # Ensure sns is used
+        sns.set_style("whitegrid")
+
+        # Run the SSD test
+        dominance, int_cdf_a, int_cdf_b, x_grid, confidence = test_second_order_stochastic_dominance(series_a=series_a, series_b=series_b)
+        
+        # Create figure with two subplots
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+        
+        # Plot 1: Original normalized CDFs
+        returns_a = series_a.dropna().values
+        returns_b = series_b.dropna().values
+
+        # Build cdf        
+        x_a = np.sort(returns_a)
+        x_b = np.sort(returns_b)
+        cdf_a = np.arange(1, len(x_a) + 1) / len(x_a)
+        cdf_b = np.arange(1, len(x_b) + 1) / len(x_b)
+        
+        ax1.plot(x_a, cdf_a, label=f"{name_a} CDF", linewidth=1, color=self.palette[0])
+        ax1.plot(x_b, cdf_b, label=f"{name_b} CDF", linewidth=1, color=self.palette[1])
+        ax1.set_title("Normalized CDFs")
+        ax1.set_xlabel("Normalized Returns")
+        ax1.set_ylabel("Cumulative Probability")
+        ax1.grid(True, alpha=0.3)
+        ax1.legend()
+        
+        # Plot 2: Integrated CDFs
+        ax2.plot(x_grid, int_cdf_a, label=f"{name_a} Integrated CDF", linewidth=1, color=self.palette[0])
+        ax2.plot(x_grid, int_cdf_b, label=f"{name_b} Integrated CDF", linewidth=1, color=self.palette[1])
+        ax2.set_title("Integrated CDFs")
+        ax2.set_xlabel("Normalized Returns")
+        ax2.set_ylabel("Integrated CDF Value")
+        ax2.grid(True, alpha=0.3)
+        ax2.legend()
+        
+        # Add dominance message
+        if dominance:
+            dom_msg = f"{name_a} dominates {name_b} (SSD)"
+        else:
+            dom_msg = f"{name_a} does not dominate {name_b} (SSD), {confidence:.2f}% of points support dominance"
+        
+        if title:
+            fig.suptitle(f"{title}\n{dom_msg}", fontsize=14)
+        else:
+            fig.suptitle(dom_msg, fontsize=14)
+        
+        plt.tight_layout()
+        plt.subplots_adjust(top=0.88)
+
+        # Save with the name
+        if save:
+            out_dir = f"{self.images_dir}/{file_name}"
+            plt.savefig(out_dir, dpi=400, bbox_inches='tight')
+            print(f"file saved at {out_dir}")
+
+        if show:
+            plt.show()
+        
+        return dominance
