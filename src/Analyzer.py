@@ -6,16 +6,16 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 from typing import Optional
-import logging
 
 from . import DataLoader
 from .utils.metrics import log_ma_returns
-from .utils.custom_formatter import setup_custom_logger
 from .utils.helpers import load_data_paths
 from .utils.params import ReturnParams
 from .utils.enums import WeightsMethod
 
 # Setup logger
+import logging
+from .utils.custom_formatter import setup_custom_logger
 logger = setup_custom_logger(__name__, level=logging.DEBUG)
 
 from . import DataLoader
@@ -27,6 +27,7 @@ class Analyzer:
     def __init__(self,
                  weights_method: str | WeightsMethod = "stocks",
                  stocks_only: bool = False,
+                 include_dividends: bool = False,
                  compare_tickers: Optional[list[str]] = None,
                  dl_kwargs: Optional[dict] = None,
                  return_params: Optional[ReturnParams] = None):
@@ -43,6 +44,9 @@ class Analyzer:
 
         stocks_only : bool, default=False
             Bool to build the merged dataframe taking into account only stocks (shrcd=10 or shrcd=11) or not. 
+
+        include_dividemds : bool, default=False
+            Bool to include the RH index with dividends or not. 
 
         compare_tickers : list, default=["VOO"]
             List of ticker symbols to compare against the Robinhood portfolio.
@@ -72,6 +76,7 @@ class Analyzer:
         This class merges dataframes containing price and popularity data and 
         provides methods for analyzing returns distribution and stochastic dominance.
         """     
+        logger.info(f"{'#' * 30} Analysis Started {'#' * 30}")
         # Safe Enum conversion
         if isinstance(weights_method, str):
             try:
@@ -99,6 +104,12 @@ class Analyzer:
         
         # Filter columns
         cols_to_keep = ["date", "prc_adj", "prc_adj_div", "popularity", "ticker", "ret"]
+        
+        # filter for dividends
+        if not include_dividends:
+            cols_to_keep = [col for col in cols_to_keep if "div" not in col]
+        
+        # Find those contained in the df
         cols_to_keep = [col for col in cols_to_keep if col in self.df_merged]
         self.df_merged = self.df_merged[cols_to_keep]
 
@@ -239,215 +250,6 @@ class Analyzer:
         
         return result
         
-
-
-    def plot_returns_timeseries(self, 
-                                save:bool=False, 
-                                name:str="returns_plot.png", 
-                                title:str="Rolling Market vs Retail Returns Across Horizons", 
-                                show:bool=True):
-        # Retrieve Returns 
-        returns, horizons = self.build_returns()
-
-        # Apply Seaborn styling
-        sns.set_style("whitegrid")
-
-        # Create figure with subplots, determine dinamycally the number
-        rows = int(np.ceil(len(horizons)/2))
-        
-        if rows > 1:
-            fig, axes = plt.subplots(rows, 2, figsize=(18, 4*rows), sharex=True)
-        else:
-            fig, axes = plt.subplots(2, 1, figsize=(14, 8), sharex=True)
-        
-        axes = axes.flatten()
-
-        # Iterate through horizons and create subplots
-        for i, d in enumerate(horizons):
-            ax = axes[i]
-            
-            # Draw horizontal line at 0
-            ax.axhline(0, color="black", alpha=0.5, linewidth=1)
-            if d < len(returns):
-                ax.axvline(returns.index[d-1], color="black", alpha=0.5, linewidth=1)
-
-            # Plot RH returns
-            sns.lineplot(x=returns.index, y=returns[f"rh_portfolio_{d}_return"], label=f"RH returns", ax=ax, color=self.colors[0], markers=True, markersize=5, linewidth=1.0)
-            
-            # Plot div rh if it is present
-            if f"rh_portfolio_div_{d}_return" in returns.columns:
-                sns.lineplot(x=returns.index, y=returns[f"rh_portfolio_div_{d}_return"], label=f"RH returns Div", ax=ax, color=self.colors[1], markers=True, markersize=5, linewidth=1.0)
-
-            # Plot ticker returns
-            for j, ticker in enumerate(self.compare_tickers):
-                sns.lineplot(x=returns.index, y=returns[f"{ticker}_{d}_return"], label=f"{ticker} returns", ax=ax, color=self.colors[2+j], markers=True, markersize=5, linewidth=1.0)
-
-
-            # Set subplot title
-            ax.set_title(f"Horizon: {d} days")
-
-            # Improve X-axis formatting
-            ax.xaxis.set_major_locator(mdates.AutoDateLocator())
-            #ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-            ax.tick_params(axis='x', rotation=0)
-
-            # Clean up y-axis labels
-            if i % 2 == 0:  # Left column only
-                ax.set_ylabel("Log Returns")
-            else:
-                ax.set_ylabel("")
-
-            # Add grid and legend
-            ax.grid(True, linestyle='--', alpha=0.6)
-            ax.legend(loc="upper left")
-
-        # Set main figure title
-        fig.suptitle(title, fontsize=16)
-
-        # Adjust layout
-        plt.tight_layout(rect=[0, 0, 1, 0.96])
-
-        if save:
-            out_dir = f"{self.images_dir}/{name}"
-            plt.savefig(out_dir, dpi=400, bbox_inches='tight')
-            print(f"file saved at {out_dir}")
-
-        if show:
-            # Show plot
-            plt.show()
-
-    def plot_returns_kdes(self, save=False, name:str="kde_plot.png", title:str="Rolling Market vs Retail Returns Distribution Across Horizons", show:bool=True):
-        # Retrieve Returns 
-        returns, horizons = self.build_returns()
-
-        # Apply Seaborn styling
-        sns.set_style("whitegrid")
-
-        # Create figure with automatic subplots
-        cols = int(np.ceil(len(horizons)/2))
-        
-        if cols > 1:
-            fig, axes = plt.subplots(2, cols, figsize=(18, 10))
-        else:
-            fig, axes = plt.subplots(2, 1, figsize=(14, 8))
-
-        axes = axes.flatten()
-
-        # Iterate through horizons and create subplots
-        for i, d in enumerate(horizons):
-            ax = axes[i]
-
-            sns.kdeplot(data=returns[f"rh_portfolio_{d}_return"], label=f"RH Distribution", ax=ax, color=self.colors[0], linewidth=1.0)
-
-            # Plot div rh if it is present
-            if f"rh_portfolio_div_{d}_return" in returns.columns:
-                sns.kdeplot(data=returns[f"rh_portfolio_div_{d}_return"], label=f"RH Distribution Div", ax=ax, color=self.colors[0], linewidth=1.0)
-
-            for j, ticker in enumerate(self.compare_tickers):
-                sns.kdeplot(data=returns[f"{ticker}_{d}_return"], label=f"{ticker} Distribution",  ax=ax, color=self.colors[2+j], linewidth=1.0)
-
-            # Set subplot title
-            ax.set_title(f"Horizon: {d}")
-
-            # Clean up x-axis labels
-            if i > 2:  # Bottom row only
-                ax.set_xlabel("Returns")
-            else:
-                ax.set_xlabel("")
-
-            # Improve X-axis formatting
-            ax.tick_params(axis='x', rotation=0)
-
-
-            # Add grid and legend
-            ax.grid(True, linestyle='--', alpha=0.6)
-            ax.legend()
-
-        # Set main figure title
-        fig.suptitle(title, fontsize=16)
-
-        # Adjust layout
-        plt.tight_layout(rect=[0, 0, 1, 0.96])
-
-        if save:
-            out_dir = f"{self.images_dir}/{name}"
-            plt.savefig(out_dir, dpi=600, bbox_inches='tight')
-            print(f"file saved at {out_dir}")
-
-        if show:
-            # Show plot
-            plt.show()
-
-    def plot_returns_cdfs(self, save=False, name:str="cdf_plot.png", title:str="Empirical CDF of Returns Across Horizons", show:bool=True):
-        # Retrieve Returns 
-        returns, horizons = self.build_returns()
-        
-        # Apply Seaborn styling
-        sns.set_style("whitegrid")
-        
-        # Create figure with automatic subplots
-        cols = int(np.ceil(len(horizons)/2))
-        
-        if cols > 1:
-            fig, axes = plt.subplots(2, cols, figsize=(18, 10))
-        else:
-            fig, axes = plt.subplots(2, 1, figsize=(14, 8))
-        
-        axes = axes.flatten()
-        
-        
-        # Iterate through horizons and create subplots
-        for i, d in enumerate(horizons):
-            ax = axes[i]
-            
-            # Plot CDF for each column
-            #self._plot_cdf(returns[f"mc_{d}_return"], "Market CDF", ax, self.colors[0])
-            self._plot_cdf(returns[f"rh_portfolio_{d}_return"], "RH CDF", ax, self.colors[0])
-
-            # Plot timeseries if its present
-            if f"rh_portfolio_div_{d}_return" in returns.columns:
-                self._plot_cdf(returns[f"rh_portfolio_div_{d}_return"], "RH Div CDF", ax, self.colors[0])
-            
-            for j, ticker in enumerate(self.compare_tickers):
-                self._plot_cdf(returns[f"{ticker}_{d}_return"], f"{ticker} CDF", ax, self.colors[1+j])
-            
-            # Set subplot title
-            ax.set_title(f"Horizon: {d}")
-            
-            # Clean up x-axis labels
-            if i > 2:  # Bottom row only
-                ax.set_xlabel("Returns")
-            else:
-                ax.set_xlabel("")
-            
-            # Improve X-axis formatting
-            ax.tick_params(axis='x', rotation=0)
-            
-            # Add grid and legend
-            ax.grid(True, linestyle='--', alpha=0.6)
-            ax.legend()
-        
-        # Set main figure title
-        fig.suptitle(title, fontsize=16)
-        
-        # Adjust layout
-        plt.tight_layout(rect=[0, 0, 1, 0.96])
-        
-        if save:
-            out_dir = f"{self.images_dir}/{name}"
-            plt.savefig(out_dir, dpi=600, bbox_inches='tight')
-            print(f"file saved at {out_dir}")
-        
-        if show:
-            # Show plot
-            plt.show()
-
-    def _plot_cdf(self, data, label, ax, color):
-        """Helper method to plot a single CDF on the given axis"""
-        sorted_data = np.sort(data)
-        cdf = np.arange(1, len(sorted_data) + 1) / len(sorted_data)
-        ax.plot(sorted_data, cdf, label=label, color=color, linewidth=1.0)
-
 
     def test_second_order_stochastic_dominance(self, col_a:str, col_b:str, df:pd.DataFrame=None):
         """
