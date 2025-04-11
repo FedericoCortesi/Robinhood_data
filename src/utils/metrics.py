@@ -121,6 +121,51 @@ def compute_crra_utility(returns_array:np.ndarray, gamma:float)->np.ndarray :
     
     return utility_array
 
+def test_first_order_stochastic_dominance(series_a:pd.Series, series_b:pd.Series):
+    """
+    Test for first-order stochastic dominance between two return series from a DataFrame.
+    
+    Parameters:
+    - series_a : pd.Series
+        First return series
+    - series_a : pd.Series
+        Second return series
+        
+    Returns:
+    - tuple:
+        - dominance: bool, True if series A dominates series B
+        - cdf_a_interp: numpy.array, interploated CDF of series A
+        - cdf_b_interp: numpy.array, interploated CDF of series B
+        - x_grid: numpy.array, common x-axis values for the integrated CDFs
+        - dominance_confidence: float, percentage of points where the dominance relation holds
+    """    
+
+    # Extract and drop NaN values
+    returns_a = series_a.dropna().values
+    returns_b = series_b.dropna().values
+            
+    # Create sorted arrays and CDFs
+    x_a = np.sort(returns_a)
+    x_b = np.sort(returns_b)
+
+    # Go over each item in the array and get the cumulative probability
+    cdf_a = np.arange(1, len(x_a) + 1) / len(x_a)
+    cdf_b = np.arange(1, len(x_b) + 1) / len(x_b)
+    
+    # Create integrated CDFs (need to use common x-grid)
+    x_grid = np.unique(np.concatenate([x_a, x_b]))
+    x_grid.sort()  # Ensure the grid is sorted
+    
+    # Interpolate CDFs onto common grid
+    cdf_a_interp = np.interp(x_grid, x_a, cdf_a, left=0)
+    cdf_b_interp = np.interp(x_grid, x_b, cdf_b, left=0)
+        
+    # Test for SSD: A dominates B if integrated_cdf_a <= integrated_cdf_b for all points
+    dominance_points = cdf_a_interp <= cdf_b_interp
+    dominance = np.all(dominance_points)
+    dominance_confidence = np.mean(dominance_points) * 100
+    
+    return dominance, cdf_a_interp, cdf_b_interp, x_grid, dominance_confidence
 
 
 def test_second_order_stochastic_dominance(series_a:pd.Series, series_b:pd.Series):
