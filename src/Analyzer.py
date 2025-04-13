@@ -85,6 +85,7 @@ class Analyzer:
                 raise ValueError(f"`weights_method` must be one of {[m.value for m in WeightsMethod]}")
 
         self.weights_method = weights_method
+        logger.debug(f"weights_method: {self.weights_method}")
         
         # Save attributes
         self.stocks_only = stocks_only
@@ -101,6 +102,7 @@ class Analyzer:
         # "mc" variable used to be here, decided to delete it as i don't care about the "market index" built on RH data.
         # Previously, the "market index"_t was just \sum_{i=1}^N P_{i,t}\cdot S_{i,t}
         self.df_merged = self.dl.merge_dfs(stocks_only=self.stocks_only)
+        logger.debug(f"self.df_merged: {self.df_merged.columns}")
         
         # Filter columns
         cols_to_keep = ["date", "prc_adj", "prc_adj_div", "popularity", "ticker", "ret"]

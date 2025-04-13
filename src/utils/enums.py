@@ -8,3 +8,4 @@ class NaNHandling(str, Enum):
     DROP = "drop"
     KEEP = "keep"
     FILL = "fill"
+    ZERO = "zero"

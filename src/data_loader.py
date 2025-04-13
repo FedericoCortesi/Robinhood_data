@@ -103,6 +103,8 @@ class DataLoader:
             df_rh = df_rh.ffill(axis=0)
         elif self.handle_nans == "drop":
             df_rh = df_rh.dropna(axis=1)
+        elif self.handle_nans == "zero":
+            df_rh = df_rh.fillna(0)
         else:
             pass
 
@@ -120,6 +122,7 @@ class DataLoader:
 
         # Load csv
         df_crsp = pd.read_parquet(self.df_crsp_path)
+        df_crsp = df_crsp.dropna(subset="prc_adj")
 
         # Save
         #cols_to_drop = ["cfacshr_adj", "cfacpr_adj", "cfacshr", "cfacpr", "sprtrn"]
@@ -162,7 +165,6 @@ class DataLoader:
         df_crsp.loc[:,"shrout_adj"] = df_crsp["shrout"]*1000*df_crsp["cfacshr_adj"] 
 
         if "divamt" in df_crsp.columns:
-            logger.debug("Handling dividends")
             df_crsp["divamt"] = df_crsp["divamt"].fillna(0) # Handle nans
             
             # Get the cumulative dividend amount for each ticker
@@ -248,6 +250,8 @@ class DataLoader:
         self.df_rh_long = self.df_rh_long.sort_values(by=["ticker", "date"])
         self.df_rh_long = self.df_rh_long.reset_index(drop=True)
 
+        logger.debug(f"self.df_rh_long['ticker'].nunique(): {self.df_rh_long['ticker'].nunique()}")
+
         # Append users if true
         if users:
             self._concat_users_to_robinhood()
@@ -269,12 +273,15 @@ class DataLoader:
             self.df_crsp = self.df_crsp[self.df_crsp["date"]<=end_date]
 
         # Merge both dataframes on 'date' and 'ticker'
+        logger.debug(f"self.df_crsp['ticker'].nunique(): {self.df_crsp['ticker'].nunique()}")
         df_merged = self.df_rh_long.merge(self.df_crsp, on=['date', 'ticker'], how='inner')
+        logger.debug(f"df_merged['ticker'].nunique(): {df_merged['ticker'].nunique()}")
 
         # Get the total number of trading days and filter out tickers with different values (missing or repeating data)
-        trading_days = df_merged["date"].nunique()
-        tickers_to_keep = df_merged["ticker"].value_counts()[df_merged["ticker"].value_counts()==trading_days].index
-        df_merged = df_merged[df_merged["ticker"].isin(tickers_to_keep)]
+        #trading_days = df_merged["date"].nunique()
+        #tickers_to_keep = df_merged["ticker"].value_counts()[df_merged["ticker"].value_counts()==trading_days].index
+        #df_merged = df_merged[df_merged["ticker"].isin(tickers_to_keep)]
+        logger.debug(f"df_merged['ticker'].nunique(): {df_merged['ticker'].nunique()}")
 
         # Drop columns
         df_merged = df_merged.drop(columns=["permno"])
@@ -333,6 +340,8 @@ class DataLoader:
         for tick in self.df_crsp["ticker"].unique():
             if tick in rh_tickers:
                 inner_tickers.append(tick)
+
+        logger.debug(f"len inner_tickers: {len(inner_tickers)}")
 
         # Filter df
         self.df_crsp = self.df_crsp[self.df_crsp["ticker"].isin(inner_tickers) == True] 
