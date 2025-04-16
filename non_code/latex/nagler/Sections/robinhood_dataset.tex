@@ -2,22 +2,23 @@
 \subsection{Description of the Dataset}
 This data is retrieved from \url{https://robintrack.net/}, the creator retrieved data from the official Robinhood API.
 
-The dataset contains the number of Robinhood users holding at least one share of 8,221 securities. The available data spans from February 5, 2018, to August 13, 2020, covering 818 days (data is available also for non-trading days). Although the data was originally recorded hourly, I aggregated it to a daily frequency by computing the average number of holders per day to simplify computations due to the dataset's size. This aggregation can be easily reversed if needed. 
+The dataset contains the \textbf{number} of Robinhood users holding at least one share of 8,221 securities.
+
+\begin{quote}
+    \textit{
+        This is a key feature of the dataset, we cannot track the holdings of individual investors, nor we know the amount of money or stocks invested in a certain security, 
+        we also cannot know the buy/sell flows on stocks, although we can proxy it with the change in holders.     
+        }
+\end{quote}
+
+The available data spans from February 5, 2018, to August 13, 2020, covering 818 days (data is available also for non-trading days and some days are missing). 
+Although the data was originally recorded hourly, I aggregated it to a daily frequency by computing the average number of holders per day. 
 
 
-\begin{figure}[h!]
-        \centering
-        \includegraphics[width=0.8\linewidth]{../images/no_stocks_date.png}
-        
-\end{figure}
 
-
-\paragraph{Handling NaNs}  
-The original dataset contains missing values for 3,331 securities, primarily in the earlier periods. In some cases, assets appear in the dataset only after a certain date, despite being publicly traded before. It is important to distinguish between missing values and zero values, as they represent different concepts. Some securities exhibit a sudden increase from zero to a larger number of holders, but interpreting these as errors would impose an assumption on investor behavior.  
-
-\noindent Additionally, 1,248 securities have at least one recorded zero in the number of holders. The majority of missing data corresponds to small-cap stocks, which collectively account for at most 3 percent of total market capitalization. Given the limited impact of these securities on overall retail activity, I opted to remove all securities with missing values to ensure consistency in the dataset.  
-
-
+\paragraph{Handling Missing Values}  
+The original dataset contains missing values for 3,331 securities, primarily in the earlier periods. 
+To ensure consistency in the comparison we adopt the same method in \cite{Fedyk2024}
 
 \subsubsection{Distribution of Key Features (Log-Transformed)}
 The distributions of trading volume, market capitalization, and retail holders were initially highly skewed, with a few extreme values dominating the dataset. To address this, I applied a logarithmic transformation: $x^\prime = \log(1+x)$. 
@@ -41,18 +42,22 @@ The key observations after applying the transformation are:
 
 
 
-
-
-
-
-
-
-
 \subsection{Comparing the Portfolios}
-\subsubsection{Methodology and Overview} 
-To build a representative portfolio of the average Robinhood investor, it is necessary to retrieve the prices of the securities. A capitalization-weighted approach can be used, multiplying the price of each security by the number of users who hold it. This approach assumes that all Robinhood users hold a similar number of shares for a given ticker, or that the distribution of shares held per user follows a normal distribution.  
+\subsubsection{Different Approaches} 
+\cite{Fedyk2024} and \cite{Welch2022} use the same approach to build the performance of the Robinhood crowd (or "reference index"): 
+they build daily weights and then apply the weights from the precious day to returns of stocks. They directly build portfolio returns.
 
-Over the years covered in the dataset, Robinhood has gained a significant number of users. Data on active users is available on Statista\footnote{\url{https://www.statista.com/statistics/822176/number-of-users-robinhood/}}, though only on a yearly basis. Comparing the Statista figures with Robinhood's reported numbers for 2023 suggests that the active user count corresponds to December 31 of each year. This data could later be used to normalize the number of users and build a reference portfolio.  
+I tried, on the other hand, to build a index, applying weights to prices rather than returns.  
+
+
+
+To build a representative portfolio of the average Robinhood investor, it is necessary to retrieve the prices of the securities. 
+A capitalization-weighted approach can be used, multiplying the price of each security by the number of users who hold it. 
+This approach assumes that all Robinhood users hold a similar number of shares for a given ticker, or that the distribution of shares held per user follows a normal distribution.  
+
+Over the years covered in the dataset, Robinhood has gained a significant number of users. Data on active users is available on Statista\footnote{\url{https://www.statista.com/statistics/822176/number-of-users-robinhood/}}, though only on a yearly basis. 
+Comparing the Statista figures with Robinhood's reported numbers for 2023 suggests that the active user count corresponds to December 31 of each year. 
+This data could later be used to normalize the number of users and build a reference portfolio.  
 
 The total number of open positions can be computed as the sum of all investors who hold at least one security in each asset, effectively a row-wise sum of the dataset.  
 
