@@ -1,12 +1,13 @@
 import numpy as np
 import pandas as pd
+import json
 import warnings
 warnings.simplefilter(action='ignore', category=Warning)
 
 import logging
 from .utils.custom_formatter import setup_custom_logger
 # Setup logger
-logger = setup_custom_logger(__name__, level=logging.INFO)
+logger = setup_custom_logger(__name__, level=logging.DEBUG)
 
 from .utils.helpers import load_data_paths
 from .utils.enums import NaNHandling
@@ -17,7 +18,7 @@ class DataLoader:
     """Loads and preprocesses financial data from specified paths."""
 
     def __init__(self, 
-                 handle_nans: str | NaNHandling = "drop", 
+                 handle_nans: str | NaNHandling = "zero", 
                  load_merged: bool = True, 
                  load_other_dfs: bool = False):
         """
@@ -76,10 +77,20 @@ class DataLoader:
         # Load csv
         df_rh = pd.read_parquet(self.df_robinhood_path)
 
-        # Handle nans
-        #df_rh = df_rh.fillna(0)
-        #df_rh = df_rh.where(df_rh!=0, np.nan)
+        logger.debug(f"df_rh.shape: {df_rh.shape}")
 
+
+        # load tickers to exclude
+        with open("../data/tickers/tickers_to_exclude.json") as f:
+            excluded = json.load(f)["excluded_tickers"]
+
+        logger.debug(f"len(excluded): {len(excluded)}")
+
+        # filter cols
+        cols_to_keep = [col for col in df_rh.columns if col not in excluded]
+        logging.debug(f"len cols to keep: {len(cols_to_keep)}")
+
+        df_rh = df_rh[cols_to_keep]
 
         # define row-wise sum
         df_rh["sum"] = df_rh.sum(axis=1)
@@ -108,6 +119,7 @@ class DataLoader:
         else:
             pass
 
+        logger.debug(f"df_rh.shape: {df_rh.shape}")
         # Save as attribute
         self.df_rh = df_rh
         
@@ -277,14 +289,14 @@ class DataLoader:
         df_merged = self.df_rh_long.merge(self.df_crsp, on=['date', 'ticker'], how='inner')
         logger.debug(f"df_merged['ticker'].nunique(): {df_merged['ticker'].nunique()}")
 
-        # Get the total number of trading days and filter out tickers with different values (missing or repeating data)
-        #trading_days = df_merged["date"].nunique()
-        #tickers_to_keep = df_merged["ticker"].value_counts()[df_merged["ticker"].value_counts()==trading_days].index
-        #df_merged = df_merged[df_merged["ticker"].isin(tickers_to_keep)]
-        logger.debug(f"df_merged['ticker'].nunique(): {df_merged['ticker'].nunique()}")
+        # clean data
 
+        #trading_days = df_merged["date"].nunique()
+        #tickers_to_drop = df_merged["ticker"].value_counts()[df_merged["ticker"].value_counts()>trading_days].index
+        #df_merged = df_merged[~df_merged["ticker"].isin(tickers_to_drop)]
+        
         # Drop columns
-        df_merged = df_merged.drop(columns=["permno"])
+        #df_merged = df_merged.drop(columns=["permno"])
 
         #-- Build additional features --#
 

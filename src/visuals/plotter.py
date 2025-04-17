@@ -235,7 +235,8 @@ class Plotter:
             # formatting
             ax.xaxis.set_major_locator(mticker.MaxNLocator(nbins=7))
             ax.xaxis.set_major_formatter(mticker.FormatStrFormatter("%.3f"))
-            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%d"))
+            ax.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5))
+            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
             ax.tick_params(axis='x', rotation=0)
             ax.set_xlabel("Returns" if i > 2 else "")
             ax.set_ylabel("Returns")
