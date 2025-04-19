@@ -1,100 +1,36 @@
 \section{Robinhood Dataset}
 \subsection{Description of the Dataset}
-This data is retrieved from \url{https://robintrack.net/}, the creator retrieved data from the official Robinhood API.
+The dataset records the \textbf{number} of Robinhood users holding at least one share of 8,619 securities, with observations taken hourly. 
+Following \cite{Welch2022} and \cite{Fedyk2024}, we aggregate this data on a daily basis by selecting the last observation of each trading day.
 
-The dataset contains the \textbf{number} of Robinhood users holding at least one share of 8,221 securities.
+The sample spans from February 5, 2018, to August 13, 2020, covering 818 days. Note that the dataset includes non-trading days and contains some missing observations.
 
 \begin{quote}
     \textit{
-        This is a key feature of the dataset, we cannot track the holdings of individual investors, nor we know the amount of money or stocks invested in a certain security, 
-        we also cannot know the buy/sell flows on stocks, although we can proxy it with the change in holders.     
-        }
+        Since the dataset only provides the number of investors per security, we cannot track individual holdings, monetary amounts, or share quantities. 
+        Moreover, buy/sell flows are unobservable; however, we can approximate them using changes in the number of holders.
+    }
 \end{quote}
 
-The available data spans from February 5, 2018, to August 13, 2020, covering 818 days (data is available also for non-trading days and some days are missing). 
-Although the data was originally recorded hourly, I aggregated it to a daily frequency by computing the average number of holders per day. 
+We merge this dataset with CRSP to obtain market-level information and later construct a benchmark index. 
+The resulting dataframe contains 7,613 unique securities—substantially more than in \cite{Fedyk2024} and \cite{Welch2022}, who restrict their analysis to U.S. common stocks only. 
+Details of the data cleaning procedure are provided in Appendix~\ref{sec:data}.
 
+In terms of security types, common stocks represent 57.3\% of the dataset, while ETFs and other funds account for 26.3\% and 8.7\%, respectively. 
+Structured products, REITs, and ADRs constitute the remaining share. 
+When classifying by market capitalization, stocks dominate with 83.1\%, followed by ETFs (9.3\%) and other funds (3.3\%).
 
+The total number of open positions on any given day is calculated as the sum of users holding at least one share across all securities—i.e., a row-wise sum across the dataset.
 
-\paragraph{Handling Missing Values}  
-The original dataset contains missing values for 3,331 securities, primarily in the earlier periods. 
-To ensure consistency in the comparison we adopt the same method in \cite{Fedyk2024}
+Market data for each security was retrieved from CRSP\footnote{The Center for Research in Security Prices (CRSP), based at the University of Chicago, provides high-quality historical market data widely used in finance research and investment analysis.} via WRDS. 
+Out of the full universe, 8,099 securities were available in CRSP, as it includes only U.S.-listed assets. 
 
-\subsubsection{Distribution of Key Features (Log-Transformed)}
-The distributions of trading volume, market capitalization, and retail holders were initially highly skewed, with a few extreme values dominating the dataset. To address this, I applied a logarithmic transformation: $x^\prime = \log(1+x)$. 
-
-This transformation reduces the impact of outliers, enhances interpretability by making the data more symmetric, and facilitates comparisons between stocks of different sizes.
-
-The key observations after applying the transformation are:
-\begin{itemize}
-    \item \textbf{Trading Volume:} The distribution appears approximately normal, centered around a peak, with a slight left tail. While most stocks have relatively low trading volume, a few highly traded stocks, such as large-cap or meme stocks, exist but no longer dominate the distribution.
-    \item \textbf{Market Capitalization:} The transformed market capitalization data exhibits a bell-shaped curve, suggesting a more balanced spread across small, mid, and large-cap stocks. However, some large-cap stocks remain in the extreme right tail, indicating that a few companies, such as Apple and Microsoft, are significantly larger than the majority.
-    
-    \item \textbf{Retail Holders:} The number of retail holders follows a roughly log-normal distribution, confirming that a small number of stocks attract massive retail participation while most remain relatively unpopular. The left tail suggests that many stocks have very few retail holders, reinforcing the notion that retail trading is concentrated in a subset of securities.
-\end{itemize}
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=1\linewidth]{../images/Distributions.png}
+    \includegraphics[width=0.8\linewidth]{../images/no_positions_date.png}
 \end{figure}
 
-
-
-
-
-\subsection{Comparing the Portfolios}
-\subsubsection{Different Approaches} 
-\cite{Fedyk2024} and \cite{Welch2022} use the same approach to build the performance of the Robinhood crowd (or "reference index"): 
-they build daily weights and then apply the weights from the precious day to returns of stocks. They directly build portfolio returns.
-
-I tried, on the other hand, to build a index, applying weights to prices rather than returns.  
-
-
-
-To build a representative portfolio of the average Robinhood investor, it is necessary to retrieve the prices of the securities. 
-A capitalization-weighted approach can be used, multiplying the price of each security by the number of users who hold it. 
-This approach assumes that all Robinhood users hold a similar number of shares for a given ticker, or that the distribution of shares held per user follows a normal distribution.  
-
-Over the years covered in the dataset, Robinhood has gained a significant number of users. Data on active users is available on Statista\footnote{\url{https://www.statista.com/statistics/822176/number-of-users-robinhood/}}, though only on a yearly basis. 
-Comparing the Statista figures with Robinhood's reported numbers for 2023 suggests that the active user count corresponds to December 31 of each year. 
-This data could later be used to normalize the number of users and build a reference portfolio.  
-
-The total number of open positions can be computed as the sum of all investors who hold at least one security in each asset, effectively a row-wise sum of the dataset.  
-
-Market data for all securities was retrieved from the CRSP\footnote{The Center for Research in Security Prices, based at the University of Chicago, provides high-quality historical market data widely used in finance research and investment analysis.} database, accessed via WRDS. However, only 8,099 securities are available in CRSP, as it focuses exclusively on American assets. The difference in open positions between the full dataset and the CRSP subset is minimal. If, instead, all securities with missing values are dropped, leaving only 5,221 securities, the gap widens.
-
-\begin{figure}[h!]
-        \centering
-        \includegraphics[width=0.8\linewidth]{../images/no_positions_vs_date_drop.png}
-\end{figure}
-
-The graph illustrates the  count of open positions per day  on Robinhood from April 2018 to mid-2020, showing a  steady increase  over time, with a  sharp acceleration in early 2020. This surge aligns with the onset of the  COVID-19 pandemic, which likely drove a significant influx of new retail investors seeking market opportunities amid economic uncertainty and stimulus checks. 
-
-
-
-\subsubsection{Retail Investors Prefer "Famous" Stocks}
-
-The majority of the securities are common shares, representing about 57.9\%. ETFs represent about 23.7\% and other funds are the 9.2\% of the dataset. Other structured investments, REITs, and ADRs cover the remaining part.
-
-Analysing the securities by market capitalisation about 82.9\% is represented by stocks and 9.6\% by ETFs. If we look at the "Retail Market Cap" (i.e. number of positions times price), 89.2\% of securities are stocks and 5.8\% are ETFs.  
-
-Looking at the securities Robinhood users prefer holding, ranked by "Retail Market Cap", investors prefer holding smaller cap stock. A qualitative analysis shows "famous" stocks, such as Tesla, Starbucks, and Nvidia to name a few, to appear among the most popularly owned.
-
-\subsubsection{Possible Measures of Divergence} 
-\paragraph{Rank Distance} 
-To describe the preference of retail investors for smaller cap stock I propose the following measure:
-\begin{align*}
-    d_R = \sum_{i=1}^N \frac{R^{\text{Mkt}}_i-R^{\text{RH}}_i}{R^{\text{RH}}_i}
-\end{align*}
-Where $R^{\text{Mkt}}_i$ is the rank of the $i^\text{th}$ security by market cap, and $R^{\text{RH}}_i$ is the rank by retail market cap. The normalization by $R^{\text{RH}}_i$ reduces the impact of small-cap stocks with minor ranking differences.
-
-\begin{figure}[h]
-        \centering
-        \includegraphics[width=0.8\linewidth]{../images/rank_distance.png}
-\end{figure}
-
-The plotted Daily Rank Distance suggests a clear downward trend from early 2018 to mid-2020, indicating that the ranking of stocks by retail market cap has become increasingly aligned with the ranking by total market cap. Initially, the distance is above 1800, gradually declining towards 1450. This implies that retail investors, who originally exhibited a stronger preference for smaller-cap stocks, have progressively shifted towards stocks that are more representative of the broader market.
-
-Between 2018 and 2019, the decline is relatively steady, reflecting a gradual change in retail investment behavior. However, the trend accelerates in 2019 and 2020, suggesting a more pronounced shift. The beginning of 2020 shows increased volatility, with occasional upward spikes, which could be attributed to market disruptions, possibly linked to the COVID-19 crash and the subsequent retail trading boom. The rapid expansion of retail investing during this period, fueled by stimulus checks and zero-commission trading, may have led to temporary deviations, but the overall trend continues downward.
-
-A sustained decrease in rank distance suggests that retail investors have moved closer to institutional preferences, potentially increasing their exposure to large-cap stocks or index-tracking assets. If this trend persists, it would indicate a continued assimilation of retail behavior into the broader market structure. Conversely, a reversal in this pattern could signal renewed speculative activity or a shift back to small-cap stocks.
+The figure above shows the daily count of open positions on Robinhood from April 2018 to mid-2020. 
+We observe a steady increase in user participation, with a sharp acceleration beginning in early 2020. 
+This surge coincides with the onset of the COVID-19 pandemic, likely driven by a combination of heightened market volatility, increased retail interest, and fiscal stimulus payments.

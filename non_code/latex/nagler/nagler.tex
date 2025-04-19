@@ -53,7 +53,8 @@
 % --- Page formatting settings ---
 
 % Set link colors for labeled items (blue) and citations (red)
-\hypersetup{colorlinks=true, linkcolor=blue, citecolor=red}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=black}
+
 
 % Make reference section title font smaller
 \renewcommand{\refname}{\large\bf{References}}
@@ -198,7 +199,10 @@
 % --- Document starts here ---
 
 \begin{document}
+\input{Sections/introduction}
 \input{Sections/robinhood_dataset}
+\input{Sections/returns}
+
 \include{Sections/appendix}
 
 % References Section

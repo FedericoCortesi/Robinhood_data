@@ -86,4 +86,16 @@
 \end{table}
 
 
+\newpage
+\section{Handling Missing Data}
+\label{sec:data}
+The original Robinhood dataset contains missing values for 3,331 securities, primarily in the earlier periods. 
+This means that these securities don't have information for a certain date.
+   
+To ensure consistency we adopt a similar method as \cite{Fedyk2024}. Their Robinhood portfolio is constructed using the available securities on a daily basis, 
+hence securities with missing values are simply not taken into account for the day. Moreover we drop all securities that they have defined as problematic in the appendix.
+
+Since our CRSP dataset is also a bit different from the one they use, we drop entirely securities that have more than one entry per day.
+
+
 \end{appendices}

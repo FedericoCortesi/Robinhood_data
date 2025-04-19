@@ -1,9 +1,30 @@
 \section{Analysing Trading Patterns}
 
-\subsubsection{Presentation of Facts}
+
+\subsection{Comparing Portfolios}
+\subsubsection{Weights Methods} 
+\cite{Fedyk2024} and \cite{Welch2022} use the same approach to build the performance of the Robinhood crowd (or "reference index"): 
+they build daily weights and then apply the weights from the previous day to daily stock returns, directly building portfolio returns. 
+
+First, it is necessary to define how those weights are computed. They define two different types of weights, although they yield similar findings in their analysis.
+
+The first method is the "dollar method", which assumes that every investor represents an equal dollar amount investment in the stock. 
+\begin{equation}
+    w_{i,t} = \frac{N_{i,t}}{\sum_j N_{j,t}}
+\end{equation}
+
+where $w_{i,t}$ is the Robinhood portfolio weight of security $i$ at time $t$ and $N_{i,t}$ is the number of investors in security $i$ at time $t$.
+
+Alternatively, they define the "share method", where each Robinhood investor in a stock represents a one share investment in that stock.
+\begin{equation}
+    w_{i,t} = \frac{N_{i,t}\cdot P_{i,t}}{\sum_j N_{j,t}\cdot P_{j,t}}
+\end{equation}
+where $P_{j,t}$ is the price of stock $j$ at time $t$.
 
 \subsection{Building the Robinhood Portfolio}
 As explained above, the biggest limitation of the Robintrack dataset is that it counts the number of users holding a certain security and doesn't provide any information on the amount invested in a particular security. 
+
+I tried, on the other hand, to build an index, applying weights to prices rather than returns.  
 
 A possible solution is building a portfolio in which we assume that all positions hold the same equivalent amount of money in a certain security. This means weighing stocks by their "popularity":
 \begin{equation*}

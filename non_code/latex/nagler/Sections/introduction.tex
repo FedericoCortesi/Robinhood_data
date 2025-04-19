@@ -1,0 +1,19 @@
+\section{Introduction}
+
+In recent years, the rise of commission-free trading platforms has profoundly reshaped retail investor behavior and sparked growing interest among scholars in behavioral finance. 
+One of the most prominent examples is Robinhood, a mobile-first brokerage that gained widespread popularity for eliminating trading fees and offering a highly gamified user experience. 
+The platform attracted a large number of retail investors, particularly young and inexperienced individuals.
+\footnote{According to Robinhood’s IPO filing, the typical user on the platform is 31 years old, with an average account balance of approximately \$3,500. Notably, around half of the platform’s users are investing for the first time.}
+
+An important development in the empirical literature was the release of Robintrack, an open-source dataset that tracks the number of Robinhood users holding individual stocks over time. 
+This data, which was collected via Robinhood's public API, provides a rare opportunity to directly observe the trading dynamics and portfolio shifts of real retail investors. 
+The dataset can be downloaded from \url{https://robintrack.net/}.
+
+Several recent studies, including \cite{Fedyk2024} and \cite{Welch2022}\footnote{it must be noted that the former explicitly follows the mehtod of the latter}, 
+have leveraged the Robintrack dataset to examine retail investor performance. 
+Their findings suggest that Robinhood investors—contrary to popular belief—exhibited strong market timing and outperformed passive benchmarks. 
+In particular, these papers report significant cumulative returns and positive alpha using standard factor models.
+
+In this paper, we revisit these claims by constructing an alternative methodology for portfolio formation based on the same dataset. 
+Specifically, we analyze whether the returns of Robinhood users’ favorite stocks exhibit stochastic dominance over benchmark indices.
+Our goal is to offer a more nuanced assessment of whether retail investors truly generate abnormal returns or whether previous results may be driven by sample selection or methodological choices.
