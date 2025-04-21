@@ -73,8 +73,8 @@ class Plotter:
         horizons = self.series_list[0].horizons
         rows = int(np.ceil(len(horizons)/2))
 
-        fig, axes = plt.subplots(rows, 2, figsize=(18, 4*rows), sharex=True) if rows > 1 else plt.subplots(2, 1, figsize=(14, 8), sharex=True)
-        axes = axes.flatten()
+        fig, axes = plt.subplots(rows, 2, figsize=(18, 4*rows), sharex=True) if rows > 1 else plt.subplots(len(horizons), 1, figsize=(18, 5*len(horizons)), sharex=True)
+        axes = axes.flatten() if len(horizons) > 1 else [axes]
 
         for i, d in enumerate(horizons):
             ax = axes[i]
@@ -162,7 +162,7 @@ class Plotter:
             ax.set_title(f"Horizon: {d} days")
             ax.xaxis.set_major_locator(mticker.MaxNLocator(nbins=7))
             ax.xaxis.set_major_formatter(mticker.FormatStrFormatter("%.3f"))
-            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%d"))
+            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
             ax.tick_params(axis='x', rotation=0)
             ax.set_ylabel("Density" if i > 2 else "")
             ax.set_xlabel("")

@@ -1,7 +1,7 @@
 from enum import Enum
 
 class WeightsMethod(str, Enum):
-    STOCKS = "stocks"
+    NUMBER = "number"
     WEALTH = "wealth"
 
 class NaNHandling(str, Enum):

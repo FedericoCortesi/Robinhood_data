@@ -7,7 +7,7 @@ warnings.simplefilter(action='ignore', category=Warning)
 import logging
 from .utils.custom_formatter import setup_custom_logger
 # Setup logger
-logger = setup_custom_logger(__name__, level=logging.DEBUG)
+logger = setup_custom_logger(__name__, level=logging.INFO)
 
 from .utils.helpers import load_data_paths
 from .utils.enums import NaNHandling
@@ -77,18 +77,14 @@ class DataLoader:
         # Load csv
         df_rh = pd.read_parquet(self.df_robinhood_path)
 
-        logger.debug(f"df_rh.shape: {df_rh.shape}")
-
 
         # load tickers to exclude
         with open("../data/tickers/tickers_to_exclude.json") as f:
             excluded = json.load(f)["excluded_tickers"]
 
-        logger.debug(f"len(excluded): {len(excluded)}")
-
         # filter cols
         cols_to_keep = [col for col in df_rh.columns if col not in excluded]
-        logging.debug(f"len cols to keep: {len(cols_to_keep)}")
+        logger.debug(f"len cols to keep: {len(cols_to_keep)}")
 
         df_rh = df_rh[cols_to_keep]
 
@@ -119,7 +115,6 @@ class DataLoader:
         else:
             pass
 
-        logger.debug(f"df_rh.shape: {df_rh.shape}")
         # Save as attribute
         self.df_rh = df_rh
         
@@ -146,6 +141,27 @@ class DataLoader:
         logger.info("CRSP data loaded")
         return
     
+
+    def _group_dividends(self, df_crsp:pd.DataFrame) -> pd.DataFrame:
+        """
+        Takes the crsp df as input and sums dividends in the same date for a ticker to have a consistent number of days.
+        """
+
+        # Ensure the date column is datetime
+        df_crsp["date"] = pd.to_datetime(df_crsp["date"])
+
+        # Group by date (and optionally ticker if you have multiple securities), then sum dividends
+        daily_divs = df_crsp.groupby(["date", "ticker"])["divamt"].sum().reset_index()
+
+        df_crsp = df_crsp.drop(columns=["divamt"])
+
+        # 2. Merge the new, aggregated dividend data
+        df_crsp = df_crsp.merge(daily_divs, on=["date", "ticker"], how="left")
+
+        df_crsp["divamt"] = df_crsp["divamt"]
+
+        return df_crsp        
+
     
     def _build_df_crsp(self):
         """
@@ -178,6 +194,10 @@ class DataLoader:
 
         if "divamt" in df_crsp.columns:
             df_crsp["divamt"] = df_crsp["divamt"].fillna(0) # Handle nans
+
+            # handle dates with more dividends
+            df_crsp = self._group_dividends(df_crsp)
+
             
             # Get the cumulative dividend amount for each ticker
             df_crsp["div_cum"] = df_crsp[["ticker", "divamt"]].groupby("ticker").cumsum()
@@ -217,10 +237,11 @@ class DataLoader:
         # If stock_only is true filter by the corresponding code before returning
         if stocks_only:
             # filter the codes correspondign to stocks
-            df = df[(df["shrcd"]==11)|(df["shrcd"]==11)]
+            df = df[(df["shrcd"]==11)|(df["shrcd"]==10)]
 
             # Compute popularity again
             df["popularity"] = df["holders"] / df[["date", "holders"]].groupby("date")["holders"].transform("sum")
+            df["popularity"] = df[["ticker", "popularity"]].groupby("ticker").shift(1).fillna(0) # Lag by one day
 
             df["ticker"] = df["ticker"].cat.remove_unused_categories() # otherwise it keeps the old values for ticker in memory and is a problem for grouping etc
             df = df.reset_index(drop=True) # Ensure consistent index
@@ -321,6 +342,7 @@ class DataLoader:
         df_merged["holders_change_diff"] = df_merged.groupby("ticker")["holders"].diff()
         df_merged["total_holders"] = df_merged[["date", "holders"]].groupby("date").transform("sum")
         df_merged["popularity"] = df_merged["holders"] / df_merged[["date", "holders"]].groupby("date")["holders"].transform("sum")
+        df_merged["popularity"] = df_merged[["ticker", "popularity"]].groupby("ticker").shift(1).fillna(0) # Lag by one day
         
         # Create total holders change
         total_holders_series = df_merged.drop_duplicates("date")[["date", "total_holders"]].set_index("date").sort_index()
@@ -402,30 +424,26 @@ class DataLoader:
         df_merged = self.merge_dfs()
 
         # Extract required columns first (avoids unnecessary memory usage)
-        df = df_merged[['date', 'ticker', 'mc', "popularity", 'mc_retail', 'holders', 'prc_adj', 'shrcd', "vol"]].copy()
+        df = df_merged[['date', 'ticker', 'mc', "popularity", 'holders', 'prc_adj', 'shrcd', "vol"]].copy()
 
         # Sort by m in descending order (this is done for all dates at once)
         df_sorted = df.sort_values(by=['date', by], ascending=[True, False])
 
         # Build rank based on market cap and users
         df_sorted["rank_mkt"] = df_sorted.groupby("date")["mc"].rank(ascending=False)
-        df_sorted["rank_ret"] = df_sorted.groupby("date")["mc_retail"].rank(ascending=False)
         df_sorted[f"rank_{by}"] = df_sorted.groupby("date")[by].rank(ascending=False)
         
         # Compute distance metric for rank
-        df_sorted["rank_distance"] = (df_sorted["rank_mkt"] - df_sorted["rank_ret"]) / df_sorted["rank_ret"]
+        df_sorted["rank_distance"] = (df_sorted["rank_mkt"] - df_sorted[f"rank_{by}"]) / df_sorted[f"rank_{by}"]
 
         # Compute distance metric for distribution
         df_sorted["m_daily"] = df_sorted[["date", "mc"]].groupby("date").transform('sum')
-        df_sorted["mc_retail_daily"] = df_sorted[["date", "mc_retail"]].groupby("date").transform('sum')
         df_sorted[f"{by}_daily"] = df_sorted[["date", "mc"]].groupby("date").transform('sum')
         
         df_sorted["m_daily_pct"] = df_sorted["mc"] / df_sorted["m_daily"]
-        df_sorted["mc_retail_daily_pct"] = df_sorted["mc_retail"] / df_sorted["mc_retail_daily"]
         df_sorted[f"{by}_daily_pct"] = df_sorted[by] / df_sorted[f"{by}_daily"]
 
         # Compute distance metric for rank
-        df_sorted["pct_distance"] = (df_sorted["mc_retail_daily_pct"] - df_sorted["m_daily_pct"])*df_sorted["mc_retail_daily_pct"]
         df_sorted[f"{by}_pct_distance"] = (df_sorted[f"{by}_daily_pct"] - df_sorted["m_daily_pct"])*df_sorted[f"{by}_daily_pct"]
 
         # Keep only the top N tickers per date

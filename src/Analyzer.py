@@ -25,7 +25,7 @@ CURRENT_DIR = Path(__file__).resolve().parent
 
 class Analyzer:
     def __init__(self,
-                 weights_method: str | WeightsMethod = "stocks",
+                 weights_method: str | WeightsMethod = "number",
                  stocks_only: bool = False,
                  include_dividends: bool = False,
                  compare_tickers: Optional[list[str]] = None,
@@ -37,9 +37,9 @@ class Analyzer:
         Parameters
         ----------
         
-        weights_methods : str {stocks, wealth}, default="stocks"
-            String to build the rh portfolio weights based on wealth or stocks imputation. 
-            - stocks: assumes each holding in the dataframe represents one stock
+        weights_methods : str {number, wealth}, default="number"
+            String to build the rh portfolio weights based on wealth or number imputation. 
+            - number: assumes each holding in the dataframe represents one stock
             - wealth: assumes `popularity` is a proxy for percentage of welath held in a certain stock
 
         stocks_only : bool, default=False
@@ -103,10 +103,11 @@ class Analyzer:
         self.df_merged = self.dl.merge_dfs(stocks_only=self.stocks_only)
         
         # Filter columns
-        cols_to_keep = ["date", "prc_adj", "prc_adj_div", "popularity", "ticker", "ret"]
+        cols_to_keep = ["date", "prc_adj", "prc_adj_div", "divamt", "popularity", "ticker", "ret", "shrcd"]
         
         # filter for dividends
-        if not include_dividends:
+        self.include_dividends = include_dividends
+        if not self.include_dividends:
             cols_to_keep = [col for col in cols_to_keep if "div" not in col]
         
         # Find those contained in the df
@@ -140,7 +141,7 @@ class Analyzer:
             for i, col in enumerate(self.compare_tickers):
 
                 if col not in df_clean["ticker"].unique():
-                    message = "Empty dataframe produced for ticker: {col}." 
+                    message = f"Empty dataframe produced for ticker: {col}." 
                     message = message + f" Maybe {col} is not a stock?" if self.stocks_only else message
                     logger.warning(message)
 
@@ -175,6 +176,52 @@ class Analyzer:
 
         return df_out
     
+
+    def _reinvest_dividends_value(self,value_array:np.ndarray) -> np.ndarray:
+        """
+        Build an array of dividends accounting for their growth if they were inveested with the same returns of the `value_array`.
+        
+        Parameters
+        ----------
+        value_array : np.ndarray, array of values of the portfolio 
+
+        Returns
+        -------
+        total_reinvested : np.ndarray, array of dividends accounting for daily returns 
+                
+        """
+        # compute gross returns form value_array, it represents the returns of the portfolio
+        ret = value_array / value_array.shift(1)
+        ret = ret.fillna(1) # because at t=1 the return is 1
+
+        # get the returns from the merged df
+        div_array = self.df_merged[["divamt", "date", "popularity"]]
+        div_array["divamt"] = div_array["divamt"] * div_array["popularity"] # Normalize by weight
+        div_array = div_array[["divamt", "date"]].groupby("date").sum() 
+        div_array = div_array.values.flatten() # flatten becuase it is a list of lists
+
+        # Initialize the array to store results
+        total_reinvested = []
+
+        # iterate over each date
+        for i, val in enumerate(div_array):
+
+            # get the value of the prior date
+            prior_value = total_reinvested[-1] if i != 0 else 0
+
+            # add the cash inflow 
+            value = prior_value + val
+
+            # multiply by the daily returns to see how much is the value after
+            value = value * ret[i]
+
+            # append to list
+            total_reinvested.append(float(value))
+
+        total_reinvested = np.array(total_reinvested)
+        
+        return total_reinvested
+
     
 
     def build_levels(self)->pd.DataFrame:
@@ -190,25 +237,28 @@ class Analyzer:
         levels : pd.DataFrame, a dataframe containing the daily value of the tickers and reference index (if `self.weights_method` is set to `stocks`)
         """
         
-        if self.weights_method == WeightsMethod.STOCKS:
+        if self.weights_method == WeightsMethod.NUMBER:
             # Build Portfolio using Popularity
             self.df_merged["rh_portfolio"] = self.df_merged["popularity"] * self.df_merged["prc_adj"]
-            # Include dividends
-            if "prc_adj_div" in self.df_merged.columns:
-                self.df_merged["rh_portfolio_div"] = self.df_merged["popularity"] * self.df_merged["prc_adj_div"]
 
         elif self.weights_method == WeightsMethod.WEALTH:
             self.df_merged["rh_portfolio"] = self.df_merged["popularity"] * self.df_merged["ret"]
-            self.df_merged["rh_portfolio"] = self.df_merged["rh_portfolio"].apply(lambda x: np.log(x+1))
         else:
             raise ValueError(f"Unsupported weights_method: {self.weights_method}")
         
 
         # Using the sum and including "mc" would build the "market index". Excluded as it's not very relevant 
-        if "rh_portfolio_div" in self.df_merged.columns:
-            levels = self.df_merged[["date", "rh_portfolio", "rh_portfolio_div"]].groupby("date").sum()
+        if self.include_dividends:
+            levels = self.df_merged[["date", "rh_portfolio"]].groupby("date").sum()
+            reinvested_dividends = self._reinvest_dividends_value(levels["rh_portfolio"])
+            levels["rh_portfolio_div"] = reinvested_dividends + levels["rh_portfolio"]
+
         else:
             levels = self.df_merged[["date", "rh_portfolio"]].groupby("date").sum()
+            
+        # Convert to log returns
+        if self.weights_method == WeightsMethod.WEALTH: 
+            levels["rh_portfolio"] = levels["rh_portfolio"].apply(lambda x: np.log(x+1))
 
 
         # Obtain the dataframe with relevant tickers

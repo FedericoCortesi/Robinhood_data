@@ -4,7 +4,7 @@ from scipy.optimize import minimize_scalar
 from scipy.stats import skew, kurtosis
 
 import logging
-from typing import List
+from typing import List, Tuple
 
 from . import setup_custom_logger
 from .params import ReturnParams
@@ -17,10 +17,24 @@ logger = setup_custom_logger(__name__, level=logging.DEBUG)
 def log_ma_returns(
         levels:pd.DataFrame, 
         return_params: ReturnParams, 
-        returns_columns:List[str]=[]):
+        returns_columns:List[str]=[]) -> Tuple[pd.DataFrame, list]:
     """
     Given a dataframe with daily prices the function returns moving averages of log returns and a list of the computed horizons.
+
+    Parameters
+    ----------
+    levels : pd.DataFrame, df of values of the portfolio and other securities
+    return_params : ReturnParams, ReturnParams object with the parameters needed to build returns  
+    return_columns : str, name of the column with daily returns (if any)  
+
+    Returns
+    -------
+    returns : pd.DataFrame, df of returns of the portfolio 
+    horizons : list, all horizons used to compute returns 
+    
     """
+    logger.debug(f"returns columns: {returns_columns}")
+
     # Default rp
     return_params = return_params if return_params is not None else ReturnParams()
 
