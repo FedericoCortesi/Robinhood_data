@@ -10,7 +10,7 @@ from . import setup_custom_logger
 from .params import ReturnParams
 
 # Setup logger
-logger = setup_custom_logger(__name__, level=logging.DEBUG)
+logger = setup_custom_logger(__name__, level=logging.INFO)
 
 
 

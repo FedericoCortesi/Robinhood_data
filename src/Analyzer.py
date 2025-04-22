@@ -11,7 +11,7 @@ from . import DataLoader
 from .utils.metrics import log_ma_returns
 from .utils.helpers import load_data_paths
 from .utils.params import ReturnParams
-from .utils.enums import WeightsMethod
+from .utils.enums import WeightsApplication
 
 # Setup logger
 import logging
@@ -25,7 +25,7 @@ CURRENT_DIR = Path(__file__).resolve().parent
 
 class Analyzer:
     def __init__(self,
-                 weights_method: str | WeightsMethod = "number",
+                 weights_application: str | WeightsApplication = "number",
                  stocks_only: bool = False,
                  include_dividends: bool = False,
                  compare_tickers: Optional[list[str]] = None,
@@ -37,7 +37,7 @@ class Analyzer:
         Parameters
         ----------
         
-        weights_methods : str {number, wealth}, default="number"
+        weights_applications : str {number, wealth}, default="number"
             String to build the rh portfolio weights based on wealth or number imputation. 
             - number: assumes each holding in the dataframe represents one stock
             - wealth: assumes `popularity` is a proxy for percentage of welath held in a certain stock
@@ -78,13 +78,13 @@ class Analyzer:
         """     
         logger.info(f"{'#' * 30} Analysis Started {'#' * 30}")
         # Safe Enum conversion
-        if isinstance(weights_method, str):
+        if isinstance(weights_application, str):
             try:
-                weights_method = WeightsMethod(weights_method.lower())
+                weights_application = WeightsApplication(weights_application.lower())
             except ValueError:
-                raise ValueError(f"`weights_method` must be one of {[m.value for m in WeightsMethod]}")
+                raise ValueError(f"`weights_application` must be one of {[m.value for m in WeightsApplication]}")
 
-        self.weights_method = weights_method
+        self.weights_application = weights_application
         
         # Save attributes
         self.stocks_only = stocks_only
@@ -234,17 +234,17 @@ class Analyzer:
 
         Returns
         -------
-        levels : pd.DataFrame, a dataframe containing the daily value of the tickers and reference index (if `self.weights_method` is set to `stocks`)
+        levels : pd.DataFrame, a dataframe containing the daily value of the tickers and reference index (if `self.weights_application` is set to `stocks`)
         """
         
-        if self.weights_method == WeightsMethod.NUMBER:
+        if self.weights_application == WeightsApplication.NUMBER:
             # Build Portfolio using Popularity
             self.df_merged["rh_portfolio"] = self.df_merged["popularity"] * self.df_merged["prc_adj"]
 
-        elif self.weights_method == WeightsMethod.WEALTH:
+        elif self.weights_application == WeightsApplication.WEALTH:
             self.df_merged["rh_portfolio"] = self.df_merged["popularity"] * self.df_merged["ret"]
         else:
-            raise ValueError(f"Unsupported weights_method: {self.weights_method}")
+            raise ValueError(f"Unsupported weights_application: {self.weights_application}")
         
 
         # Using the sum and including "mc" would build the "market index". Excluded as it's not very relevant 
@@ -257,7 +257,7 @@ class Analyzer:
             levels = self.df_merged[["date", "rh_portfolio"]].groupby("date").sum()
             
         # Convert to log returns
-        if self.weights_method == WeightsMethod.WEALTH: 
+        if self.weights_application == WeightsApplication.WEALTH: 
             levels["rh_portfolio"] = levels["rh_portfolio"].apply(lambda x: np.log(x+1))
 
 
@@ -269,7 +269,7 @@ class Analyzer:
             levels = levels.merge(df_tickers, on="date")
 
         # set a flag for returns
-        if self.weights_method == WeightsMethod.WEALTH:
+        if self.weights_application == WeightsApplication.WEALTH:
             self.returns_columns = ["rh_portfolio"]
         else:
             self.returns_columns = []

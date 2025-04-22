@@ -7,10 +7,10 @@ warnings.simplefilter(action='ignore', category=Warning)
 import logging
 from .utils.custom_formatter import setup_custom_logger
 # Setup logger
-logger = setup_custom_logger(__name__, level=logging.INFO)
+logger = setup_custom_logger(__name__, level=logging.DEBUG)
 
 from .utils.helpers import load_data_paths
-from .utils.enums import NaNHandling
+from .utils.enums import NaNHandling, WeightsMethod
 
 from config import PROJECT_ROOT
 
@@ -18,7 +18,8 @@ class DataLoader:
     """Loads and preprocesses financial data from specified paths."""
 
     def __init__(self, 
-                 handle_nans: str | NaNHandling = "zero", 
+                 handle_nans: str | NaNHandling = "zero",
+                 weights_method: str | WeightsMethod = "dollar", 
                  load_merged: bool = True, 
                  load_other_dfs: bool = False):
         """
@@ -26,17 +27,25 @@ class DataLoader:
 
         Args:
             handle_nans (str): Strategy for handling NaNs ('fill', 'drop', 'keep').
+            weights_method (str): How to compute weights ('dollar', 'share').
             load_merged (bool): Whether to load the merged DataFrame.
             load_other_dfs (bool): Whether to load other DataFrames.
         """
-            # Safe Enum conversion
+        # Safe Enum conversion
         if isinstance(handle_nans, str):
             try:
                 handle_nans = NaNHandling(handle_nans.lower())
             except ValueError:
                 raise ValueError(f"`handle_nans` must be one of {[n.value for n in handle_nans]}")
+        
+        if isinstance(weights_method, str):
+            try:
+                weights_method = WeightsMethod(weights_method.lower())
+            except ValueError:
+                raise ValueError(f"`weights_method` must be one of {[n.value for n in weights_method]}")        
 
         self.handle_nans = handle_nans
+        self.weights_method = weights_method
         self.load_merged = load_merged
         self.load_other_dfs = load_other_dfs
 
@@ -240,11 +249,17 @@ class DataLoader:
             df = df[(df["shrcd"]==11)|(df["shrcd"]==10)]
 
             # Compute popularity again
-            df["popularity"] = df["holders"] / df[["date", "holders"]].groupby("date")["holders"].transform("sum")
-            df["popularity"] = df[["ticker", "popularity"]].groupby("ticker").shift(1).fillna(0) # Lag by one day
+            df["popularity"] = self._build_popularity(df_merged=df)
 
             df["ticker"] = df["ticker"].cat.remove_unused_categories() # otherwise it keeps the old values for ticker in memory and is a problem for grouping etc
-            df = df.reset_index(drop=True) # Ensure consistent index
+            
+            # Rewrite index as some rows have been dropped
+            df = df.reset_index(drop=True)
+
+        # Rewrite popularity as dfs in memory have been built using DOLLAR method
+        if self.weights_method == WeightsMethod.SHARE:
+            logger.debug(f"rebuilding popularity: {self.weights_method}")
+            df["popularity"] = self._build_popularity(df_merged=df)
 
         # Filter columns
         columns = columns if columns else df.columns 
@@ -341,8 +356,7 @@ class DataLoader:
         df_merged["holders_change_pct"] = df_merged.groupby("ticker")["holders"].apply(lambda x: np.log(x / x.shift(1))).reset_index(level=0, drop=True)
         df_merged["holders_change_diff"] = df_merged.groupby("ticker")["holders"].diff()
         df_merged["total_holders"] = df_merged[["date", "holders"]].groupby("date").transform("sum")
-        df_merged["popularity"] = df_merged["holders"] / df_merged[["date", "holders"]].groupby("date")["holders"].transform("sum")
-        df_merged["popularity"] = df_merged[["ticker", "popularity"]].groupby("ticker").shift(1).fillna(0) # Lag by one day
+        df_merged["popularity"] = self._build_popularity(df_merged=df_merged)
         
         # Create total holders change
         total_holders_series = df_merged.drop_duplicates("date")[["date", "total_holders"]].set_index("date").sort_index()
@@ -361,6 +375,28 @@ class DataLoader:
 
         logger.info("DataFrames merged")
         return df_merged
+    
+    def _build_popularity(self, df_merged:pd.DataFrame)->pd.Series:
+        """
+        Method to build the weights based on the method specified in the constructor.
+        """
+        df_merged = df_merged[["holders", "date", "prc_adj", "ticker"]].copy()
+
+        if self.weights_method == WeightsMethod.DOLLAR:
+            df_merged["popularity"] = df_merged["holders"] / df_merged[["date", "holders"]].groupby("date")["holders"].transform("sum")
+
+        if self.weights_method == WeightsMethod.SHARE:
+            holders_prc = df_merged["holders"] * df_merged["prc_adj"] 
+            holders_prc.index = df_merged["date"]
+            popularity = holders_prc / holders_prc.groupby("date").transform("sum")
+
+            df_merged["popularity"] = popularity.values
+
+
+        
+        df_merged["popularity"] = df_merged[["ticker", "popularity"]].groupby("ticker").shift(1).fillna(0) # Lag by one day
+
+        return df_merged["popularity"]
 
 
     def _filter_dfs_common_tickers(self):
