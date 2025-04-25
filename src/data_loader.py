@@ -7,7 +7,7 @@ warnings.simplefilter(action='ignore', category=Warning)
 import logging
 from .utils.custom_formatter import setup_custom_logger
 # Setup logger
-logger = setup_custom_logger(__name__, level=logging.INFO)
+logger = setup_custom_logger(__name__, level=logging.DEBUG)
 
 from .utils.helpers import load_data_paths
 from .utils.enums import NaNHandling, WeightsMethod
@@ -93,7 +93,6 @@ class DataLoader:
 
         # filter cols
         cols_to_keep = [col for col in df_rh.columns if col not in excluded]
-        logger.debug(f"len cols to keep: {len(cols_to_keep)}")
 
         df_rh = df_rh[cols_to_keep]
 
@@ -145,6 +144,19 @@ class DataLoader:
         #cols_to_drop = []
         #cols_to_drop = [col for col in df_crsp.columns if col in cols_to_drop]
         #df_crsp = df_crsp.drop(columns=cols_to_drop)
+
+        #if "divamt" in df_crsp.columns:
+        df_crsp["divamt"] = df_crsp["divamt"].fillna(0) # Handle nans
+        # handle dates with more dividends
+        df_crsp = self._group_dividends(df_crsp) # consolidate in any case to handle multiple entries a day
+
+        if "divamt" in df_crsp.columns:
+            # Get the cumulative dividend amount for each ticker
+            df_crsp["div_cum"] = df_crsp[["ticker", "divamt"]].groupby("ticker").cumsum()
+
+            # Get the price with dividends ()
+            df_crsp["prc_adj_div"] = df_crsp["prc_adj"] + df_crsp["div_cum"]
+
         self.df_crsp = df_crsp
         
         logger.info("CRSP data loaded")
@@ -155,6 +167,7 @@ class DataLoader:
         """
         Takes the crsp df as input and sums dividends in the same date for a ticker to have a consistent number of days.
         """
+        logger.debug("inside group_dividens")
 
         # Ensure the date column is datetime
         df_crsp["date"] = pd.to_datetime(df_crsp["date"])
@@ -168,6 +181,8 @@ class DataLoader:
         df_crsp = df_crsp.merge(daily_divs, on=["date", "ticker"], how="left")
 
         df_crsp["divamt"] = df_crsp["divamt"]
+
+        df_crsp = df_crsp.drop_duplicates()
 
         return df_crsp        
 
@@ -201,13 +216,12 @@ class DataLoader:
         df_crsp.loc[:,"prc_adj"] = df_crsp["prc"]/df_crsp["cfacpr_adj"] 
         df_crsp.loc[:,"shrout_adj"] = df_crsp["shrout"]*1000*df_crsp["cfacshr_adj"] 
 
+        #if "divamt" in df_crsp.columns:
+        df_crsp["divamt"] = df_crsp["divamt"].fillna(0) # Handle nans
+        # handle dates with more dividends
+        df_crsp = self._group_dividends(df_crsp) # consolidate in any case to handle multiple entries a day
+
         if "divamt" in df_crsp.columns:
-            df_crsp["divamt"] = df_crsp["divamt"].fillna(0) # Handle nans
-
-            # handle dates with more dividends
-            df_crsp = self._group_dividends(df_crsp)
-
-            
             # Get the cumulative dividend amount for each ticker
             df_crsp["div_cum"] = df_crsp[["ticker", "divamt"]].groupby("ticker").cumsum()
 
@@ -298,7 +312,6 @@ class DataLoader:
         self.df_rh_long = self.df_rh_long.sort_values(by=["ticker", "date"])
         self.df_rh_long = self.df_rh_long.reset_index(drop=True)
 
-        logger.debug(f"self.df_rh_long['ticker'].nunique(): {self.df_rh_long['ticker'].nunique()}")
 
         # Append users if true
         if users:
@@ -321,9 +334,7 @@ class DataLoader:
             self.df_crsp = self.df_crsp[self.df_crsp["date"]<=end_date]
 
         # Merge both dataframes on 'date' and 'ticker'
-        logger.debug(f"self.df_crsp['ticker'].nunique(): {self.df_crsp['ticker'].nunique()}")
         df_merged = self.df_rh_long.merge(self.df_crsp, on=['date', 'ticker'], how='inner')
-        logger.debug(f"df_merged['ticker'].nunique(): {df_merged['ticker'].nunique()}")
 
         # clean data
 
@@ -410,8 +421,6 @@ class DataLoader:
         for tick in self.df_crsp["ticker"].unique():
             if tick in rh_tickers:
                 inner_tickers.append(tick)
-
-        logger.debug(f"len inner_tickers: {len(inner_tickers)}")
 
         # Filter df
         self.df_crsp = self.df_crsp[self.df_crsp["ticker"].isin(inner_tickers) == True] 
