@@ -131,8 +131,12 @@ class Plotter:
         # Use horizons from the first series (assumed common)
         horizons = self.series_list[0].horizons
         cols = int(np.ceil(len(horizons)/2))
-
-        fig, axes = plt.subplots(2, cols, figsize=(6*cols, 10)) if cols > 1 else plt.subplots(2, 1, figsize=(14, 8))
+        
+        if cols > 1:
+            fig, axes = plt.subplots(2, cols, figsize=(18, 10))
+        else:
+            fig, axes = plt.subplots(2, 1, figsize=(14, 8))
+            
         axes = axes.flatten()
 
         # Iterate through horizons and create subplots

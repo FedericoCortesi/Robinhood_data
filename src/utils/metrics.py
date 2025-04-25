@@ -16,7 +16,7 @@ logger = setup_custom_logger(__name__, level=logging.INFO)
 
 def log_ma_returns(
         levels:pd.DataFrame, 
-        return_params: ReturnParams, 
+        return_params: ReturnParams=None, 
         returns_columns:List[str]=[]) -> Tuple[pd.DataFrame, list]:
     """
     Given a dataframe with daily prices the function returns moving averages of log returns and a list of the computed horizons.
