@@ -16,7 +16,7 @@ from .utils.enums import WeightsApplication
 # Setup logger
 import logging
 from .utils.custom_formatter import setup_custom_logger
-logger = setup_custom_logger(__name__, level=logging.DEBUG)
+logger = setup_custom_logger(__name__, level=logging.INFO)
 
 from . import DataLoader
 
@@ -28,6 +28,7 @@ class Analyzer:
                  weights_application: str | WeightsApplication = "number",
                  stocks_only: bool = False,
                  include_dividends: bool = False,
+                 exclude_rh: bool = False,
                  compare_tickers: Optional[list[str]] = None,
                  dl_kwargs: Optional[dict] = None,
                  return_params: Optional[ReturnParams] = None):
@@ -45,8 +46,11 @@ class Analyzer:
         stocks_only : bool, default=False
             Bool to build the merged dataframe taking into account only stocks (shrcd=10 or shrcd=11) or not. 
 
-        include_dividemds : bool, default=False
+        include_dividends : bool, default=False
             Bool to include the RH index with dividends or not. 
+
+        exclude_rh : bool, default=False
+            Bool to include the RH index with in levels or not. 
 
         compare_tickers : list, default=["VOO"]
             List of ticker symbols to compare against the Robinhood portfolio.
@@ -88,6 +92,7 @@ class Analyzer:
         
         # Save attributes
         self.stocks_only = stocks_only
+        self.exclude_rh = exclude_rh
         
         # Instantiate Dataloader
         dl_kwargs = dl_kwargs if dl_kwargs is not None else {}
@@ -101,9 +106,11 @@ class Analyzer:
         # "mc" variable used to be here, decided to delete it as i don't care about the "market index" built on RH data.
         # Previously, the "market index"_t was just \sum_{i=1}^N P_{i,t}\cdot S_{i,t}
         self.df_merged = self.dl.merge_dfs(stocks_only=self.stocks_only)
+        self.df_merged = self.df_merged[self.df_merged["popularity"]!=0] # Drop first day (shift) and faster processing
         
         # Filter columns
-        cols_to_keep = ["date", "prc_adj", "prc_adj_div", "divamt", "popularity", "ticker", "ret", "shrcd"]
+        #cols_to_keep = ["date", "prc_adj", "prc_adj_div", "divamt", "popularity", "ticker", "ret", "shrcd"]
+        cols_to_keep = ["date", "prc_adj", "holders", "prc_adj_div", "divamt", "popularity", "ticker", "ret", "shrcd"]
         
         # filter for dividends
         self.include_dividends = include_dividends
@@ -236,7 +243,15 @@ class Analyzer:
         -------
         levels : pd.DataFrame, a dataframe containing the daily value of the tickers and reference index (if `self.weights_application` is set to `stocks`)
         """
+        # Obtain the dataframe with relevant tickers
+        df_tickers = self._extract_relevant_tickers()
         
+        if self.exclude_rh:
+            # set a flag 
+            self.returns_columns = []
+            return df_tickers
+
+        # Use formulas
         if self.weights_application == WeightsApplication.NUMBER:
             # Build Portfolio using Popularity
             self.df_merged["rh_portfolio"] = self.df_merged["popularity"] * self.df_merged["prc_adj"]
@@ -260,9 +275,6 @@ class Analyzer:
         if self.weights_application == WeightsApplication.WEALTH: 
             levels["rh_portfolio"] = levels["rh_portfolio"].apply(lambda x: np.log(x+1))
 
-
-        # Obtain the dataframe with relevant tickers
-        df_tickers = self._extract_relevant_tickers()
 
         # Merge the levels
         if df_tickers is not None:
