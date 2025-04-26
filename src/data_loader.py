@@ -7,7 +7,7 @@ warnings.simplefilter(action='ignore', category=Warning)
 import logging
 from .utils.custom_formatter import setup_custom_logger
 # Setup logger
-logger = setup_custom_logger(__name__, level=logging.DEBUG)
+logger = setup_custom_logger(__name__, level=logging.INFO)
 
 from .utils.helpers import load_data_paths
 from .utils.enums import NaNHandling, WeightsMethod

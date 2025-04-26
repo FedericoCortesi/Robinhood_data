@@ -56,8 +56,8 @@ class Plotter:
             Plotter.index_counter += len(base_cols)
 
 
-
-    def plot_returns_timeseries(self, 
+    def plot_returns_timeseries(self,
+                                custom_labels: List[str] = None, 
                                 save: bool = False, 
                                 name: str = "returns_plot.png", 
                                 title: str = "Rolling Market vs Retail Returns Across Horizons", 
@@ -76,6 +76,10 @@ class Plotter:
         fig, axes = plt.subplots(rows, 2, figsize=(18, 4*rows), sharex=True) if rows > 1 else plt.subplots(len(horizons), 1, figsize=(18, 5*len(horizons)), sharex=True)
         axes = axes.flatten() if len(horizons) > 1 else [axes]
 
+        # Create a list to store all line objects and their labels for the common legend
+        lines = []
+        labels = []
+
         for i, d in enumerate(horizons):
             ax = axes[i]
             ax.axhline(0, color="black", alpha=0.5, linewidth=1)
@@ -93,8 +97,14 @@ class Plotter:
                     # find index 
                     color_index = plotted_securities % Plotter.index_counter
                     
-                    sns.lineplot(x=returns.index, y=returns[col], label=plot_label,
-                                 ax=ax, color=self.palette[color_index], linewidth=1.0)
+                    line = sns.lineplot(x=returns.index, y=returns[col], 
+                                    ax=ax, color=self.palette[color_index], linewidth=1.0,
+                                    label='_nolegend_')  # Hide individual legends
+                    
+                    # Only add to legend list the first time we see this series (in the first subplot)
+                    if i == 0:
+                        lines.append(line.lines[-1])
+                        labels.append(plot_label)
 
                     # increase counter for color
                     plotted_securities += 1
@@ -104,10 +114,19 @@ class Plotter:
             ax.set_ylabel("Log Returns" if i % 2 == 0 else "")
             ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.1f"))
             ax.grid(True, linestyle='--', alpha=0.6)
-            ax.legend(loc="upper left")
+            # Remove individual legends
+            ax.get_legend().remove() if ax.get_legend() is not None else None
 
-        fig.suptitle(title, fontsize=16)
-        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        if custom_labels is not None:
+            assert len(labels) == len(custom_labels), f"Custom labels must be of same lenght as the series. Required length: {len(labels)}, current length; {len(custom_labels)}"
+            labels = custom_labels
+
+        # Create a single legend outside all subplots
+        fig.legend(lines, labels, loc='upper center', bbox_to_anchor=(0.05, 0.98),
+                ncol=(len(labels)//4+1), frameon=True, fontsize='medium')
+
+        fig.suptitle(title, fontsize=16, y=0.99)
+        plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjusted rect to leave space for the legend
 
         if save:
             plt.savefig(name, dpi=400, bbox_inches='tight')
@@ -116,11 +135,13 @@ class Plotter:
         if show:
             plt.show()
 
+
     def plot_returns_kdes(self, 
-                          save:bool=False, 
-                          name:str="kde_plot.png", 
-                          title:str="Rolling Market vs Retail Returns Distribution Across Horizons", 
-                          show:bool=True):
+                        custom_labels: List[str] = None, 
+                        save:bool=False, 
+                        name:str="kde_plot.png", 
+                        title:str="Rolling Market vs Retail Returns Distribution Across Horizons", 
+                        show:bool=True):
         
         if not self.series_list:
             raise ValueError("No return series provided.")
@@ -139,6 +160,10 @@ class Plotter:
             
         axes = axes.flatten()
 
+        # Create a list to store all line objects and their labels for the common legend
+        lines = []
+        labels = []
+
         # Iterate through horizons and create subplots
         for i, d in enumerate(horizons):
             ax = axes[i]
@@ -156,22 +181,41 @@ class Plotter:
                     # find index 
                     color_index = plotted_securities % Plotter.index_counter
                     
-                    sns.kdeplot(data=returns[col], label=plot_label,
-                                 ax=ax, color=self.palette[color_index], linewidth=1.0)
+                    line = sns.kdeplot(data=returns[col], ax=ax, 
+                                        color=self.palette[color_index], linewidth=1.0,
+                                        label='_nolegend_')  # Hide individual legends
+                    
+                    # Only add to legend list the first time we see this series (in the first subplot)
+                    if i == 0:
+                        # Get the last line added to the current axes
+                        lines.append(ax.get_lines()[-1])
+                        labels.append(plot_label)
 
                     # increase counter for color
                     plotted_securities += 1
         
             # formatting
             ax.set_title(f"Horizon: {d} days")
+            ax.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5))
             ax.xaxis.set_major_locator(mticker.MaxNLocator(nbins=7))
-            ax.xaxis.set_major_formatter(mticker.FormatStrFormatter("%.3f"))
-            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
+            ax.xaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
+            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%d"))
             ax.tick_params(axis='x', rotation=0)
-            ax.set_ylabel("Density" if i > 2 else "")
-            ax.set_xlabel("")
+            ax.set_ylabel("Density" if (i % cols) == 0 else "") # Divide by rows
+            ax.set_xlabel("Probability")
             ax.grid(True, linestyle='--', alpha=0.6)
-            ax.legend(loc="upper left")
+            
+            # Remove individual legends
+            if ax.get_legend() is not None:
+                ax.get_legend().remove()
+
+        if custom_labels is not None:
+            assert len(labels) == len(custom_labels), f"Custom labels must be of same lenght as the series. Required length: {len(labels)}, current length; {len(custom_labels)}"
+            labels = custom_labels
+
+        # Create a single legend with the specified positioning
+        fig.legend(lines, labels, loc='upper center', bbox_to_anchor=(0.05, 0.98),
+                ncol=(len(labels)//4+1), frameon=True, fontsize='medium')
 
         # Set main figure title
         fig.suptitle(title, fontsize=16)
@@ -189,10 +233,11 @@ class Plotter:
             plt.show()
 
     def plot_returns_cdfs(self, 
-                          save=False, 
-                          name:str="cdf_plot.png", 
-                          title:str="Empirical CDF of Returns Across Horizons", 
-                          show:bool=True):
+                        custom_labels: List[str] = None, 
+                        save=False, 
+                        name:str="cdf_plot.png", 
+                        title:str="Empirical CDF of Returns Across Horizons", 
+                        show:bool=True):
         if not self.series_list:
             raise ValueError("No return series provided.")
         
@@ -209,6 +254,10 @@ class Plotter:
             fig, axes = plt.subplots(2, 1, figsize=(14, 8))
         
         axes = axes.flatten()        
+        
+        # Create a list to store all line objects and their labels for the common legend
+        lines = []
+        labels = []
         
         # Iterate through horizons and create subplots
         for i, d in enumerate(horizons):
@@ -227,8 +276,13 @@ class Plotter:
                     # find index 
                     color_index = plotted_securities % Plotter.index_counter
 
-                    # Plot CDF for each column
-                    self._plot_cdf(returns[col], plot_label, ax, self.palette[color_index])
+                    # Plot CDF for each column with no legend label
+                    line = self._plot_cdf(returns[col], '_nolegend_', ax, self.palette[color_index])
+                    
+                    # Only add to legend list the first time we see this series (in the first subplot)
+                    if i == 0:
+                        lines.append(line)
+                        labels.append(plot_label)
             
                     # increase counter for color
                     plotted_securities += 1
@@ -242,11 +296,21 @@ class Plotter:
             ax.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5))
             ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
             ax.tick_params(axis='x', rotation=0)
-            ax.set_xlabel("Returns" if i > 2 else "")
-            ax.set_ylabel("Returns")
+            ax.set_xlabel("Returns")
+            ax.set_ylabel("Probability" if (i % cols) == 0 else "")
             ax.grid(True, linestyle='--', alpha=0.6)
-            ax.legend(loc="upper left")
+            
+            # Remove individual legends
+            if ax.get_legend() is not None:
+                ax.get_legend().remove()
+        
+        if custom_labels is not None:
+            assert len(labels) == len(custom_labels), f"Custom labels must be of same lenght as the series. Required length: {len(labels)}, current length; {len(custom_labels)}"
+            labels = custom_labels
 
+        # Create a single legend with the specified positioning
+        fig.legend(lines, labels, loc='upper center', bbox_to_anchor=(0.05, 0.98),
+                ncol=(len(labels)//4+1), frameon=True, fontsize='medium')
         
         # Set main figure title
         fig.suptitle(title, fontsize=16)
@@ -267,7 +331,8 @@ class Plotter:
         """Helper method to plot a single CDF on the given axis"""
         sorted_data = np.sort(data)
         cdf = np.arange(1, len(sorted_data) + 1) / len(sorted_data)
-        ax.plot(sorted_data, cdf, label=label, color=color, linewidth=1.0)
+        line = ax.plot(sorted_data, cdf, label=label, color=color, linewidth=1.0)[0]
+        return line  # Return the Line2D object for legend
         
 
     def plot_ssd_comparison(self, 
