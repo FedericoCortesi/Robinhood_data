@@ -131,27 +131,74 @@ The World ETF again displays lower returns, in line with its broader exposure to
 
 Descriptive statistics supporting these findings are reported in Table \ref{tab:returns_all}.
 
-\subsection{Analysis of Short-Term Market Movements and the Impact of COVID}
+\subsection{Analysis of Short-Term Returns and the Impact of COVID}
 Comparing the daily returns for the whole period available we can already observe distinct behavior in terms of returns and distributions for the market and Robinhood indeces.
 To test whether there are statistically significant differences beteen the mean daily returns of the Robinhood portfolios, the S\&P 500 and the world ETF, I conduct an ANOVA test.
 The null hypothesis is that all portfolios have equal mean daily returns.
 
-Mean daily returns are very close, and the results of the ANOVA test indicate that the null results cannot be rejected at the conventional significance levels (p-value = 0.9273).
-This suggests that, at the daily frequency, the mean returns of the Robinhood portfolios and the benchmarks are not statistically different.
+\subsubsection{Covering the Whole Period}
+As expected from the results regarding the cumulative returns, mean daily returns are very similar for the Robinhood Portfolios.
+Fedyk's method has a mean of 0.000555, while the method based on prices has a mean of 0.000450.
+The ANOVA analysis conducted on these two portfolios, equal to a t-test in this case, has a p-value of 0.9273.
+This suggests that at the daily frequency the expected growth rate, i.e. the mean log returns, of the Robinhood portfolios are not statistically different.
 
-Nonetheless, a striking similarity between the market indeces and between the Robinhood portfolios appears when looking at the plot below.
-The distributions differ in their higher moments, with Robinhood portfolios 
 
-In terms of standard deviation, RH shows more volatility in both horizons. 
-The 1-day standard deviation for RH is 0.018809, compared to the market's 0.01547, and for the 5-day returns, RH's standard deviation is 0.041909, while the market's is 0.031198. 
-Therefore, RH consistently exhibits higher returns and higher volatility over both timeframes compared to the market. Detailed distribution are in table \ref{tab:st_returns_stats_all}.
+In terms of standard deviation, the Robinhood portfolios have relatively larger values, around 0.02, while the market indeces hvae values around 0.15. 
+This is consistent with what can be seen from the distributions: retail portfolios have fatter tails while modal returns appear similar across all timeseries.
 
-Here below the plots of the time series, while the returns are in table (\ref{tab:returns_all}):
+Conducting ANOVA tests on all possible combinations of these four timeseries, none has an acceptable p-value, results are in table \ref{tab:anova_all}.
+However, conducting a Fligner test to assess difference in variances, the Robinhood portfolios show statistically significant differet variances than the market proxies, results are in table \ref{tab:fligner_all}.
+
+
+Here below the plots of the distributions, while the returns are in table \ref{tab:returns_all}:
 \begin{figure}[h!]
     \centering
     \includegraphics[width=1\linewidth]
     {../images/distributions/st_all.png}
 \end{figure}
+
+
+\subsubsection{Excluding COVID}
+This results on daily returns, however, are probably impacted by the noise of the March 2020 crash. 
+I run the same analysis filtering the dataframe up to February 3rd 2020, the date in which the pandemic was declared in the US.
+
+In this case point estimates for means differ greatly even among Robinhood Portfolios, with the price based approach yielding -0.000328 on average versus Fedyk's 0.000246.
+Nonetheless, also at this level returns are not statistically significant, results can be found in table \ref{tab:anova_before}.
+
+In terms of standard deviation, the market indices show again clearly a different distribution, with variances being markably lower. 
+This is corroborated by fligner tests, available in table \ref{tab:fligner_before}.
+
+Here below the plots of the distributions, while the returns are in table \ref{tab:returns_st_before}:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]
+    {../images/distributions/st_before.png}
+\end{figure}
+
+\subsection{Comments}
+Daily returns show a deceptively optimistic view, with the different series having statistically equal log-returns.
+However, the retail portfolios carry systematically higher day-to-day risk, amd this compounds as underperformance at the cumulative level before the pandemic.
+
+A one-way ANOVA on daily log returns fails to reject equality of means for any group of series, both including and excluding the pandemic. 
+
+However, looking at the risk dimension, stand deviations differ sharply. 
+Fligner-Killeen tests reject homogeneity at any $\alpha$ level whenever a retail series is compared with a market proxy.
+As highlighted earlier, this can be easily seen from the shape of the distributions, with correspondingly fatter tails.
+In log space, larger dispersion automatically lowers long-run growth because every large swing pulls the cumulative sum away from the average trend.
+In other words, retail investors accept more noise than the market but earn no meaurable extra drift in a single day.
+
+Although ANOVA cannot reject equality between the Robinhood portfolios, the point estimates themselves are not identical (compare table \ref{tab:returns_st_before}).
+The gap in their mean returns, about -0.0006 log points, rapidly cumulates to -0.25 log points. 
+The test lacks power because daily $@s$ is large; the economic impact measured in compounding is evident.
+
+Path dependence widens the difference.
+The price-weighted series \ref{returns_mine} embeds a negative correlation between returns and remaining capital.
+When a stock falls, its contribution to the portfolio value shrinks, and therefore any subsequent rebound is applied to less capital, exactly how a normal portfolio would work. 
+The return-weighted construction re-anchors weights every market close and therefore avoids this drag.
+Losses in early 2019 thus penalise the price-weighted portfolio twice.  
+
+
+
 
 
 %% -------------------------------------------------------------------- %%
