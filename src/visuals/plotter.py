@@ -59,7 +59,7 @@ class Plotter:
     def plot_returns_timeseries(self,
                                 custom_labels: List[str] = None, 
                                 save: bool = False, 
-                                name: str = "returns_plot.png", 
+                                file_name: str = "returns_plot.png", 
                                 title: str = "Rolling Market vs Retail Returns Across Horizons", 
                                 show: bool = True):
 
@@ -112,7 +112,7 @@ class Plotter:
             ax.set_title(f"Horizon: {d} days")
             ax.tick_params(axis='x', rotation=0)
             ax.set_ylabel("Log Returns" if i % 2 == 0 else "")
-            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.1f"))
+            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.3f"))
             ax.grid(True, linestyle='--', alpha=0.6)
             # Remove individual legends
             ax.get_legend().remove() if ax.get_legend() is not None else None
@@ -129,8 +129,9 @@ class Plotter:
         plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjusted rect to leave space for the legend
 
         if save:
-            plt.savefig(name, dpi=400, bbox_inches='tight')
-            print(f"file saved at {name}")
+            out_dir = f"{self.images_dir}/{file_name}"
+            plt.savefig(out_dir, dpi=600, bbox_inches='tight')
+            print(f"file saved at {out_dir}")
 
         if show:
             plt.show()
@@ -139,7 +140,7 @@ class Plotter:
     def plot_returns_kdes(self, 
                         custom_labels: List[str] = None, 
                         save:bool=False, 
-                        name:str="kde_plot.png", 
+                        file_name:str="kde_plot.png", 
                         title:str="Rolling Market vs Retail Returns Distribution Across Horizons", 
                         show:bool=True):
         
@@ -153,12 +154,16 @@ class Plotter:
         horizons = self.series_list[0].horizons
         cols = int(np.ceil(len(horizons)/2))
         
-        if cols > 1:
-            fig, axes = plt.subplots(2, cols, figsize=(18, 10))
+        if len(horizons) > 1:
+            if cols > 1:
+                fig, axes = plt.subplots(2, cols, figsize=(18, 10))
+            else:
+                fig, axes = plt.subplots(2, 1, figsize=(14, 8))
         else:
-            fig, axes = plt.subplots(2, 1, figsize=(14, 8))
+                fig, axes = plt.subplots(1, 1, figsize=(18, 5))
+
             
-        axes = axes.flatten()
+        axes = axes.flatten() if len(horizons) > 1 else [axes]
 
         # Create a list to store all line objects and their labels for the common legend
         lines = []
@@ -202,7 +207,7 @@ class Plotter:
             ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%d"))
             ax.tick_params(axis='x', rotation=0)
             ax.set_ylabel("Density" if (i % cols) == 0 else "") # Divide by rows
-            ax.set_xlabel("Probability")
+            ax.set_xlabel("Log Returns")
             ax.grid(True, linestyle='--', alpha=0.6)
             
             # Remove individual legends
@@ -224,7 +229,7 @@ class Plotter:
         plt.tight_layout(rect=[0, 0.05, 1, 0.96])
 
         if save:
-            out_dir = f"{self.images_dir}/{name}"
+            out_dir = f"{self.images_dir}/{file_name}"
             plt.savefig(out_dir, dpi=600, bbox_inches='tight')
             print(f"file saved at {out_dir}")
 
@@ -235,7 +240,7 @@ class Plotter:
     def plot_returns_cdfs(self, 
                         custom_labels: List[str] = None, 
                         save=False, 
-                        name:str="cdf_plot.png", 
+                        file_name:str="cdf_plot.png", 
                         title:str="Empirical CDF of Returns Across Horizons", 
                         show:bool=True):
         if not self.series_list:
@@ -319,7 +324,7 @@ class Plotter:
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         
         if save:
-            out_dir = f"{self.images_dir}/{name}"
+            out_dir = f"{self.images_dir}/{file_name}"
             plt.savefig(out_dir, dpi=600, bbox_inches='tight')
             print(f"file saved at {out_dir}")
         
@@ -416,9 +421,9 @@ class Plotter:
             dom_msg = f"{name_a} does not dominate {name_b} (SSD), {confidence:.2f}% of points support dominance"
         
         if title:
-            fig.suptitle(f"{title}\n{dom_msg}", fontsize=14)
+            fig.suptitle(f"{title}\n{dom_msg}", fontsize=16)
         else:
-            fig.suptitle(dom_msg, fontsize=14)
+            fig.suptitle(dom_msg, fontsize=16)
         
         plt.tight_layout()
         plt.subplots_adjust(top=0.88)
