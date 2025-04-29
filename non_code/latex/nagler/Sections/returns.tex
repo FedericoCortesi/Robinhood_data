@@ -1,5 +1,5 @@
 
-\section{Comparing Returns and Risk measures}
+\section{Comparing Returns and Risk measures}\label{return_section}
 The biggest difference do not appear when using different kinds of weights ("dollar" or "share" method) but rather when building the portfolio from prices or returns. 
 Moreover, Fedyk and Welch build their portfolio only using common american stocks (share code 10 or 11). 
 In my final analysis I look at all types of securities but significant differences emerge even when using the same sample. 
@@ -30,7 +30,7 @@ where $r_t$ are dauly log returns and $R_t$ are daily percentage returns.
 
 
 \subsubsection{Rolling Returns Across Investment Horizons}
-\paragraph{Common Stocks Only}
+\paragraph{Common Stocks Only}\label{fedyk_paper_returns}
 At short horizons (5–30 days), the two Robinhood portfolios (Fedyk and Mine) display highly similar dynamics, with both closely tracking market indices and exhibiting bursts of volatility during periods of market stress, particularly around the onset of the COVID-19 crash. 
 This suggests that in the very short term, retail investors tend to move in tandem with broader market trends, with limited divergence in return profiles across methodologies.
 However, at the 120-day horizon, both Robinhood portfolios outperform the S\&P 500 and a World ETF\footnote{I've used Vanguard's VOO for the S\&P500 and Vanguard's VT as a World Equity ETF}. 
@@ -53,6 +53,7 @@ In sum, the 120-day results provide two key insights: first, that retail traders
     \centering
     \includegraphics[width=1\linewidth]
     {../images/returns/comparison_1.png}
+    \caption{Rolling log-returns of Robinhood and market portfolios at four investment horizons (stock-only sample)}
 \end{figure}
 
 \paragraph{Full Universe of Securities}
@@ -74,6 +75,7 @@ Fedyk’s method performs slightly better but remains clearly below the benchmar
     \centering
     \includegraphics[width=1\linewidth]
     {../images/returns/comparison_2.png}
+    \caption{Rolling log-returns of Robinhood and market portfolios at four investment horizons (complete sample)}
 \end{figure}
 
 A detailed description of the distributions can be found in table \ref{tab:returns_all}.
@@ -102,6 +104,7 @@ Despite the strong rebound observed after the COVID-19 crash, the cumulative per
     \centering
     \includegraphics[width=1\linewidth]
     {../images/distributions/comparison_1.png}
+    \caption{Distribution of rolling log-returns for retail and benchmark portfolios across investment horizons (stock-only sample)}
 \end{figure}
 
 
@@ -127,6 +130,7 @@ The World ETF again displays lower returns, in line with its broader exposure to
     \centering
     \includegraphics[width=1\linewidth]
     {../images/distributions/comparison_2.png}
+    \caption{Distribution of rolling log-returns for retail and benchmark portfolios across investment horizons (complete sample)}
 \end{figure}
 
 Descriptive statistics supporting these findings are reported in Table \ref{tab:returns_all}.
@@ -155,6 +159,7 @@ Here below the plots of the distributions, while the returns are in table \ref{t
     \centering
     \includegraphics[width=1\linewidth]
     {../images/distributions/st_all.png}
+    \caption{Distribution of daily log-returns for retail and benchmark portfolios (complete sample)}
 \end{figure}
 
 
@@ -173,6 +178,7 @@ Here below the plots of the distributions, while the returns are in table \ref{t
     \centering
     \includegraphics[width=1\linewidth]
     {../images/distributions/st_before.png}
+    \caption{Distribution of daily log-returns for retail and benchmark portfolios (complete sample, excluding COVID)}
 \end{figure}
 
 \subsection{Comments}

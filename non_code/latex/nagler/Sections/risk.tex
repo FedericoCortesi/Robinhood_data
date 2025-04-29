@@ -1,1 +1,27 @@
-\subsection{Assessing Risk Aversion}
+\section{Assessing Risk Preferences: A Dual-Criterion Approach}
+\subsection{Introduction}
+The results of section \ref{return_section} paint very different pictures of retail investors. 
+Using the method set forth by \cite{Welch2022} and \cite{Fedyk2024}, analysed also in section \ref{fedyk_paper_returns}, yields superior returns and similar drawdowns to the market.
+They also conclude that the Robinhood crowd has achieved positve alpha when analysed under different factor models (table VII, IX, X in \cite{Welch2022} and table 16 in \cite{Fedyk2024}). 
+These results appear to be in contrast with the existing literature on the retail investing, most notably \cite{BarberOdean2000}.
+
+A more fundamental question, however, is whether those returns are attractive once investors' attitudes toward risk are taken into account.
+This section evaluates the Robinhood portfolio against its market benchmarks using two complementary criteria.
+
+First, I adopt the constant-relative-risk-aversion (CRRA) framework, in line with the majority of asset pricing work.
+\begin{equation}
+    U(W) = 
+    \begin{cases}
+    \frac{W^{1-\gamma}-1}{1-\gamma}, \gamma\neq 1\\
+    \ln(W), \gamma = 1
+    \end{cases}
+\end{equation}
+
+By computing expected utility of both the Robinhood and benchmark portfolios over a grid of possible risk aversion ($@g$) values,
+I identify the cutoff $@g^*$ such that a representative CRRA investor is indifferent between the two.
+This delivers a concise, parametric summary of how risk preferences may shape portfolio choice.
+
+Second, I apply first- and second-order stochastic dominance tests (FSD and SSD) to the same return distributions.
+This allows to avoid unnecesary, though conventional, assumptions regarding functional forms or parameterisation.
+Log-Normality might well not be respected for different distributions, stochastic dominance tests take into account the shape of empirical CDFs to answer stronger questions. 
+
