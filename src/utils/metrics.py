@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
+from scipy.optimize import minimize
 from scipy.optimize import minimize_scalar
 from scipy.stats import skew, kurtosis
+
+import statsmodels.stats.api as sms
 
 import logging
 from typing import List, Tuple
@@ -74,14 +77,13 @@ def log_ma_returns(
     return returns, horizons
 
 
-def compute_crra_gamma_fourth_moment(returns: np.ndarray, risk_free: float = 0) -> float:
+def compute_crra_gamma_fourth_moment(returns: np.ndarray) -> float:
     """
     Estimates the risk aversion coefficient (gamma) in a CRRA utility function
     using a higher-order Taylor approximation of expected utility.
 
     Parameters:
     - returns: np.ndarray of portfolio returns (gross or net)
-    - risk_free: risk-free rate (same scale as returns)
 
     Returns:
     - Estimated gamma that maximizes expected utility
@@ -108,7 +110,9 @@ def compute_crra_gamma_fourth_moment(returns: np.ndarray, risk_free: float = 0) 
         term3 = (1/6) * gamma * (gamma + 1) * (gamma + 2) * mu3 / mu**3
         term4 = - (1/24) * gamma * (gamma + 1) * (gamma + 2) * (gamma + 3) * mu4 / mu**4
         
-        return mu**(1 - gamma) * (term1 + term2 + term3 + term4)
+        utility = mu**(1 - gamma) * (term1 + term2 + term3 + term4)
+        logger.debug(f"gamma: {gamma} | utility: {utility}")
+        return utility
 
     # Objective: negative expected utility (since we minimize)
     objective = lambda gamma: -expected_utility(gamma)
@@ -120,8 +124,88 @@ def compute_crra_gamma_fourth_moment(returns: np.ndarray, risk_free: float = 0) 
 
     return result.x if result.success else np.nan
 
+def compute_crra_gamma(array:np.ndarray)->float:
+    """
+    Given the inputs it estimates the gamma of a CRRA utility function.
+    
+    Parameters:
+    - array : np.ndarray
+        Array of returns - risk free
 
-def compute_crra_utility(returns_array:np.ndarray, gamma:float)->np.ndarray :
+    Returns:
+    - gamma : float
+    """
+    mean = np.mean(array)
+    var = np.var(array)
+
+    gamma = (mean)/var + 1/2
+    return gamma
+
+
+def paramteric_expected_utility_crra(gamma:float, array:np.ndarray):
+    """
+    Given gamma and an array it computes the expected utility given a formula. The array should be of gross returns net of risk free.
+    """
+    gamma = float(gamma)
+
+    log_returns = np.log(array)
+
+    if gamma != 1:
+        mu = np.mean(log_returns)
+        s_2 = np.var(log_returns)
+
+        numerator = np.exp(mu*(1-gamma) + (s_2/2)*(1-gamma)**2) - 1
+        denominator = 1 - gamma
+
+        utility =  numerator / denominator
+    else:
+        mu = np.mean(log_returns)
+        utility =  mu
+
+    #logger.debug(f"Gamma: {gamma:.4f} | Utility: {utility:.4f}")
+    return utility
+
+
+def error_ce(gamma:float, array_stocks:np.ndarray, array_benchmark:np.ndarray, parametric:bool=True):
+    gamma = float(gamma)
+    if parametric:
+        u_stocks = paramteric_expected_utility_crra(gamma, array_stocks)
+        u_becnhmark = paramteric_expected_utility_crra(gamma, array_benchmark)
+    else:
+        u_stocks = compute_crra_utility(array_stocks, gamma)
+        u_becnhmark = compute_crra_utility(array_benchmark, gamma)
+
+    error = np.abs(u_becnhmark - u_stocks) 
+
+
+    logger.debug(f"Gamma: {gamma:.4f} | Error: {error:.4f} | Utility stocks: {u_stocks:.4f} | Utility Benchmark: {u_becnhmark:.4f}")
+    return error
+
+
+def find_gamma_certainty_equivalent(array_stocks: np.ndarray, array_benchmark: np.ndarray, parametric:bool=True):
+    result = minimize(
+        error_ce,
+        x0=np.array([1.01]),  # initial guess for gamma
+        args=(array_stocks, array_benchmark, parametric),
+        bounds=[(-10, 10)],  # set realistic bounds to ensure stable optimization
+        method='Powell'
+    )
+
+    
+    if result.success: 
+        if round(result.fun, 3) == 0:
+            gamma_hat = result.x[0]  
+        else:
+            logger.info(f"Didn't converge. Error: {result.fun}")
+            gamma_hat = np.nan
+    else:
+        raise ValueError("Optimization failed:", result.message)
+
+    return gamma_hat
+
+
+
+def compute_crra_utility(returns_array:np.ndarray, gamma:float, confint:bool=False, alpha:float=0.05)->np.ndarray :
     """
     Computes the crra utility given a certain gross returns array and gamma.
     """
@@ -133,7 +217,35 @@ def compute_crra_utility(returns_array:np.ndarray, gamma:float)->np.ndarray :
     else:
         utility_array = (returns_array**(1-gamma)-1)/(1-gamma)
     
-    return utility_array
+    if not confint:
+        return utility_array.mean()
+    
+    else:
+        ds = sms.DescrStatsW(utility_array)
+
+        ci_low, ci_high = ds.tconfint_mean(alpha=alpha)
+
+        return utility_array.mean(), ci_low, ci_high
+    
+
+def moment_condition(gamma: float,
+                     rp: np.ndarray,
+                     bar_rf: float) -> float:
+    """
+    Sample analogue of E[ (1/(1+bar_rf))*(1+rp)^(-gamma)*(1+rp) ] - 1.
+    """
+    m_t = (1.0 / (1.0 + bar_rf)) * (1.0 + rp) ** (-gamma)
+    return (m_t * (1.0 + rp)).mean() - 1.0
+
+def squared_moment(gamma: float,
+                   rp: np.ndarray,
+                   bar_rf: float) -> float:
+    """
+    Square of the moment condition—useful for minimization.
+    """
+    g = moment_condition(gamma, rp, bar_rf)
+    return g * g    
+
 
 def test_first_order_stochastic_dominance(series_a:pd.Series, series_b:pd.Series):
     """

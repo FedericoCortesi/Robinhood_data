@@ -47,12 +47,28 @@ class Plotter:
         """
         Update counter for the number of different securties by iterating over each series in series_list
         """
-        for series in self.series_list:
+        if len(self.series_list) > 1 :
+            for series in self.series_list:
+                # get the individual df columns and find base securities
+                cols = series.df.columns
+
+                # Obtain base cols (columsn without returns name)
+                base_cols = {col for col in cols if not re.search(r"_\d+_return$", col)}
+                
+                if len(base_cols) == 0:
+                    base_cols = cols
+                
+                Plotter.index_counter += len(base_cols)
+        else:
             # get the individual df columns and find base securities
-            cols = series.df.columns
+            cols = self.series_list[0].df.columns
 
             # Obtain base cols (columsn without returns name)
             base_cols = {col for col in cols if not re.search(r"_\d+_return$", col)}
+            
+            if len(base_cols) == 0:
+                base_cols = cols
+            
             Plotter.index_counter += len(base_cols)
 
 

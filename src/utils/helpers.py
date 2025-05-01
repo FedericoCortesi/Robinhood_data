@@ -1,5 +1,6 @@
 import json
 import re
+import pandas as pd
 
 # Setup logger
 import logging
@@ -44,3 +45,18 @@ def load_tickers_mapping(filepath="config/tickers_mapping.json"):
     except json.JSONDecodeError:
         logger.error(f"Invalid JSON format in {filepath}")
         return {}
+    
+def load_factors(filepath="jf-datashare/gabriel-cuevas/data/18_rwarh_d_1.csv")->pd.DataFrame:
+    """Loads the factor dataset from the replication code."""
+
+    filepath = PROJECT_ROOT / filepath
+
+    try:
+        return pd.read_csv(filepath, index_col=0)
+    except FileNotFoundError:
+        logger.error(f"Factors file not found: {filepath}")
+        return {}  # Return an empty dict if the file is not found
+    except json.JSONDecodeError:
+        logger.error(f"Invalid JSON format in {filepath}")
+        return {}
+

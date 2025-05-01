@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np
 
 import seaborn as sns
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 
 from typing import Optional
 
@@ -18,7 +16,6 @@ import logging
 from .utils.custom_formatter import setup_custom_logger
 logger = setup_custom_logger(__name__, level=logging.INFO)
 
-from . import DataLoader
 
 from pathlib import Path
 CURRENT_DIR = Path(__file__).resolve().parent
