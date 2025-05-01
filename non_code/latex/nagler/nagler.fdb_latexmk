@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex nagler"] 1745936303 "nagler.aux" "nagler.bbl" "nagler" 1745937401 0
-  "./references.bib" 1745922116 2876 c5d9fdaedf659ece219b79f114a1f985 ""
-  "Sections/appendix.aux" 1745937399 4768 e3156cc01dc6d05b73af4b727826b9e2 "pdflatex"
+["bibtex nagler"] 1746104243 "nagler.aux" "nagler.bbl" "nagler" 1746106221 0
+  "./references.bib" 1746049637 3180 27c7d5575d54e378f734a91b5dbd562a ""
+  "Sections/appendix.aux" 1746106220 4769 12d6cbfb0e7fd6096625d41575ac93d7 "pdflatex"
   "d:/texlive/2023/texmf-dist/bibtex/bst/base/apalike.bst" 1700058237 24635 604dafcc79f521a11ea73e506e1fbd98 ""
-  "nagler.aux" 1745937399 5640 93a1f3b29a8bec36aea25a1b3199d8e4 "pdflatex"
+  "nagler.aux" 1746106220 6157 fd62d816544a3ea484e69f77eff9edac "pdflatex"
   (generated)
   "nagler.bbl"
   "nagler.blg"
   (rewritten before read)
-["pdflatex"] 1745937384 "d:/Uni/Bocconi/Thesis/Robinhood_data/non_code/latex/nagler/nagler.tex" "nagler.pdf" "nagler" 1745937401 0
+["pdflatex"] 1746106204 "d:/Uni/Bocconi/Thesis/Robinhood_data/non_code/latex/nagler/nagler.tex" "nagler.pdf" "nagler" 1746106221 0
   "../images/distributions/comparison_1.png" 1745675900 1581329 da141a1025b903bd4eacfe29c0d1c8c1 ""
   "../images/distributions/comparison_2.png" 1745679537 1579359 5b1a16ce4160919a37bc24717315a77f ""
   "../images/distributions/st_all.png" 1745772786 581896 5817974adf4cb4465d79ffa60ebb7f88 ""
@@ -16,12 +16,12 @@
   "../images/no_positions_date.png" 1740494026 40798 449eaf3cd5b83df61815e565fc93f6d0 ""
   "../images/returns/comparison_1.png" 1745643080 1741539 b310c8a237068f7df31e16e716d89cbd ""
   "../images/returns/comparison_2.png" 1745649651 1716597 81716d6901af52c568e53b4e561601b8 ""
-  "Sections/appendix.aux" 1745937399 4768 e3156cc01dc6d05b73af4b727826b9e2 "pdflatex"
+  "Sections/appendix.aux" 1746106220 4769 12d6cbfb0e7fd6096625d41575ac93d7 "pdflatex"
   "Sections/appendix.tex" 1745851042 23250 2e33b2d2124e378acdd2486bd5fc0900 ""
   "Sections/building_portfolio.tex" 1745781411 5223 b77b3a6a9d47ba7afc4c93e982ba07f1 ""
   "Sections/introduction.tex" 1744883670 2138 7c27d99ded37906858763a00e82e01f9 ""
   "Sections/returns.tex" 1745928023 25913 2afe184cb69c3658e85dc6c0da999bc1 ""
-  "Sections/risk.tex" 1745937383 1973 688bf4577d8c7c25d90a71148b4a7da2 ""
+  "Sections/risk.tex" 1746106203 3927 657324b28fd515fb24f12932c4bab223 ""
   "Sections/robinhood_dataset.tex" 1745927667 2700 fa0b4a50f24c0a4d3ee05b2ec4cc726c ""
   "d:/Uni/Bocconi/Thesis/Robinhood_data/non_code/latex/nagler/nagler.tex" 1745927747 8078 1ce24097a638818852229f262326dc71 ""
   "d:/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc" 1700060166 3486 c7eadf5dcc57b3b2d11736679f6636ba ""
@@ -62,6 +62,7 @@
   "d:/texlive/2023/texmf-dist/fonts/tfm/public/lm/rm-lmri12.tfm" 1700060166 16968 09a34e0af90920bbcece784f13606525 ""
   "d:/texlive/2023/texmf-dist/fonts/tfm/public/lm/rm-lmtt12.tfm" 1700060166 1336 3f1d3798f35e35601b79a222d795ee97 ""
   "d:/texlive/2023/texmf-dist/fonts/tfm/public/lm/ts1-lmr10.tfm" 1700060166 1556 b86d923e6b2f9aab2e313098a95cb0b8 ""
+  "d:/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb" 1700057863 34694 870c211f62cb72718a00e353f14f254d ""
   "d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmbx12.pfb" 1700060166 116908 9a7a12d1e4df280ea0ab4aad83cdef88 ""
   "d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmex10.pfb" 1700060166 23055 2e5b42921de910eaa97b85df04ca4891 ""
   "d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmmi10.pfb" 1700060166 30388 702fae6a5f0e6e9c48a1d872b442ffcf ""
@@ -194,9 +195,9 @@
   "d:/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1700067288 4754190 47b409e29f7040ae0b2ce0fd5f8cefc8 ""
   "d:/texlive/2023/texmf-var/web2c/pdftex/pdflatex.fmt" 1700067371 8213497 5e6e08f3605001b16fbf0acaf06230bf ""
   "d:/texlive/2023/texmf.cnf" 1700067266 713 e69b156964470283e0530f5060668171 ""
-  "nagler.aux" 1745937399 5640 93a1f3b29a8bec36aea25a1b3199d8e4 "pdflatex"
-  "nagler.bbl" 1745936304 717 f047c4468af8767375b719e1540a5d3b "bibtex nagler"
-  "nagler.out" 1745937399 4180 28b0544fdd8e165bb37e9cec21110720 "pdflatex"
+  "nagler.aux" 1746106220 6157 fd62d816544a3ea484e69f77eff9edac "pdflatex"
+  "nagler.bbl" 1746104245 968 609c536f7ebf8527b34221caeb395f5a "bibtex nagler"
+  "nagler.out" 1746106220 4433 d68cf83fb74d935137fc5d7bc2f905e1 "pdflatex"
   "nagler.tex" 1745927747 8078 1ce24097a638818852229f262326dc71 ""
   (generated)
   "Sections/appendix.aux"

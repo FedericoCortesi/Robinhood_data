@@ -4,44 +4,44 @@ The top-level auxiliary file: nagler.aux
 A level-1 auxiliary file: Sections/appendix.aux
 The style file: apalike.bst
 Database file #1: references.bib
-You've used 3 entries,
+You've used 4 entries,
             1935 wiz_defined-function locations,
-            496 strings with 4200 characters,
-and the built_in function-call counts, 1077 in all, are:
-= -- 111
-> -- 27
-< -- 3
-+ -- 10
-- -- 8
-* -- 86
-:= -- 194
-add.period$ -- 10
-call.type$ -- 3
-change.case$ -- 20
-chr.to.int$ -- 3
-cite$ -- 3
-duplicate$ -- 39
-empty$ -- 81
-format.name$ -- 13
-if$ -- 206
+            505 strings with 4386 characters,
+and the built_in function-call counts, 1499 in all, are:
+= -- 155
+> -- 40
+< -- 4
++ -- 14
+- -- 12
+* -- 125
+:= -- 264
+add.period$ -- 13
+call.type$ -- 4
+change.case$ -- 27
+chr.to.int$ -- 4
+cite$ -- 4
+duplicate$ -- 53
+empty$ -- 113
+format.name$ -- 20
+if$ -- 289
 int.to.chr$ -- 1
 int.to.str$ -- 0
-missing$ -- 2
-newline$ -- 19
-num.names$ -- 9
-pop$ -- 10
+missing$ -- 3
+newline$ -- 24
+num.names$ -- 12
+pop$ -- 14
 preamble$ -- 1
-purify$ -- 19
+purify$ -- 26
 quote$ -- 0
-skip$ -- 32
+skip$ -- 43
 stack$ -- 0
-substring$ -- 94
-swap$ -- 2
+substring$ -- 137
+swap$ -- 3
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 18
+type$ -- 24
 warning$ -- 0
-while$ -- 10
+while$ -- 14
 width$ -- 0
-write$ -- 43
+write$ -- 56

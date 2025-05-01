@@ -1,5 +1,5 @@
 \section{Assessing Risk Preferences: A Dual-Criterion Approach}
-\subsection{Introduction}
+\subsection{Setup and Definitions}
 The results of section \ref{return_section} paint very different pictures of retail investors. 
 Using the method set forth by \cite{Welch2022} and \cite{Fedyk2024}, analysed also in section \ref{fedyk_paper_returns}, yields superior returns and similar drawdowns to the market.
 They also conclude that the Robinhood crowd has achieved positve alpha when analysed under different factor models (table VII, IX, X in \cite{Welch2022} and table 16 in \cite{Fedyk2024}). 
@@ -15,13 +15,46 @@ First, I adopt the constant-relative-risk-aversion (CRRA) framework, in line wit
     \frac{W^{1-\gamma}-1}{1-\gamma}, \gamma\neq 1\\
     \ln(W), \gamma = 1
     \end{cases}
+    \label{CRRA}
 \end{equation}
 
-By computing expected utility of both the Robinhood and benchmark portfolios over a grid of possible risk aversion ($@g$) values,
-I identify the cutoff $@g^*$ such that a representative CRRA investor is indifferent between the two.
+By computing expected utility of both the Robinhood and benchmark portfolios over a grid of possible risk aversion ($\gamma$) values,
+I identify the cutoff $\gamma^*$ such that a representative CRRA investor is indifferent between the two, formally:
+\begin{equation}
+    \gamma^* = \min\left\{ \gamma_j : \mathbb{E}[U_p(\gamma_j)] \geq \mathbb{E}[U_m(\gamma_j)] \right\}
+    \label{gamma_cutoff}
+\end{equation}
 This delivers a concise, parametric summary of how risk preferences may shape portfolio choice.
+
+However, this method cannot deliver precise estimates given the limited sample size. 
+I therefore employ another method to directly estimate the risk aversion $\gamma$ following the Generalized Method of Moments (GMM) framework introduced by \cite{hansen1982generalized}.
+
+\begin{equation}
+    \mathbb{E}\left[ \beta \frac{U^\prime(c_{t+1})}{U^\prime(c_{t})}R_{t+1} - 1\right] = 0
+    \label{euler_def}
+\end{equation}  
+where $R_{t+1}$ is the realized return on the asset at time $t+1$.
+
+Rewriting equation \ref{euler_def} and assuming CRRA utility we arrive at the following condition:
+\begin{equation}
+    \mathbb{E}\left[ \beta \left( \frac{c_{t+1}}{c_{t}} \right)^{-\gamma} R_{t+1} - 1\right] = 0
+\end{equation}  
+
+Then, using portfolio returns as a proxy of consumption and letting $\beta = \frac{1}{1+\bar{r_f}}$ we derive the following GMM moment condition:
+\begin{equation}
+    g(\gamma) = \mathbb{E} \left[ \frac{R_{t+1}^{-\gamma}}{1+\bar{r}_f}  R_{t+1} - 1\right] = 0
+    \label{gmm_condition}
+\end{equation}  
+
+I then use a root-solving algorithm to find the $\gamma$ that satisfies equation \ref{gmm_condition}. 
+
+
 
 Second, I apply first- and second-order stochastic dominance tests (FSD and SSD) to the same return distributions.
 This allows to avoid unnecesary, though conventional, assumptions regarding functional forms or parameterisation.
 Log-Normality might well not be respected for different distributions, stochastic dominance tests take into account the shape of empirical CDFs to answer stronger questions. 
 
+\subsection{Expected Utility and Cutoff}
+As birefly explained above, although equation \ref{gamma_cutoff} delivers a concise summary for what paramaters of risk aversion a rational utility-maximizer agent with CRRA utility would choose the Robinhood portfolio,
+the limited size and noise of the sample imply wide conference intervals for the estimated expected utilities.
+In practice, this remains a useful conceptual framework to understand how risk preference and believes may affect portfolio choice, but in limited samples its numerical outputs are more illustrative than definitive.

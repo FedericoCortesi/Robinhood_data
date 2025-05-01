@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.11.15)  29 APR 2025 16:36
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.11.15)  1 MAY 2025 15:30
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -770,7 +770,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 [1{d:/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{d:/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}
 
 {d:/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-rmtt.enc}{d:/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}]
-<../images/no_positions_date.png, id=115, 609.9588pt x 340.3917pt>
+<../images/no_positions_date.png, id=119, 609.9588pt x 340.3917pt>
 File: ../images/no_positions_date.png Graphic file (type png)
 <use ../images/no_positions_date.png>
 Package pdftex.def Info: ../images/no_positions_date.png  used on input line 31.
@@ -820,7 +820,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [6]
-<../images/returns/comparison_1.png, id=169, 1318.9275pt x 574.18515pt>
+<../images/returns/comparison_1.png, id=173, 1318.9275pt x 574.18515pt>
 File: ../images/returns/comparison_1.png Graphic file (type png)
 <use ../images/returns/comparison_1.png>
 Package pdftex.def Info: ../images/returns/comparison_1.png  used on input line 55.
@@ -834,7 +834,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [7 <../images/returns/comparison_1.png>]
-<../images/returns/comparison_2.png, id=178, 1318.9275pt x 574.18515pt>
+<../images/returns/comparison_2.png, id=182, 1318.9275pt x 574.18515pt>
 File: ../images/returns/comparison_2.png Graphic file (type png)
 <use ../images/returns/comparison_2.png>
 Package pdftex.def Info: ../images/returns/comparison_2.png  used on input line 77.
@@ -848,7 +848,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [8 <../images/returns/comparison_2.png>]
-<../images/distributions/comparison_1.png, id=188, 1318.2048pt x 673.67685pt>
+<../images/distributions/comparison_1.png, id=192, 1318.2048pt x 673.67685pt>
 File: ../images/distributions/comparison_1.png Graphic file (type png)
 <use ../images/distributions/comparison_1.png>
 Package pdftex.def Info: ../images/distributions/comparison_1.png  used on input line 106.
@@ -862,7 +862,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [9 <../images/distributions/comparison_1.png>]
-<../images/distributions/comparison_2.png, id=198, 1319.1684pt x 673.67685pt>
+<../images/distributions/comparison_2.png, id=202, 1319.1684pt x 673.67685pt>
 File: ../images/distributions/comparison_2.png Graphic file (type png)
 <use ../images/distributions/comparison_2.png>
 Package pdftex.def Info: ../images/distributions/comparison_2.png  used on input line 132.
@@ -876,7 +876,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [10 <../images/distributions/comparison_2.png>]
-<../images/distributions/st_all.png, id=209, 1319.1684pt x 337.62135pt>
+<../images/distributions/st_all.png, id=213, 1319.1684pt x 337.62135pt>
 File: ../images/distributions/st_all.png Graphic file (type png)
 <use ../images/distributions/st_all.png>
 Package pdftex.def Info: ../images/distributions/st_all.png  used on input line 161.
@@ -890,7 +890,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [11 <../images/distributions/st_all.png>]
-<../images/distributions/st_before.png, id=221, 1319.1684pt x 337.62135pt>
+<../images/distributions/st_before.png, id=225, 1319.1684pt x 337.62135pt>
 File: ../images/distributions/st_before.png Graphic file (type png)
 <use ../images/distributions/st_before.png>
 Package pdftex.def Info: ../images/distributions/st_before.png  used on input line 180.
@@ -983,21 +983,21 @@ LaTeX2e <2023-11-01>
 L3 programming layer <2023-11-09>
  ***********
 Package rerunfilecheck Info: File `nagler.out' has not changed.
-(rerunfilecheck)             Checksum: 28B0544FDD8E165BB37E9CEC21110720;4180.
+(rerunfilecheck)             Checksum: D68CF83FB74D935137FC5D7BC2F905E1;4433.
  ) 
 Here is how much of TeX's memory you used:
- 21638 strings out of 474267
- 411517 string characters out of 5751470
+ 21650 strings out of 474267
+ 411692 string characters out of 5751470
  1965558 words of memory out of 5000000
- 43408 multiletter control sequences out of 15000+600000
+ 43414 multiletter control sequences out of 15000+600000
  606518 words of font info for 77 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  79i,12n,93p,813b,968s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmbx12.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmex10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmmi10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmmi12.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmmi6.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmmi8.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr12.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr6.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr7.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr8.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmri10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmri12.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmsy10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmsy6.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmsy8.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmtt12.pfb>
-Output written on nagler.pdf (20 pages, 7351781 bytes).
+<d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmbx12.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmex10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmmi10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmmi12.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmmi6.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmmi8.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr12.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr6.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr7.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr8.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmri10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmri12.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmsy10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmsy6.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmsy8.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmtt12.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on nagler.pdf (20 pages, 7362237 bytes).
 PDF statistics:
- 383 PDF objects out of 1000 (max. 8388607)
- 307 compressed objects within 4 object streams
- 77 named destinations out of 1000 (max. 500000)
- 204 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 402 PDF objects out of 1000 (max. 8388607)
+ 324 compressed objects within 4 object streams
+ 83 named destinations out of 1000 (max. 500000)
+ 212 words of extra memory for PDF output out of 10000 (max. 10000000)
 
