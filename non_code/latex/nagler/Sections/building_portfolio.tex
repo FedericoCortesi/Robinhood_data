@@ -26,6 +26,7 @@ The other authors build the portfolio returns by multiplying weights by their da
 assuming that the weights, however computed, represent a certain share of wealth in a stock of the Robinhood crowd.
 \begin{equation}
     r_{RH,t} = \sum_{i=1}^N w_{i,t}\cdot r_{i,t}
+    \label{returns_fedyk}
 \end{equation}
 
 On the other hand, I tried to compute the value of the Robinhood portfolio by doing a weighted sum of the prices of the securities in the dataset.
@@ -35,6 +36,7 @@ I will call this the "Price" method, or simply my method.
 We can therefore define the value of the Robinhood Portfolio as follows:
 \begin{equation}
     V_{RH,t}=\sum_{i=1}^N w^{\text{dollar}}_{i,t}\cdot P_{i,t}
+    \label{value_mine}
 \end{equation}
 
 Returns are then computed from the value of the overall portfolio as:

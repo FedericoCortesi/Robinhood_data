@@ -93,3 +93,24 @@ plotter = Plotter([
 
 plotter.plot_returns_timeseries(custom_labels=["Fedyk", "Mine", "World ETF", "S&P 500"], save=True, file_name="/returns/st_all.png")
 plotter.plot_returns_kdes(custom_labels=["Fedyk", "Mine", "World ETF", "S&P 500"], save=True, file_name="/distributions/st_all.png")
+
+# cutoff_daily.png
+from src import Analyzer
+from src import RiskTests
+from src.utils.params import ReturnParams
+
+import numpy as np
+
+return_params = ReturnParams(
+    horizons={},  
+    start_date=None,
+    cumulative=False,
+    append_start=False
+)
+
+an = Analyzer(compare_tickers=["VT"], return_params=return_params, stocks_only=False, weights_application="wealth", dl_kwargs={"weights_method":"dollar"})
+
+
+rt = RiskTests(an)
+daily_factors = rt.factors
+rt.find_cutoff_gamma()

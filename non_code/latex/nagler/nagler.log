@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.11.15)  1 MAY 2025 15:30
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.11.15)  2 MAY 2025 02:19
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -571,6 +571,13 @@ Package: appendix 2020/02/08 v1.2c extra appendix facilities
 \c@@pps=\count332
 \c@@ppsavesec=\count333
 \c@@ppsaveapp=\count334
+) (d:/texlive/2023/texmf-dist/tex/latex/caption/subcaption.sty
+Package: subcaption 2023/07/28 v1.6b Sub-captions (AR)
+LaTeX Info: Redefining \subref on input line 189.
+Package subcaption Info: The counter `subfigure' was already defined by
+(subcaption)             \newsubfloat (offered by the subfig package) on input line 238.
+Package subcaption Info: The counter `subtable' was already defined by
+(subcaption)             \newsubfloat (offered by the subfig package) on input line 238.
 ) (d:/texlive/2023/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2020/01/02 v5.9 Page Geometry
  (d:/texlive/2023/texmf-dist/tex/generic/iftex/ifvtex.sty
@@ -600,7 +607,7 @@ Package footmisc Info: Declaring symbol style lamport-robust on input line 724.
 Package footmisc Info: Declaring symbol style lamport* on input line 744.
 Package footmisc Info: Declaring symbol style lamport*-robust on input line 765.
 )
-Package hyperref Info: Option `colorlinks' set `true' on input line 61.
+Package hyperref Info: Option `colorlinks' set `true' on input line 63.
  (d:/texlive/2023/texmf-dist/tex/latex/amsfonts/euscript.sty
 Package: euscript 2009/06/22 v3.00 Euler Script fonts
 LaTeX Font Info:    Overwriting math alphabet `\EuScript' in version `bold'
@@ -615,31 +622,31 @@ LaTeX Font Info:    Overwriting math alphabet `\EuScript' in version `bold'
 \c@example*=\count344
 \c@remark*=\count345
 \c@claim=\count346
-Package translations Info: No language package found. I am going to use `english' as default language. on input line 206.
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 206.
+Package translations Info: No language package found. I am going to use `english' as default language. on input line 208.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 208.
  (d:/texlive/2023/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ) (./nagler.aux (./Sections/appendix.aux))
 \openout1 = `nagler.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 206.
-LaTeX Font Info:    ... okay on input line 206.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 206.
-LaTeX Font Info:    ... okay on input line 206.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 206.
-LaTeX Font Info:    ... okay on input line 206.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 206.
-LaTeX Font Info:    ... okay on input line 206.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 206.
-LaTeX Font Info:    ... okay on input line 206.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 206.
-LaTeX Font Info:    ... okay on input line 206.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 206.
-LaTeX Font Info:    ... okay on input line 206.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 206.
-LaTeX Font Info:    ... okay on input line 206.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 206.
-LaTeX Font Info:    ... okay on input line 206.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 208.
+LaTeX Font Info:    ... okay on input line 208.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 208.
+LaTeX Font Info:    ... okay on input line 208.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 208.
+LaTeX Font Info:    ... okay on input line 208.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 208.
+LaTeX Font Info:    ... okay on input line 208.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 208.
+LaTeX Font Info:    ... okay on input line 208.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 208.
+LaTeX Font Info:    ... okay on input line 208.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 208.
+LaTeX Font Info:    ... okay on input line 208.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 208.
+LaTeX Font Info:    ... okay on input line 208.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 208.
+LaTeX Font Info:    ... okay on input line 208.
  (d:/texlive/2023/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count347
@@ -675,7 +682,7 @@ Package caption Info: End \AtBeginDocument code.
  (d:/texlive/2023/texmf-dist/tex/latex/upquote/upquote.sty
 Package: upquote 2012/04/19 v1.3 upright-quote and grave-accent glyphs in verbatim
 )
-Package hyperref Info: Link coloring ON on input line 206.
+Package hyperref Info: Link coloring ON on input line 208.
  (./nagler.out) (./nagler.out)
 \@outlinefile=\write3
 \openout3 = `nagler.out'.
@@ -683,7 +690,7 @@ Package hyperref Info: Link coloring ON on input line 206.
  (d:/texlive/2023/texmf-dist/tex/latex/translations/translations-basic-dictionary-english.trsl
 File: translations-basic-dictionary-english.trsl (english translation file `translations-basic-dictionary')
 )
-Package translations Info: loading dictionary `translations-basic-dictionary' for `english'. on input line 206.
+Package translations Info: loading dictionary `translations-basic-dictionary' for `english'. on input line 208.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -770,10 +777,10 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 [1{d:/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{d:/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}
 
 {d:/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-rmtt.enc}{d:/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}]
-<../images/no_positions_date.png, id=119, 609.9588pt x 340.3917pt>
-File: ../images/no_positions_date.png Graphic file (type png)
-<use ../images/no_positions_date.png>
-Package pdftex.def Info: ../images/no_positions_date.png  used on input line 31.
+<../images/old/no_positions_date.png, id=123, 609.9588pt x 340.3917pt>
+File: ../images/old/no_positions_date.png Graphic file (type png)
+<use ../images/old/no_positions_date.png>
+Package pdftex.def Info: ../images/old/no_positions_date.png  used on input line 31.
 (pdftex.def)             Requested size: 377.62642pt x 210.73941pt.
 
 
@@ -795,7 +802,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[3{d:/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{d:/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}{d:/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc} <../images/no_positions_date.png>]
+[3{d:/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{d:/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}{d:/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc} <../images/old/no_positions_date.png>]
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 14.49998pt, for example:
@@ -820,7 +827,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [6]
-<../images/returns/comparison_1.png, id=173, 1318.9275pt x 574.18515pt>
+<../images/returns/comparison_1.png, id=177, 1318.9275pt x 574.18515pt>
 File: ../images/returns/comparison_1.png Graphic file (type png)
 <use ../images/returns/comparison_1.png>
 Package pdftex.def Info: ../images/returns/comparison_1.png  used on input line 55.
@@ -834,7 +841,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [7 <../images/returns/comparison_1.png>]
-<../images/returns/comparison_2.png, id=182, 1318.9275pt x 574.18515pt>
+<../images/returns/comparison_2.png, id=186, 1318.9275pt x 574.18515pt>
 File: ../images/returns/comparison_2.png Graphic file (type png)
 <use ../images/returns/comparison_2.png>
 Package pdftex.def Info: ../images/returns/comparison_2.png  used on input line 77.
@@ -848,7 +855,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [8 <../images/returns/comparison_2.png>]
-<../images/distributions/comparison_1.png, id=192, 1318.2048pt x 673.67685pt>
+<../images/distributions/comparison_1.png, id=196, 1318.2048pt x 673.67685pt>
 File: ../images/distributions/comparison_1.png Graphic file (type png)
 <use ../images/distributions/comparison_1.png>
 Package pdftex.def Info: ../images/distributions/comparison_1.png  used on input line 106.
@@ -862,7 +869,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [9 <../images/distributions/comparison_1.png>]
-<../images/distributions/comparison_2.png, id=202, 1319.1684pt x 673.67685pt>
+<../images/distributions/comparison_2.png, id=206, 1319.1684pt x 673.67685pt>
 File: ../images/distributions/comparison_2.png Graphic file (type png)
 <use ../images/distributions/comparison_2.png>
 Package pdftex.def Info: ../images/distributions/comparison_2.png  used on input line 132.
@@ -876,7 +883,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [10 <../images/distributions/comparison_2.png>]
-<../images/distributions/st_all.png, id=213, 1319.1684pt x 337.62135pt>
+<../images/distributions/st_all.png, id=217, 1319.1684pt x 337.62135pt>
 File: ../images/distributions/st_all.png Graphic file (type png)
 <use ../images/distributions/st_all.png>
 Package pdftex.def Info: ../images/distributions/st_all.png  used on input line 161.
@@ -890,7 +897,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [11 <../images/distributions/st_all.png>]
-<../images/distributions/st_before.png, id=225, 1319.1684pt x 337.62135pt>
+<../images/distributions/st_before.png, id=229, 1319.1684pt x 337.62135pt>
 File: ../images/distributions/st_before.png Graphic file (type png)
 <use ../images/distributions/st_before.png>
 Package pdftex.def Info: ../images/distributions/st_before.png  used on input line 180.
@@ -911,7 +918,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[13])
+[13]
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 14.49998pt, for example:
@@ -920,6 +927,39 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [14]
+<../images/risk/cutoff_daily.png, id=272, 1293.633pt x 711.8595pt>
+File: ../images/risk/cutoff_daily.png Graphic file (type png)
+<use ../images/risk/cutoff_daily.png>
+Package pdftex.def Info: ../images/risk/cutoff_daily.png  used on input line 76.
+(pdftex.def)             Requested size: 472.03123pt x 259.74509pt.
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[15 <../images/risk/cutoff_daily.png>]
+<../images/risk/cutoff_number_all.png, id=280, 1293.633pt x 711.8595pt>
+File: ../images/risk/cutoff_number_all.png Graphic file (type png)
+<use ../images/risk/cutoff_number_all.png>
+Package pdftex.def Info: ../images/risk/cutoff_number_all.png  used on input line 110.
+(pdftex.def)             Requested size: 226.57297pt x 124.67503pt.
+<../images/risk/cutoff_wealth_all.png, id=281, 1293.633pt x 711.8595pt>
+File: ../images/risk/cutoff_wealth_all.png Graphic file (type png)
+<use ../images/risk/cutoff_wealth_all.png>
+Package pdftex.def Info: ../images/risk/cutoff_wealth_all.png  used on input line 115.
+(pdftex.def)             Requested size: 226.57297pt x 124.67503pt.
+)
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[16 <../images/risk/cutoff_number_all.png> <../images/risk/cutoff_wealth_all.png>]
 \openout2 = `Sections/appendix.aux'.
 
  (./Sections/appendix.tex
@@ -930,7 +970,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[15
+[17
 
 ]
 
@@ -940,7 +980,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[16]
+[18]
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 14.49998pt, for example:
@@ -948,7 +988,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[17]
+[19]
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 14.49998pt, for example:
@@ -956,7 +996,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[18])
+[20])
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 14.49998pt, for example:
@@ -964,7 +1004,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[19
+[21
 
 ] (./nagler.bbl)
 
@@ -974,7 +1014,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller to compensate:
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[20
+[22
 
 
 ] (./nagler.aux (./Sections/appendix.aux))
@@ -983,21 +1023,21 @@ LaTeX2e <2023-11-01>
 L3 programming layer <2023-11-09>
  ***********
 Package rerunfilecheck Info: File `nagler.out' has not changed.
-(rerunfilecheck)             Checksum: D68CF83FB74D935137FC5D7BC2F905E1;4433.
+(rerunfilecheck)             Checksum: EDA51532D6838906BD57C8CE3A2A83B8;4716.
  ) 
 Here is how much of TeX's memory you used:
- 21650 strings out of 474267
- 411692 string characters out of 5751470
- 1965558 words of memory out of 5000000
- 43414 multiletter control sequences out of 15000+600000
+ 21766 strings out of 474267
+ 414541 string characters out of 5751470
+ 1966558 words of memory out of 5000000
+ 43520 multiletter control sequences out of 15000+600000
  606518 words of font info for 77 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  79i,12n,93p,813b,968s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmbx12.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmex10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmmi10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmmi12.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmmi6.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmmi8.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr12.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr6.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr7.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmr8.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmri10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmri12.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmsy10.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmsy6.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmsy8.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/lm/lmtt12.pfb><d:/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on nagler.pdf (20 pages, 7362237 bytes).
+Output written on nagler.pdf (22 pages, 7657203 bytes).
 PDF statistics:
- 402 PDF objects out of 1000 (max. 8388607)
- 324 compressed objects within 4 object streams
- 83 named destinations out of 1000 (max. 500000)
- 212 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 429 PDF objects out of 1000 (max. 8388607)
+ 343 compressed objects within 4 object streams
+ 91 named destinations out of 1000 (max. 500000)
+ 235 words of extra memory for PDF output out of 10000 (max. 10000000)
 
