@@ -108,9 +108,32 @@ return_params = ReturnParams(
     append_start=False
 )
 
-an = Analyzer(compare_tickers=["VT"], return_params=return_params, stocks_only=False, weights_application="wealth", dl_kwargs={"weights_method":"dollar"})
+an = Analyzer(compare_tickers=[], return_params=return_params, stocks_only=False, weights_application="wealth", dl_kwargs={"weights_method":"dollar"})
 
 
 rt = RiskTests(an)
 daily_factors = rt.factors
 rt.find_cutoff_gamma()
+
+
+# cutoff_number_all.png
+from src import Analyzer
+from src import RiskTests
+from src.utils.params import ReturnParams
+
+return_params = ReturnParams(
+    horizons={},  
+    start_date=None,
+#    end_date="2020-02-03",
+    cumulative=False,
+    append_start=False
+)
+
+an = Analyzer(compare_tickers=[], return_params=return_params, stocks_only=False, weights_application="number", dl_kwargs={"weights_method":"dollar"})
+
+
+rt = RiskTests(an)
+
+all_ret_df = rt.build_all_pairs_dataframe()
+all_ret_df.describe()
+rt.find_cutoff_gamma(df_returns=all_ret_df-1, bounds=(-8,2))

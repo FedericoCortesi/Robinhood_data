@@ -391,8 +391,8 @@ class Plotter:
             True if series A dominates series B
         """
         # Initialize names
-        name_a = name_a if name_a is not None else "series_a"
-        name_b = name_b if name_b is not None else "series_b"
+        name_a = name_a if name_a is not None else series_a.name
+        name_b = name_b if name_b is not None else series_b.name
 
         # Ensure sns is used
         sns.set_style("whitegrid")

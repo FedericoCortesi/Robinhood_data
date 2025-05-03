@@ -155,7 +155,7 @@
 
 \begin{table}[ht]
 \centering
-\caption{Results for Fligner Tests on Daily Returns, , up to February 3$^\text{rd}$ 2020}
+\caption{Results for Fligner Tests on Daily Returns, up to February 3$^\text{rd}$ 2020}
     \begin{tabular}{lll}
     \toprule
     \textbf{subset}        & \multicolumn{1}{r}{\textbf{F Statistic}} & \multicolumn{1}{r}{\textbf{p-value}} \\ \midrule
@@ -174,7 +174,21 @@
 \label{tab:fligner_before}
 \end{table}
 
+\begin{table}[ht]
+\centering
+\caption{Confidence Interval and Point Estimates for $\hat\gamma$ covering the whole period}
+    \begin{tabular}{lll}
+    \toprule
+    \textbf{Horizon}        & \multicolumn{1}{r}{$\hat\gamma$ \textbf{(Mine)} [95\% CI]} & \multicolumn{1}{r}{$\hat\gamma$ \textbf{(Fedyk)} [95\% CI]} \\ \midrule
+    Daily                      & 2.875 [0.424, 20.026]                      & 3.071 [0.896, 20.745]                       \\
+    Weekly                     & 2.908 [0.703, 24.608]                      & 3.101 [0.651, 26.497]                       \\
+    Monthly                    & 2.51 [-0.518, 29.888]                      & 3.693 [-0.763, 33.333]                       \\
+    \end{tabular}
+\label{tab:gamma_all}
+\end{table}
     
+    
+
 
 
 \clearpage
