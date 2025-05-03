@@ -187,7 +187,7 @@ def find_gamma_certainty_equivalent(array_stocks: np.ndarray, array_benchmark: n
         error_ce,
         x0=np.array([1.01]),  # initial guess for gamma
         args=(array_stocks, array_benchmark, parametric),
-        bounds=[(-10, 10)],  # set realistic bounds to ensure stable optimization
+        bounds=[(-20, 20)],  # set realistic bounds to ensure stable optimization
         method='Powell'
     )
 

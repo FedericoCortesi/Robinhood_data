@@ -234,7 +234,7 @@ class Analyzer:
         
         Parameters
         ----------
-        None
+        none
 
         Returns
         -------
@@ -287,13 +287,16 @@ class Analyzer:
 
 
 
-    def build_returns(self):
+    def build_returns(self, other_levels:np.ndarray=None, levels_return_columns:list=None)->pd.DataFrame:
         # Get params
         start_date = self.return_params.start_date
         end_date = self.return_params.end_date
         
         # Retrieve levels
         levels = self.build_levels()
+        if other_levels is not None:
+            levels = levels.merge(other_levels, right_index=True, left_index=True)
+            self.returns_columns = self.returns_columns + levels_return_columns
 
         # Filter
         if start_date is not None:

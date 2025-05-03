@@ -15,15 +15,22 @@ from src.utils.metrics import find_gamma_certainty_equivalent, paramteric_expect
 # Setup logger
 import logging
 from .utils.custom_formatter import setup_custom_logger
-logger = setup_custom_logger(__name__, level=logging.DEBUG)
+logger = setup_custom_logger(__name__, level=logging.INFO)
 
 from . import Analyzer
 
 class RiskTests():
-    def __init__(self, analyzer:Analyzer=None):
+    def __init__(self, analyzer:Analyzer=None, ff_mkt_index:bool=False, mkt_index:str=None):
 
         self.analyzer = analyzer
-        self.mkt_index = self.analyzer.compare_tickers[0] if len(self.analyzer.compare_tickers) > 0 else None # take the first
+
+        if mkt_index is None:
+            self.mkt_index = self.analyzer.compare_tickers[0] if len(self.analyzer.compare_tickers) > 0 else None # take the first
+        else:
+            assert mkt_index in self.analyzer.compare_tickers, f"mkt_index {mkt_index} not found in analyzer's tickers: {self.analyzer.compare_tickers}"
+            self.mkt_index = mkt_index
+
+        self.ff_mkt_index = ff_mkt_index
 
         self.factors = load_factors()
         self.factors.index = pd.to_datetime(self.factors.index, format="%Y%m%d")
@@ -38,25 +45,37 @@ class RiskTests():
 
         ret = (np.exp(ret) -1)*100 # get them in percentage returns
 
-        self.factors = pd.DataFrame(self.factors[["rf", "xmkt"]]) # keep good columns and ensure is datafrme to merge later
+        # keep good columns and ensure is datafrme to merge later 
+        self.factors = pd.DataFrame(self.factors[["rf", "xmkt", "pfioret100"]])
 
-        cols_to_keep = ["rh_portfolio", self.mkt_index] if self.mkt_index is not None else "rh_portfolio"
+        cols_to_keep = ["rh_portfolio", self.mkt_index]
+        cols_to_keep = [
+            col for col in cols_to_keep
+            if col is not None and col in ret.columns
+        ]
+        logger.debug(f"cols to keep: {cols_to_keep}")
 
         self.factors = self.factors.merge(ret[cols_to_keep], left_index=True, right_index=True, how="inner") # merge rh_portfolio
         
-        if self.mkt_index:
+        if self.mkt_index and not self.ff_mkt_index:
             self.factors = self.factors.rename(columns={self.mkt_index:"mkt"}) # rename for consistency
         
         # find in decimal form
         self.factors /= 100 
 
-        self.factors["xr"] = self.factors["rh_portfolio"] - self.factors["rf"] # take out risk free to have excess returns
-        if self.mkt_index:
+        # take out risk free to have excess returns
+        if "rh_portfolio" in cols_to_keep:
+            self.factors["xr"] = self.factors["rh_portfolio"] - self.factors["rf"] 
+        
+        # handle "market" index
+        if self.mkt_index and not self.ff_mkt_index:
             self.factors["xmkt"] = self.factors["mkt"] - self.factors["rf"] # excess returns market
             self.factors = self.factors[["rh_portfolio", "rf", "mkt", "xr", "xmkt"]]
         else:
             self.factors["mkt"] = self.factors["xmkt"] + self.factors["rf"] # excess returns market
-            self.factors = self.factors[["rh_portfolio", "rf", "mkt", "xr", "xmkt"]]
+            cols_to_keep = ["rh_portfolio", "rf", "mkt", "xr", "xmkt"]
+            cols_to_keep = [col for col in cols_to_keep if col in self.factors.columns]
+            self.factors = self.factors[cols_to_keep] 
 
         return self.factors
     
@@ -241,9 +260,9 @@ class RiskTests():
                 ax.set_ylabel('Expected Utility')
 
                 # **set title on the axes** with explicit fontsize
-                fig.suptitle('Expected utility vs gamma with 95% CI', fontsize=16)
+                fig.suptitle('Expected utility vs gamma with 95% CI', fontsize=18)
 
-                ax.legend()
+                ax.legend(fontsize=14)
                 ax.grid(True)
                 plt.tight_layout()
                 plt.show()
@@ -362,50 +381,6 @@ class RiskTests():
             # Return NaN values if bootstrap fails
             return (float('nan'), float('nan'), float('nan'))        
 
-
-    def bootstrap_difference_utility_old(self, df_returns:pd.DataFrame=None, gamma0:float=None)->Tuple[float, float, float]:
-        """
-        Bootstrap the differernce in utility for market and market around an initial gamma value.
-        
-        -------
-        Returns:
-            point_estimate
-            lower
-            upper
-        """
-
-        if df_returns is None:
-            df_returns = self._build_daily_factors() +1
-                    
-        # parameters
-        B = 5_000                   # number of bootstrap replications
-        gamma0 = self.estimate_euler_gamma() if gamma0 is None else gamma0 # gamma around which you need to bootstrap difference
-        n = len(df_returns)
-
-        # storage for the bootstrap difference
-        deltaU = np.empty(B)
-
-        for b in trange(B):
-            # 1) sample row‐indices with replacement
-            idx = np.random.randint(0, n, size=n)
-            df_b = df_returns.iloc[idx]
-
-            # 2) compute mean utilities (no confint needed inside bootstrap)
-            mu_rh = compute_crra_utility(df_b["xr"], gamma0, confint=False)
-            mu_mk = compute_crra_utility(df_b["xmkt"], gamma0, confint=False)
-
-            # 3) record difference: market − RH
-            deltaU[b] = mu_mk - mu_rh
-
-        # 4) build CI
-        lower, upper = np.percentile(deltaU, [2.5, 97.5])
-        point_estimate = np.mean(deltaU)
-
-        print(f"ΔU (market - RH) at γ={gamma0:.3f}: "
-            f"{point_estimate:.5f} "
-            f"[{lower:.5f}, {upper:.5f}]")
-        
-        return (point_estimate, lower, upper)
 
 
     def bootstrap_gamma(self, df_returns=None, portfolio_name="rh_portfolio", n_resamples=5000, 
