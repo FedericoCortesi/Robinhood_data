@@ -24,7 +24,7 @@ This delivers a concise, parametric summary of how risk preferences may shape po
 
 However, this method cannot deliver precise estimates given the limited sample size. 
 I therefore employ another method to directly estimate the risk aversion $\gamma$, 
-following the Generalized Method of Moments (GMM) framework introduced by \cite{hansen1982generalized} to find the risk aversion that satisfies the intertemporal Euler Condition.
+following the Generalized Method of Moments (GMM) framework introduced by \cite{hansen1982generalized} to find the risk aversion that satisfies the intertemporal Euler Condition, aspresented also in \cite{Cochrane2005}.
 
 \begin{equation}
     \mathbb{E}\left[ \beta \frac{U^\prime(c_{t+1})}{U^\prime(c_{t})}R_{t+1} \right] = 1\
@@ -38,26 +38,27 @@ where $R_{t+1}$ is the realized gross return on the asset at time $t+1$, $\beta$
 
 \subsection{Expected Utility and Cutoff}
 \subsubsection{Sampling Variability and Finite-Sample Limitations}
-As briefly explained above, finding a cutoff value for risk aversion delivers a concise summary for what parameters of risk aversion a rational utility-maximizer agent with CRRA utility would choose the Robinhood portfolio,
-the limited size and noise of the sample imply wide conference intervals for the estimated expected utilities.
+Identifying a cutoff level of risk aversion provides a clear criterion for the CRRA utility-maximizing investor: 
+it is the minimum $\gamma$ at which an alternative strategy becomes preferred to the Robinhood portfolio.
+However, the limited size and noise of the sample imply wide conference intervals for the estimated expected utilities at different $\gamma$ levels.
 In practice, this remains a useful conceptual framework to understand how risk preference and beliefs may affect portfolio choice, but in limited samples, its numerical outputs are more illustrative than definitive.
 However, this method yields precise results in a very specific case I will describe later. 
 
 Formally, we want to find $\gamma^*$ defined as:
 \begin{equation}
-    \gamma^* = \min\left\{ \gamma_j : \mathbb{E}[U_p(\gamma_j)] \geq \mathbb{E}[U_m(\gamma_j)] \right\}
+    \gamma^* = \min\left\{ \gamma_j : \mathbb{E}[U_p(\gamma_j)] \leq \mathbb{E}[U_m(\gamma_j)] \right\}
     \label{gamma_cutoff}
 \end{equation}
 where $U_p(\cdot)$ is the utility of the Robinhood portfolio, while $U_m(\cdot)$ is the utility of the market portfolio.
 
-In practice, this methods applies the CRRA utility function (\ref{CRRA}) to each gross return observation and then takes the sample average,
-effectively taking the resulting mean as the investor's expected utility at the final date based on the history of realized returns.
-Gross returns are equal to the wealth at time $t$, assuming the initial wealth $W$ to be equal to one without loss of generality.
+In practice, we apply CRRA utility function (\ref{CRRA}) to each gross return observation and then takes the sample average.
+The resulting mean serves as the expected utility implied by the investor's revealed choices over the sample period.
+Wealth at time $t$ is equal to gross returns, assuming the initial wealth $W$ to be equal to one without loss of generality.
 
 The main problem related to this approach is inherent to the sample we apply it to, having only 539 observations and inclusion of extreme events such as the COVID crash. 
 These factors inflate the sample variability of our mean-utility estimates, so much that regardless of whether we use daily returns, various rolling-window horizons, or subperiods, the resulting confidence intervals remain prohibitively wide.
 Figure \ref{fig:cutoff} illustrates this well: 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{../images/risk/cutoff_daily.png}
     \caption{Utility for the Robinhood and Market portfolios evaluated over a grid of $\gamma$.}
@@ -77,7 +78,7 @@ For every ordered pair of dates $(i,j)$ with $1 \le i < j \le T$, we compute the
     1 \le i < j \le T,
     \label{eq:allpairs_return}
 \end{equation}
-where $r_k$ is the gross portfolio return on day $k$ and $r_{f,k}$ is the daily risk-free rate.  
+where $r_k$ is the portfolio return on day $k$ and $r_{f,k}$ is the daily risk-free rate.  
 Using excess returns over the risk-free rate is necessary due to the changes in macroeconomic policy during the time of the sample. 
 We treat each multi-day return $R_{i,j}$ as a separate outcome in the investor's distribution of possible holding-period returns, we increase the number of observations from $T$ to $T(T-1)/2$, which reduces sampling variability in our utility-based estimates.  
 This "all-pairs" approach preserves the time-ordering of returns while allowing us to evaluate expected utility cutoffs with far greater precision.  
@@ -92,7 +93,7 @@ In both instances the cutoff risk aversion as defined in \ref{gamma_cutoff} is n
 in particular, the portfolio I constructed has a cutoff risk aversion of -5.437 while the one built using the alternative method we obtain -5.239.
 The plot below shows this finding, only extremely risk loving investors would prefer the Robinhood portfolios over a diversified index.  
 
-\begin{figure}[h!]
+\begin{figure}[H]
   \centering
   \subfloat[Robinhood Returns Built from Prices]{%
     \includegraphics[width=0.48\textwidth]{../images/risk/cutoff_number_all.png}%
@@ -123,7 +124,7 @@ $U^\prime(x)=x^{-\gamma}$, hence $\frac{U^\prime(c_{t+1})}{U^\prime(c_{t})}=\lef
     \mathbb{E}\left[ \beta \left( \frac{c_{t+1}}{c_{t}} \right)^{-\gamma} R_{t+1} \right] = 1
 \end{equation}  
 
-Then, using portfolio returns as a proxy of consumption and letting $\beta = \frac{1}{1+\bar{r_f}}$ we derive the following GMM moment condition:
+Then, using gross portfolio returns as a proxy of consumption growth and letting $\beta = \frac{1}{1+\bar{r_f}}$ we derive the following GMM moment condition:
 \begin{equation}
     g(\gamma) = \mathbb{E} \left[ \frac{R_{t+1}^{-\gamma}}{1+\bar{r}_f}  R_{t+1} - 1\right] = 0
     \label{gmm_condition}

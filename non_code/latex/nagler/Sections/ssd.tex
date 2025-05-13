@@ -1,6 +1,8 @@
 \section{Stochastic Dominance Analysis and Behavioral Implications}
 
-In this final empirical exercise, we compare the full return distributions of the Robinhood portfolio and the market benchmark using nonparametric stochastic dominance tests.  A second-order stochastic dominance (SSD) result in favor of the market would imply that \emph{every} risk-averse investor (i.e.\ all CRRA preferences with \(\gamma>0\)) strictly prefers the market's payoff to that of the Robinhood strategy.
+In this final empirical exercise, we compare the full return distributions of the Robinhood portfolio and the market benchmark using nonparametric stochastic dominance tests.  
+A second-order stochastic dominance (SSD) result in favor of the market would imply that \emph{every} risk-averse investor 
+(including but not restricted to all CRRA preferences with \(\gamma>0\)) strictly prefers the market's payoff to that of the Robinhood strategy.
 
 \subsection{Methodology}
 We first estimate the empirical cumulative distribution functions (CDFs) of daily returns for the two portfolios.  Let
@@ -9,14 +11,18 @@ We first estimate the empirical cumulative distribution functions (CDFs) of dail
     \quad
     F_{m}(r) \;=\; \frac{1}{T}\sum_{t=1}^{T}\mathbf{1}\{r_{m,t}\le r\},
 \end{equation}
-where \(r_{p,t}\) and \(r_{m,t}\) are the portfolio and market returns on day \(t\).  First-order stochastic dominance (FSD) holds if \(F_{p}(r)\ge F_{m}(r)\) for all \(r\); second-order stochastic dominance (SSD) holds if
+where \(r_{p,t}\) and \(r_{m,t}\) are the portfolio and market returns on day \(t\).  
+
+To analyse whether the portfolio is preferred over the market we employ two different tests.
+First-order stochastic dominance (FSD) holds if \(F_{p}(r)\le F_{m}(r)\) for all \(r\); 
+second-order stochastic dominance (SSD) holds if
 \begin{equation}    
     G_{p}(r) \;\equiv\;\int_{-\infty}^{r}F_{p}(x)\,dx
     \quad\text{and}\quad
     G_{m}(r)\;\equiv\;\int_{-\infty}^{r}F_{m}(x)\,dx
 \end{equation}
 
-satisfy \(G_{p}(r)\ge G_{m}(r)\) for all \(r\).
+satisfy \(G_{p}(r)\le G_{m}(r)\) for all \(r\).
 
 
 \subsection{Results}
@@ -31,7 +37,7 @@ This support fraction falls monotonically with the horizon: it exceeds 98 \% at 
 These findings show that Fedyk's SSD advantage becomes increasingly stronger at longer horizons, making it preferred by every risk-averse investor.
 This relation even becomes a first-order stochastic dominance when accounting for cumulative returns, as can be easily seen from plot.
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{../images/risk/fsd_fedyk_mine.png}
     \caption{FSD Between the Robinhood Portfolios.}
@@ -54,10 +60,10 @@ G_{\mathrm{proxy}}(r) \leq G_{\mathrm{RH}}(r).
 By the 30-day horizon, this support fraction declines to approximately 92\% for the S\&P 500 and 90\% for the all-world ETF, while the Fama French index mirrors the S\&P 500's trajectory. 
 Extending to 120 days, the S\&P 500 retains complete dominance (100\% of points), whereas the all-world ETF's dominance share falls to about 83\%. 
 Over the full 563-day sample, the S\&P 500 continues to second-order dominate Robinhood, while the all-world ETF shows only weak support ($\approx$ 8\%).
-
-In other words, whether we compare against the Fedyk portfolio or traditional market indices, the second-order stochastic dominance over our Robinhood strategy is nearly universal at intraday and weekly horizons. 
-However, this advantage steadily dissolves for the Wolrd ETF as we extend to monthly and longer holding periods. 
 Only the S\&P 500 (VOO) and the Fama French market index preserve dominance in the long-run payoff distribution.
+
+In other words, whether we compare the portfolio I built against the Fedyk portfolio or traditional market indices, the second-order stochastic dominance over our Robinhood strategy is nearly universal at intraday and weekly horizons. 
+Our approach to building the Robinhood portfolio, fails SSD also against the World ETF at longer horizons.
 
 \subsubsection{All-Pairs Analysis}
 Our analysis now turns to the all-pairs dataset constructed according to Equation \ref{eq:allpairs_return}, which computes returns across all possible entry-exit point combinations. 
@@ -69,19 +75,19 @@ The world ETF (VT) achieves dominance over 96\% of evaluation points, falling sh
 These results hold more strongly when using our alternative Robinhood portfolio construction method, where all three market proxies demonstrate complete second-order dominance.
 
 The pre-pandemic subsample (through February 2020) reveals even more pronounced results in favor of market indices. 
-Fedyk's portfolio maintains second-order dominance under all market proxies during this period. 
+Fedyk's portfolio fails second-order dominance under all market proxies during this period. 
 Notably, the Fama French index achieves first-order stochastic dominance, while the S\&P 500 and world ETF narrowly miss complete first-order dominance by merely 0.17\% and 5.92\% of evaluation points respectively. 
-Our alternative Robinhood portfolio construction shows even stronger results, demonstrating first-order dominance across all three market proxies in this period.
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \subfloat[S\&P 500]{\includegraphics[width=0.48\textwidth]{../images/risk/ssd_wealth_voo_before.png}}
     \hfill
     \subfloat[World ETF]{\includegraphics[width=0.48\textwidth]{../images/risk/ssd_wealth_vt_before.png}}
-    \caption{Second-order stochastic dominance tests comparing Fedyk's Robinhood portfolio to market indices (pre-pandemic period through February 3, 2020). The left panel shows dominance results against the S\&P 500, while the right panel displays results for the world ETF.}
+    \caption{Second-order stochastic dominance tests comparing Fedyk's Robinhood portfolio to market indices (pre-pandemic period through February 3, 2020).}
     \label{fig:cutoff_all_sidebyside}
 \end{figure}
 
+Our alternative Robinhood portfolio construction shows even stronger results, demonstrating first-order dominance across all three market proxies in this period.
 The economic implications of these findings are particularly striking. 
 For any Robinhood investor selecting entry and exit points at random, the revealed preferences would appear economically irrational - the Robinhood portfolio either suffers first-order stochastic dominance or comes remarkably close to this threshold. 
 The second-order dominance results further indicate that all risk-averse investors, regardless of their specific utility function form, would have been better served by market indices. 
@@ -95,14 +101,14 @@ This creates an irreconcilable tension: while Robinhood investors exhibit risk-a
 The contradiction emerges most sharply at weekly horizons. 
 Despite estimated risk aversion parameters (\(\hat{\gamma} > 0\)) that should favor market indices under second-order stochastic dominance (SSD), we find that the Fama French market index demonstrates unambiguous SSD over both Robinhood portfolios, 
 and S\&P 500 and world ETF (VT) achieve SSD over 95-99\% of evaluation points.
-This implies that \emph{even the most conservative specification} of risk-averse preferences would favor market indices over Robinhood strategies, directly contradicting the investors' actual portfolio choices.
+This implies that even the most conservative specification of risk-averse preferences would favor market indices over Robinhood strategies, directly contradicting the investors' actual portfolio choices.
 
 The tension persists across all horizons: Daily returns show 95-98\% SSD support for market dominance, monthly returns reveal comprehensive market dominance (90.7-100\% SSD support), and only a small fraction of monthly \(\hat{\gamma}\) estimates dip below zero.
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{../images/risk/ssd_number_5d_mkt.png}
-    \caption{FSD Between the Robinhood Portfolios.}
+    \caption{SSD of the Market over the Robinhood Portfolio.}
     \label{fig:fsd_fedyk_mine}
 \end{figure}    
 
@@ -115,3 +121,18 @@ The persistence of this contradiction across multiple methodologies (CRRA estima
 
 
 \subsection{Implications for Investor Behavior}
+
+Our nonparametric stochastic-dominance tests deliver a clear verdict: across multiple return horizons and market proxies, the broad market consistently second-order stochastically dominates the Robinhood strategy for short-term horizons, and at monthly and longer horizons the S\&P 500 (VOO) in particular preserves that dominance where other proxies fade.  
+Because SSD implies preference by every risk-averse investor (all CRRA utilities with $\gamma>0$), these results extend and reinforce our earlier finding—based on Euler-GMM estimation—that retail investors exhibit positive risk aversion yet hold a portfolio that no rational, CRRA-maximizer would choose.  
+
+Taken together, the Euler-equation and stochastic-dominance evidence point to a fundamental disconnect between normative decision rules and observed retail behavior.  
+Even though our bootstrap-corrected GMM estimates uncover strictly positive—and economically plausible—risk-aversion parameters at daily and weekly frequencies, 
+the SSD tests show that any such risk-averse investor would uniformly prefer the market portfolio.  
+The persistence of sub-optimal, under-diversified strategies therefore cannot be attributed to risk-aversion alone.
+
+Instead, these findings call for behavioral explanations: investors may succumb to overconfidence in their timing ability, confirmation bias in interpreting past returns, or an illusion of control over individual trades.  
+Such biases can sustain a self-confirming equilibrium, in which retail traders overweight episodes of success and dismiss losses as noise, reinforcing the belief that their custom portfolio offers an edge—even when the broad market outperforms on every risk-averse criterion.
+
+Overall, our analysis underscores the dual power of parametric (Euler-GMM) and nonparametric (SSD) methods in asset-pricing research.  
+The former quantifies the magnitude of revealed risk preferences, while the latter delivers a parameter-free, universal ranking of payoff distributions.  
+By combining both approaches, we provide robust evidence that, despite genuine risk aversion, retail investors systematically deviate from the optimal market portfolio—highlighting the crucial role of behavioral frictions in real-world decision-making.  

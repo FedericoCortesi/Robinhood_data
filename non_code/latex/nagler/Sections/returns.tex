@@ -1,9 +1,9 @@
 
 \section{Comparing Returns and Distribution measures}\label{return_section}
-The biggest difference do not appear when using different kinds of weights ("dollar" or "share" method) but rather when building the portfolio from prices or returns. 
-Moreover, Fedyk and Welch build their portfolio only using common american stocks (share code 10 or 11). 
+The biggest difference does not appear when using different kinds of weights ("dollar" or "share" method) but rather when building the portfolio from prices or returns. 
+Moreover, Fedyk and Welch build their portfolio only using common American stocks (share code 10 or 11). 
 In my final analysis I look at all types of securities but significant differences emerge even when using the same sample. 
-Additionally, by recreating their method employed by the other authors we can analyse its return when dealing with all kinds of securities. 
+Additionally, by recreating the method employed by the other authors we can analyse its return when dealing with all kinds of securities. 
 In section \ref{diff_samples} I compare returns using only common stocks or the full sample of securities, in the other sections of this paper I will use the full sample unless explicitly stated.
 
 As the other authors have claimed in their papers, the Portfolio built directly from returns had a significantly higher cumulative return compared to the market and positive alpha.
@@ -14,24 +14,19 @@ Moreover, \cite{Fedyk2024} has analysed extensively the differences between the 
 We'll focus on the dollar method since it is the same approach I use to compute weights.
 
 \subsection{Constructing Moving Averages}
-I begin by computing daily log returns as $r = \ln\left(\frac{P_1}{P_0}\right)$, knowing that for small $x$, $\ln(1+x)\approx x$. 
 Defining log returns allows us to simply compute moving averages, showing the profitability of the Robinhood portfolio at different time frames.
 Conceptually, the value of an $n$-day moving average on a given date $T$ represents the return an investor would have earned by initiating the position at the open of day $T-n$ and holding it continuously up to close of day $T$.
-More rigorously, for a given horizon of $n$ days:
+More rigorously, for a given horizon of $n$ days, the log return over the period is:
 \begin{equation}
-    r_n = \sum_{t=T-n+1}^{T} r_t \approx \ln \left( \prod_{t=T-n+1}^{T} (1+R_t) \right)
+    r_n = \sum_{t=T-n+1}^{T} r_t = \ln \left( \prod_{t=T-n+1}^{T} R_t \right)
 \end{equation}
-where $r_t$ are dauly log returns and $R_t$ are daily percentage returns.
+where $r_t$ are daily log returns and $R_t$ are daily gross returns.
 
 
 \subsection{Retail Performance Under Different Samples}\label{diff_samples}
-
-
-
-
 \subsubsection{Rolling Returns Across Investment Horizons}
 \paragraph{Common Stocks Only}\label{fedyk_paper_returns}
-At short horizons (5–30 days), the two Robinhood portfolios (Fedyk and Mine) display highly similar dynamics, with both closely tracking market indices and exhibiting bursts of volatility during periods of market stress, particularly around the onset of the COVID-19 crash. 
+At short horizons (5-30 days), the two Robinhood portfolios (Fedyk and Mine) display highly similar dynamics, with both closely tracking market indices and exhibiting bursts of volatility during periods of market stress, particularly around the onset of the COVID-19 crash. 
 This suggests that in the very short term, retail investors tend to move in tandem with broader market trends, with limited divergence in return profiles across methodologies.
 However, at the 120-day horizon, both Robinhood portfolios outperform the S\&P 500 and a World ETF\footnote{I've used Vanguard's VOO for the S\&P500 and Vanguard's VT as a World Equity ETF}. 
 
@@ -43,39 +38,39 @@ Nonetheless, this post-crash outperformance comes after a prolonged period of cl
 Prior to March 2020, both Robinhood portfolios consistently lag behind the benchmark indices, with my method in particular reflecting substantial drawdowns and poor stock selection.
 
 What differentiates the two methods most clearly is the strength of the post-COVID recovery. 
-While Fedyk’s method shows a relatively steady climb, my price-based approach rebounds even more sharply after March 2020. 
+While Fedyk's method shows a relatively steady climb, my price-based approach rebounds even more sharply after March 2020. 
 This reflects the fact that, under my methodology, investor positions are not rebalanced away from prior favorites. 
-As a result, stocks that surged after the crash contributed disproportionately to the portfolio’s recovery. 
+As a result, stocks that surged after the crash contributed disproportionately to the portfolio's recovery. 
 
 In sum, the 120-day results provide two key insights: first, that retail traders on Robinhood did benefit from post-crisis market dynamics, and second, that the magnitude and nature of this benefit depends heavily on the modeling approach, particularly when capturing persistence in portfolio composition.
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]
     {../images/returns/comparison_1.png}
-    \caption{Rolling log-returns of Robinhood and market portfolios at four investment horizons (stock-only sample)}
+    \caption{Rolling log-returns of Robinhood and market portfolios at four investment horizons.}
 \end{figure}
 
 \paragraph{Full Universe of Securities}
 
 We now extend the analysis to all securities in the dataset, including ETFs, REITs, and structured products.
 
-Expanding the sample, we still observe that short-term movements (5–30 days) remain closely correlated across all portfolios, with limited divergence in returns or volatility between methods.
+Expanding the sample, we still observe that short-term movements (5-30 days) remain closely correlated across all portfolios, with limited divergence in returns or volatility between methods.
 
 However, the performance gap widens at longer horizons. 
-In contrast to the stock-only case, where both Robinhood portfolios outperform after the crash, here the drawdowns, particularly in the price-based portfolio, are deeper and more persistent.
+In contrast to the stock-only case, where both Robinhood portfolios outperformed after the crash, here the drawdowns, particularly in the price-based portfolio, are deeper and more persistent.
 
-Low performance spans the entire pre-COVID period: my portfolio underperforms continuously throughout 2019, while Fedyk’s stays closer to the benchmarks but still lags in absolute terms.
+Low performance spans the entire pre-COVID period: my portfolio underperforms continuously throughout 2019, while Fedyk's stays closer to the benchmarks but still lags in absolute terms.
 
 At the 563-day horizon, both Robinhood portfolios end below the S\&P 500 and the World ETF.
 My portfolio, while showing a stronger post-crash rebound, barely catches up to the S\&P 500 by the end of the sample, and only due to its heavier exposure to post-crash winners.
-Fedyk’s method performs slightly better but remains clearly below the benchmark, reversing the apparent outperformance seen in the stock-only sample.
+Fedyk's method performs slightly better but remains clearly below the benchmark, reversing the apparent outperformance seen in the stock-only sample.
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]
     {../images/returns/comparison_2.png}
-    \caption{Rolling log-returns of Robinhood and market portfolios at four investment horizons (complete sample)}
+    \caption{Rolling log-returns of Robinhood and market portfolios at four investment horizons.}
 \end{figure}
 
 A detailed description of the distributions can be found in table \ref{tab:returns_all}.
@@ -85,14 +80,14 @@ A detailed description of the distributions can be found in table \ref{tab:retur
 
 The distribution of returns across horizons provides further evidence on the differences between the Robinhood portfolios and the benchmarks.
 
-At short horizons (5–30 days), all portfolios are tightly centered around zero, with relatively similar dispersion. 
+At short horizons (5-30 days), all portfolios are tightly centered around zero, with relatively similar dispersion. 
 Both Robinhood portfolios display slightly higher volatility than the S\&P 500 and the World ETF, with standard deviations of approximately 0.045 for five-day returns, compared to about 0.03 for the benchmarks. 
 However, mean returns remain close to zero for all portfolios, and short-term behavior shows limited divergence across methods.
 
 At the 120-day horizon, differences become more evident. 
 While Fedyk's portfolio maintains a positive mean log return of approximately 0.05, my price-based portfolio exhibits a negative mean return of about -0.06. 
 The median is also much worse, at about -0.14 versus -0.02.
-This shift is reflected in the distribution shapes, with my portfolio showing a wider left tail and greater dispersion relative to both Fedyk’s method and the benchmarks.
+This shift is reflected in the distribution shapes, with my portfolio showing a wider left tail and greater dispersion relative to both Fedyk's method and the benchmarks.
 
 At the 563-day horizon, the gap further widens. 
 The price-based portfolio remains centered around negative returns, with a mean log return of approximately -0.04, while the rebalanced portfolio achieves a positive mean return of 0.17. 
@@ -100,7 +95,7 @@ In contrast, the S\&P 500 maintains a strong positive outcome, with a mean log r
 
 Despite the strong rebound observed after the COVID-19 crash, the cumulative performance of the price-based portfolio remains significantly weaker, often with higher standard deviation.
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]
     {../images/distributions/comparison_1.png}
@@ -114,19 +109,19 @@ A detailed description of the distributions can be found in table \ref{tab:retur
 
 Expanding the analysis to include all types of securities slightly alters the distributional patterns compared to the stock-only case.
 
-At short horizons (5–30 days), return distributions remain centered around zero and maintain a similar dispersion across all portfolios. 
+At short horizons (5-30 days), return distributions remain centered around zero and maintain a similar dispersion across all portfolios. 
 Standard deviations are comparable to the stock-only case, around 0.02 for both Robinhood portfolios at the daily level and 0.04 for five-day returns. 
 Mean returns are very close to zero, confirming that short-term dynamics are largely unaffected by the broader sample.
 
 At the 120-day horizon, however, differences become more evident. 
 Both Robinhood portfolios exhibit flatter distributions with thicker left tails compared to the benchmarks. 
-In particular, my price-based portfolio records a negative mean log return of approximately -0.07, while Fedyk’s method also turns slightly negative at around -0.004, unlike in the stock-only case where it remained positive. 
+In particular, my price-based portfolio records a negative mean log return of approximately -0.07, while Fedyk's method also turns slightly negative at around -0.004, unlike in the stock-only case where it remained positive. 
 The S\&P 500 maintains a positive mean return over the same horizon, reinforcing the relative weakness of retail portfolios when more asset types are included.
 
 At the cumulative horizon, the gap becomes substantial. My portfolio shows a strongly left-skewed distribution with a mean log return of approximately -0.10.
-Fedyk’s portfolio, although positive at around 0.087, remains below the S\&P 500, which achieves a mean return close to 0.1. 
+Fedyk's portfolio, although positive at around 0.087, remains below the S\&P 500, which achieves a mean return close to 0.1. 
 The World ETF again displays lower returns, in line with its broader exposure to international markets.
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]
     {../images/distributions/comparison_2.png}
@@ -136,8 +131,8 @@ The World ETF again displays lower returns, in line with its broader exposure to
 Descriptive statistics supporting these findings are reported in Table \ref{tab:returns_all}.
 
 \subsection{Analysis of Short-Term Returns and the Impact of COVID}
-Comparing the daily returns for the whole period available we can already observe distinct behavior in terms of returns and distributions for the market and Robinhood indeces.
-To test whether there are statistically significant differences beteen the mean daily returns of the Robinhood portfolios, the S\&P 500 and the world ETF, I conduct an ANOVA test.
+Comparing the daily returns for the whole period available we can already observe distinct behavior in terms of returns and distributions for the market and Robinhood indices.
+To test whether there are statistically significant differences between the mean daily returns of the Robinhood portfolios, the S\&P 500 and the world ETF, I conduct an ANOVA test.
 The null hypothesis is that all portfolios have equal mean daily returns.
 
 \subsubsection{Covering the Whole Period}
@@ -147,15 +142,15 @@ The ANOVA analysis conducted on these two portfolios, equal to a t-test in this 
 This suggests that at the daily frequency the expected growth rate, i.e. the mean log returns, of the Robinhood portfolios are not statistically different.
 
 
-In terms of standard deviation, the Robinhood portfolios have relatively larger values, around 0.02, while the market indeces hvae values around 0.15. 
-This is consistent with what can be seen from the distributions: retail portfolios have fatter tails while modal returns appear similar across all timeseries.
+In terms of standard deviation, the Robinhood portfolios have relatively larger values, around 0.02, while the market indices have values around 0.15. 
+This is consistent with what can be seen from the distributions: retail portfolios have fatter tails while modal returns appear similar across all time series.
 
 Conducting ANOVA tests on all possible combinations of these four timeseries, none has an acceptable p-value, results are in table \ref{tab:anova_all}.
-However, conducting a Fligner test to assess difference in variances, the Robinhood portfolios show statistically significant differet variances than the market proxies, results are in table \ref{tab:fligner_all}.
+However, conducting a Fligner test to assess the difference in variances, the Robinhood portfolios show statistically significant different variances than the market proxies, results are in table \ref{tab:fligner_all}.
 
 
 Here below the plots of the distributions, while the returns are in table \ref{tab:returns_all}:
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]
     {../images/distributions/st_all.png}
@@ -164,10 +159,10 @@ Here below the plots of the distributions, while the returns are in table \ref{t
 
 
 \subsubsection{Excluding COVID}
-This results on daily returns, however, are probably impacted by the noise of the March 2020 crash. 
+The results on daily returns, however, are probably impacted by the noise of the March 2020 crash. 
 I run the same analysis filtering the dataframe up to February 3rd 2020, the date in which the pandemic was declared in the US.
 
-In this case point estimates for means differ greatly even among Robinhood Portfolios, with the price based approach yielding -0.000328 on average versus Fedyk's 0.000246.
+In this case point estimates for means differ greatly even among Robinhood Portfolios, with the price-based approach yielding -0.000328 on average versus Fedyk's 0.000246.
 Nonetheless, also at this level returns are not statistically significant, results can be found in table \ref{tab:anova_before}.
 
 In terms of standard deviation, the market indices show again clearly a different distribution, with variances being markably lower. 
@@ -183,15 +178,15 @@ Here below the plots of the distributions, while the returns are in table \ref{t
 
 \subsection{Comments}
 Daily returns show a deceptively optimistic view, with the different series having statistically equal log-returns.
-However, the retail portfolios carry systematically higher day-to-day risk, amd this compounds as underperformance at the cumulative level before the pandemic.
+However, the retail portfolios carry systematically higher day-to-day risk, and this compounds as underperformance at the cumulative level before the pandemic.
 
 A one-way ANOVA on daily log returns fails to reject equality of means for any group of series, both including and excluding the pandemic. 
 
-However, looking at the risk dimension, stand deviations differ sharply. 
+However, looking at the risk dimension, standard deviations differ sharply. 
 Fligner-Killeen tests reject homogeneity at any $\alpha$ level whenever a retail series is compared with a market proxy.
 As highlighted earlier, this can be easily seen from the shape of the distributions, with correspondingly fatter tails.
 In log space, larger dispersion automatically lowers long-run growth because every large swing pulls the cumulative sum away from the average trend.
-In other words, retail investors accept more noise than the market but earn no meaurable extra drift in a single day.
+In other words, retail investors accept more noise than the market but earn no measurable extra drift in a single day.
 
 Although ANOVA cannot reject equality between the Robinhood portfolios, the point estimates themselves are not identical (compare table \ref{tab:returns_st_before}).
 The gap in their mean returns, about -0.0006 log points, rapidly cumulates to -0.25 log points. 

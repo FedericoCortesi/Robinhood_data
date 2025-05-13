@@ -5,15 +5,13 @@ Following \cite{Welch2022} and \cite{Fedyk2024}, we aggregate this data on a dai
 
 The sample spans from February 5, 2018, to August 13, 2020, covering 818 days. Note that the dataset includes non-trading days and contains some missing observations.
 
-\begin{quote}
-    \textit{
-        Since the dataset only provides the number of investors per security, we cannot track individual holdings, monetary amounts, or share quantities. 
-        Moreover, buy/sell flows are unobservable; however, we can approximate them using changes in the number of holders.
-    }
-\end{quote}
+\textbf{
+    Since the dataset only provides the number of investors per security, we cannot track individual holdings, monetary amounts, or share quantities. 
+    Moreover, buy/sell flows are unobservable; however, we can approximate them using changes in the number of holders.
+}
 
 We merge this dataset with CRSP to obtain market-level information and later construct a benchmark index. 
-The resulting dataframe contains 7,613 unique securities—substantially more than in \cite{Fedyk2024} and \cite{Welch2022}, who restrict their analysis to U.S. common stocks only. 
+The resulting dataset contains 7,613 unique securities, substantially more than in \cite{Fedyk2024} and \cite{Welch2022}, who restrict their analysis to U.S. common stocks only. 
 Details of the data cleaning procedure are provided in Appendix~\ref{sec:data}.
 
 In terms of security types, common stocks represent 57.3\% of the dataset, while ETFs and other funds account for 26.3\% and 8.7\%, respectively. 
@@ -26,10 +24,10 @@ Market data for each security was retrieved from CRSP\footnote{The Center for Re
 Out of the full universe, 8,099 securities were available in CRSP, as it includes only U.S.-listed assets. 
 
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{../images/old/no_positions_date.png}
-    \caption{Daily count of open Robinhood positions, April 2018–August 2020.}
+    \caption{Daily count of open Robinhood positions, May 2018-August 2020.}
 \end{figure}
 
 The figure above shows the daily count of open positions on Robinhood from April 2018 to mid-2020. 
