@@ -55,7 +55,7 @@ class Analyzer:
         dl_kwargs : dict, default=None
             Dictionary of keyword arguments to pass to the DataLoader.
             
-        return_params : dict, default parameters include:
+        return_params : ReturnParams, default parameters include:
             Dictionary of parameters for calculating returns:
             - horizons : set, default={5,15,30,60,120}
                 Time horizons (in days) for calculating returns.
@@ -77,7 +77,7 @@ class Analyzer:
         This class merges dataframes containing price and popularity data and 
         provides methods for analyzing returns distribution and stochastic dominance.
         """     
-        logger.info(f"{'#' * 30} Analysis Started {'#' * 30}")
+        logger.info(f"{'-' * 30} Analysis Started {'-' * 30}")
         # Safe Enum conversion
         if isinstance(weights_application, str):
             try:
@@ -127,6 +127,38 @@ class Analyzer:
 
         self.df_robinhood_path = parent_dir / self.data_paths["df_robinhood_path"]
         self.images_dir = "../non_code/latex/images"
+
+    def __str__(self):
+        """
+        Return a string representation of the Analyzer object.
+        
+        Returns a formatted string showing the key configuration parameters
+        of this Analyzer instance.
+        """
+        params = [
+            f"Analyzer(weights_application='{self.weights_application.value}'",
+            f"stocks_only={self.stocks_only}",
+            f"include_dividends={self.include_dividends}",
+            f"exclude_rh={self.exclude_rh}",
+            f"compare_tickers={self.compare_tickers})"
+        ]
+        
+        return '\n'.join(params)
+
+    def __repr__(self):
+        """
+        Return a string representation of the Analyzer object that could be used to recreate it.
+        
+        Returns a string that, when executed, would create an equivalent Analyzer instance.
+        """
+        return (f"Analyzer(weights_application='{self.weights_application.value}', "
+                f"stocks_only={self.stocks_only}, "
+                f"include_dividends={self.include_dividends}, "
+                f"exclude_rh={self.exclude_rh}, "
+                f"compare_tickers={self.compare_tickers}, "
+                f"dl_kwargs={getattr(self, 'dl_kwargs', None)}, "
+                f"return_params={repr(self.return_params)})")
+
 
     def _extract_relevant_tickers(self):
         inner_compare = self.compare_tickers.copy()
@@ -197,6 +229,8 @@ class Analyzer:
         # compute gross returns form value_array, it represents the returns of the portfolio
         ret = value_array / value_array.shift(1)
         ret = ret.fillna(1) # because at t=1 the return is 1
+
+        ret = [1 for r in ret] # assume no reinvesting 
 
         # get the returns from the merged df
         div_array = self.df_merged[["divamt", "date", "popularity"]]

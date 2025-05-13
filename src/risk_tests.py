@@ -9,18 +9,21 @@ import matplotlib.pyplot as plt
 
 from typing import Tuple, List
 
-from .utils.helpers import load_factors
+from .utils.helpers import load_factors, date_to_num
 from src.utils.metrics import find_gamma_certainty_equivalent, paramteric_expected_utility_crra, compute_crra_utility, squared_moment
+from config.constants import PROJECT_ROOT
 
 # Setup logger
 import logging
 from .utils.custom_formatter import setup_custom_logger
-logger = setup_custom_logger(__name__, level=logging.INFO)
+logger = setup_custom_logger(__name__, level=logging.DEBUG)
 
+# Import other classes
 from . import Analyzer
+from src.utils.params import ReturnParams
 
 class RiskTests():
-    def __init__(self, analyzer:Analyzer=None, ff_mkt_index:bool=False, mkt_index:str=None):
+    def __init__(self, analyzer:Analyzer=None, ff_mkt_index:bool=False, mkt_index:str=None, portfolio_column:str="rh_portfolio"):
 
         self.analyzer = analyzer
 
@@ -31,6 +34,8 @@ class RiskTests():
             self.mkt_index = mkt_index
 
         self.ff_mkt_index = ff_mkt_index
+
+        self.portfolio_column = portfolio_column
 
         self.factors = load_factors()
         self.factors.index = pd.to_datetime(self.factors.index, format="%Y%m%d")
@@ -46,14 +51,18 @@ class RiskTests():
         ret = (np.exp(ret) -1)*100 # get them in percentage returns
 
         # keep good columns and ensure is datafrme to merge later 
-        self.factors = pd.DataFrame(self.factors[["rf", "xmkt", "pfioret100"]])
+        #self.factors = pd.DataFrame(self.factors[["rf", "xmkt", "pfioret100"]]) # suppressed to use factor in regressions
 
-        cols_to_keep = ["rh_portfolio", self.mkt_index]
+        cols_to_keep = [self.portfolio_column, self.mkt_index]
         cols_to_keep = [
             col for col in cols_to_keep
             if col is not None and col in ret.columns
         ]
-        logger.debug(f"cols to keep: {cols_to_keep}")
+         
+
+        # handle case to use old returns
+        if self.portfolio_column == "rh_portfolio":
+            self.factors = self.factors.drop(columns=["pfioret100"])
 
         self.factors = self.factors.merge(ret[cols_to_keep], left_index=True, right_index=True, how="inner") # merge rh_portfolio
         
@@ -64,18 +73,18 @@ class RiskTests():
         self.factors /= 100 
 
         # take out risk free to have excess returns
-        if "rh_portfolio" in cols_to_keep:
-            self.factors["xr"] = self.factors["rh_portfolio"] - self.factors["rf"] 
+        if self.portfolio_column in cols_to_keep:
+            self.factors["xr"] = self.factors[self.portfolio_column] - self.factors["rf"] 
         
         # handle "market" index
         if self.mkt_index and not self.ff_mkt_index:
             self.factors["xmkt"] = self.factors["mkt"] - self.factors["rf"] # excess returns market
-            self.factors = self.factors[["rh_portfolio", "rf", "mkt", "xr", "xmkt"]]
+            #self.factors = self.factors[[self.portfolio_column, "rf", "mkt", "xr", "xmkt"]] # suppressed to use factor in regressions
         else:
-            self.factors["mkt"] = self.factors["xmkt"] + self.factors["rf"] # excess returns market
-            cols_to_keep = ["rh_portfolio", "rf", "mkt", "xr", "xmkt"]
-            cols_to_keep = [col for col in cols_to_keep if col in self.factors.columns]
-            self.factors = self.factors[cols_to_keep] 
+            self.factors["mkt"] = self.factors["xmkt"] + self.factors["rf"] # normal returns market
+            #cols_to_keep = [self.portfolio_column, "rf", "mkt", "xr", "xmkt"] # suppressed to use factor in regressions
+            #cols_to_keep = [col for col in cols_to_keep if col in self.factors.columns] # suppressed to use factor in regressions
+            #self.factors = self.factors[cols_to_keep] # suppressed to use factor in regressions
 
         return self.factors
     
@@ -161,7 +170,7 @@ class RiskTests():
         # Compute average daily risk-free rate
         bar_rf = ret_f.mean()
 
-        obj    = lambda g: squared_moment(g, rp, bar_rf) # define object to minimize
+        obj    = lambda g: squared_moment(g, rp, ret_f) # define object to minimize
 
         # Minimize it over a sensible interval
         #result = minimize_scalar(squared_moment_local, bounds=(-50, 50), method='bounded')
@@ -486,3 +495,41 @@ class RiskTests():
                 'gamma_estimate': gamma_hat,
                 'error': str(e)
             }
+        
+
+    def run_regressions_factor_models(self, df_returns:pd.DataFrame=None, factors:int=0):
+        """
+        Run factor models on df_returns.
+
+        Parameters:
+        -----------
+            df_returns: optional, dataframe with returns 
+            factors: int, must be 0, 1 or 6
+
+        Returns:
+        ---- 
+        """
+        # import only here because its heavy 
+        import statsmodels.api as sm
+
+        # define df if absent
+        if df_returns is None:
+            df_returns = self.factors
+
+        assert factors in [0, 1, 6], f"Number of factors must be in {[0, 1, 6]}"    
+
+        # ectract regressors col
+        ordered_factors = ['xmkt', 'smb', 'hml', 'rmw', 'cma', 'umd']
+        regressors = ordered_factors[:factors]
+
+        X = df_returns[regressors]
+        y = df_returns["xr"]
+
+        X = sm.add_constant(X)  # this adds the alpha term
+
+        model = sm.OLS(y, X)
+        results = model.fit()
+        print(results.summary())
+
+
+

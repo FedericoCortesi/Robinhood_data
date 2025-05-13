@@ -205,7 +205,7 @@ def find_gamma_certainty_equivalent(array_stocks: np.ndarray, array_benchmark: n
 
 
 
-def compute_crra_utility(returns_array:np.ndarray, gamma:float, confint:bool=False, alpha:float=0.05)->np.ndarray :
+def compute_crra_utility(returns_array:np.ndarray, gamma:float, confint:bool=False, alpha:float=0.05, mean:bool=True)->np.ndarray :
     """
     Computes the crra utility given a certain gross returns array and gamma.
     """
@@ -216,19 +216,24 @@ def compute_crra_utility(returns_array:np.ndarray, gamma:float, confint:bool=Fal
     # definition of CRRA
     else:
         utility_array = (returns_array**(1-gamma)-1)/(1-gamma)
-    
+
     if not confint:
-        return utility_array.mean()
-    
+        if mean:
+            return utility_array.mean()
+        else:
+            return utility_array.values
+
     else:
         ds = sms.DescrStatsW(utility_array)
 
         ci_low, ci_high = ds.tconfint_mean(alpha=alpha)
 
-        return utility_array.mean(), ci_low, ci_high
-    
+        if mean:
+            return utility_array.mean(), ci_low, ci_high
+        else: 
+            return utility_array, ci_low, ci_high
 
-def moment_condition(gamma: float,
+def moment_condition_0(gamma: float,
                      rp: np.ndarray,
                      bar_rf: float) -> float:
     """
@@ -237,13 +242,52 @@ def moment_condition(gamma: float,
     m_t = (1.0 / (1.0 + bar_rf)) * (1.0 + rp) ** (-gamma)
     return (m_t * (1.0 + rp)).mean() - 1.0
 
-def squared_moment(gamma: float,
+
+def moment_condition(gamma: float,
+                     rp: np.ndarray,
+                     rf: np.ndarray) -> float:
+    """
+    Sample analogue of E[ (1/(1+rf_t))*(1+rp_t)^(-gamma)*(1+rp_t) ] - 1.
+    
+    Parameters
+    ----------
+    gamma : float
+        CRRA risk aversion coefficient.
+    rp : np.ndarray
+        Realized excess returns array of shape (T,).
+    rf : np.ndarray
+        Risk-free rates array of shape (T,), corresponding to each return in rp.
+        
+    Returns
+    -------
+    float
+        Sample moment: mean of discount factor times gross return minus one.
+    """
+    if rp.shape != rf.shape:
+        raise ValueError("`rp` and `rf` must have the same shape.")
+        
+    df = 1.0 / (1.0 + rf)
+    m_t = df * (1.0 + rp) ** (-gamma)
+    return np.mean(m_t * (1.0 + rp)) - 1.0
+
+
+
+def squared_moment_0(gamma: float,
                    rp: np.ndarray,
                    bar_rf: float) -> float:
     """
     Square of the moment condition—useful for minimization.
     """
     g = moment_condition(gamma, rp, bar_rf)
+    return g * g    
+
+def squared_moment(gamma: float,
+                   rp: np.ndarray,
+                   rf: np.ndarray) -> float:
+    """
+    Square of the moment condition—useful for minimization.
+    """
+    g = moment_condition(gamma, rp, rf)
     return g * g    
 
 
