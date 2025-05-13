@@ -1,6 +1,7 @@
 import json
 import re
 import pandas as pd
+from datetime import datetime
 
 # Setup logger
 import logging
@@ -60,3 +61,12 @@ def load_factors(filepath="jf-datashare/gabriel-cuevas/data/18_rwarh_d_1.csv")->
         logger.error(f"Invalid JSON format in {filepath}")
         return {}
 
+def date_to_num(date):
+    """
+    Function to convert a date to a number, takes a datetime object as input and returns an integrer
+    """
+    date = str(date)
+    if " 00:00:00" in date:
+        date = date.replace(" 00:00:00", "")
+    date = date.replace("-", "")
+    return int(date)
