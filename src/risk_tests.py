@@ -30,7 +30,17 @@ class RiskTests():
         if mkt_index is None:
             self.mkt_index = self.analyzer.compare_tickers[0] if len(self.analyzer.compare_tickers) > 0 else None # take the first
         else:
-            assert mkt_index in self.analyzer.compare_tickers, f"mkt_index {mkt_index} not found in analyzer's tickers: {self.analyzer.compare_tickers}"
+            # build all possible indeces as market proxies 
+            feasible_tickers = self.analyzer.compare_tickers.copy()
+            logger.debug(f"feasible_tickers: {feasible_tickers}")
+            for t in self.analyzer.compare_tickers:
+                logger.debug(f"self.analyzer.compare_tickers: {self.analyzer.compare_tickers}")
+                for h in self.analyzer.return_params.horizons:
+                    feasible_tickers.append(f"{t}_{h}_return")
+                logger.debug(f"self.return_params.horizons: {self.analyzer.return_params.horizons}")
+                logger.debug(f"feasible_tickers: {feasible_tickers}")
+
+            assert mkt_index in feasible_tickers, f"mkt_index {mkt_index} not found in analyzer's feasible tickers: {feasible_tickers}"
             self.mkt_index = mkt_index
 
         self.ff_mkt_index = ff_mkt_index
@@ -216,7 +226,7 @@ class RiskTests():
                 gammas = np.linspace(lower, upper, 250)
             
             else:
-                assert (bounds[0] <= gamma_hat) and (bounds[1] >= gamma_hat), f"Gamma not in bounds: {bounds}"
+                #assert (bounds[0] <= gamma_hat) and (bounds[1] >= gamma_hat), f"Gamma not in bounds: {bounds}"
                 gammas = np.linspace(bounds[0], bounds[1], 250)
                 
 
@@ -257,12 +267,17 @@ class RiskTests():
                 ax.fill_between(gammas, lo_rh_portfolio, hi_rh_portfolio, color='C0', alpha=0.2)
 
                 # plot market
-                ax.plot(gammas, means_mk,     label='Market',       color='C1')
-                ax.fill_between(gammas, lo_mk, hi_mk,              color='C1', alpha=0.2)
+                ax.plot(gammas, means_mk, label='Market', color='C1')
+                ax.fill_between(gammas, lo_mk, hi_mk, color='C1', alpha=0.2)
 
                 # vertical line for gamma_hat
-                ax.axvline(gamma_hat, color='red', linestyle='--',
-                        label=f'γ* = {gamma_hat:.3f}')
+                if gamma_hat >= bounds[0] and gamma_hat <= bounds[1]:
+                    ax.axvline(gamma_hat, color='red', linestyle='--',
+                            label=f'γ* = {gamma_hat:.3f}')
+
+                # make 0 line thicker
+                ax.axhline(0, color='black', alpha=0.5)
+
 
                 # labels
                 ax.set_xlabel('Gamma')
