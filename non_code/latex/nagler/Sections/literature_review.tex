@@ -1,0 +1,29 @@
+\section{Literature Review}
+
+The literature on retail investor performance has evolved considerably over the past two decades. Early foundational work highlighted persistent underperformance by individual investors, while more recent studies leveraging novel, high-frequency data sources have painted a more nuanced picture—one in which method choice can swing conclusions from “retail crowd outperforms” to “retail crowd underperforms.”
+
+Barber and Odean (2000) provide the canonical starting point. Using account-level brokerage records, they show that individual investors trade excessively, incur higher transaction costs, and exhibit poor timing, leading to underperformance relative to buy-and-hold benchmarks. 
+In their analysis of trading records from a large discount broker, they find that the most active 20\% of investors underperform the market by approximately 4.3 percentage points per year, net of fees. 
+This “trading is hazardous to your wealth” result firmly establishes that behavioral biases—overconfidence, turnover, and attention-driven trading—can overwhelm any potential informational edge among retail participants.
+
+Building on advances in data availability, Welch (2022) and Fedyk (2024) both exploit the Robintrack dataset—a public, hourly snapshot of the number of Robinhood users holding each security—to construct a “Robinhood crowd” portfolio. 
+Welch (2022) introduces two weighting schemes (“dollar” and “share” methods) identical in spirit to those later formalized by Fedyk, and documents that, when one simply applies yesterday's crowd-popularity weights to today's returns, the resulting portfolio generated significant positive alpha over the February 2018-August 2020 sample. 
+The implication is provocative: under a straightforward rebalancing-via-returns approach, retail investors appear to have timed the market successfully, outperforming both the S\&P 500 and global equity benchmarks.
+
+Fedyk (2024) closely follows Welch's methodology—aggregating hourly Robintrack counts into daily weights and applying a one-day lag to avoid look-ahead bias—but restricts attention to U.S. common stocks and extends the analysis to November 2024. 
+She confirms Welch's core finding of positive cumulative returns and documents robustness across factor-adjusted performance measures (e.g., Fama-French alphas). 
+Importantly, Fedyk also compares the “dollar” versus “share” weighting schemes and shows that both yield similar outperformance, suggesting that the apparent alpha is not an artifact of price-level distortions.
+
+Despite these striking results, methodological debates have emerged. 
+Both Welch and Fedyk implement a return-based portfolio construction—effectively rebalancing the index every day to match the crowd's evolving popularity.
+Critics argue this fails to capture the persistence of holdings: a security highly favored for several days but briefly displaced will contribute little to the measured performance when its price subsequently spikes. 
+In other words, rebalanced returns reflect only “snapshots” of popularity, not the cumulative wealth path experienced by a held position.
+
+The paper at hand addresses this gap by proposing a price-based valuation approach, wherein yesterday's popularity weights are applied to end-of-day prices and the resulting portfolio value is carried forward. 
+This method preserves path dependency: once a security enters the portfolio, its subsequent price movements affect the portfolio until its popularity declines. 
+Preliminary comparisons show that, under this price-based scheme, the Robinhood crowd barely catches up to passive benchmarks over long horizons and often lags in pre-COVID drawdowns—reversing the apparent outperformance documented by Welch and Fedyk .
+
+Together, these studies illustrate how the choice of weighting and return aggregation methodology can dramatically alter the story of retail performance. 
+Barber and Odean (2000) emphasize the costs of overtrading and behavioral biases; Welch (2022) and Fedyk (2024) harness novel, public “big data” to resurrect a narrative of retail outperformance under a rebalancing-via-returns lens; and the current work tempers those claims by embedding persistence in portfolio construction, offering a more behaviorally realistic measure of the wealth trajectory experienced by Robinhood users.
+
+This evolving debate underscores two key points for the broader finance literature: first, retail investor performance is highly sensitive to measurement design; and second, understanding the behavioral dynamics—attention spikes, herding, and persistence—is critical to accurately assessing whether “the wisdom of the crowd” truly exists or is merely an artifact of how we frame and compute returns.

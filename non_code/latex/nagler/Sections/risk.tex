@@ -22,19 +22,13 @@ By computing the expected utility of both the Robinhood and benchmark portfolios
 I identify the cutoff $\gamma^*$ such that a representative CRRA investor is indifferent between the two.
 This delivers a concise, parametric summary of how risk preferences may shape portfolio choice.
 
+Then, I estimate the welfare loss derived from investing in the Robinhood portfolio rather than (i)  not investing or (ii) investing in the market portfolio.
+By comparing the certainty-equivalent wealth under each strategy for a CRRA investor, with risk aversion calibrated inside a feasible range,
+I obtain dollar-denominated welfare losses that capture the risk-return profile taken by Robinhood investors.
+
 However, this method cannot deliver precise estimates given the limited sample size. 
-I therefore employ another method to directly estimate the risk aversion $\gamma$, 
-following the Generalized Method of Moments (GMM) framework introduced by \cite{hansen1982generalized} to find the risk aversion that satisfies the intertemporal Euler Condition, aspresented also in \cite{Cochrane2005}.
-
-\begin{equation}
-    \mathbb{E}\left[ \beta \frac{U^\prime(c_{t+1})}{U^\prime(c_{t})}R_{t+1} \right] = 1\
-    \label{euler_def}
-\end{equation}  
-where $R_{t+1}$ is the realized gross return on the asset at time $t+1$, $\beta$ is discount factor, and $U^\prime(\cdot)$ is the derivative of the utility function..
-
-%Second, I apply first- and second-order stochastic dominance tests (FSD and SSD) to the same return distributions.
-%This allows to avoid unnecesary, though conventional, assumptions regarding functional forms or parameterisation.
-%Log-Normality might well not be respected for different distributions, stochastic dominance tests take into account the shape of empirical CDFs to answer stronger questions. 
+I therefore employ another method to estimate the risk aversion $\gamma$ from the percentage of wealth invested in the risky asset ($\alpha$), 
+precise numbers about the wealth of Robinhood investors are not available, I therefore plot the implied risk aversion over a grid $\alpha$ and compare it to alternative portfolios.
 
 \subsection{Expected Utility and Cutoff}
 \subsubsection{Sampling Variability and Finite-Sample Limitations}
@@ -54,6 +48,7 @@ where $U_p(\cdot)$ is the utility of the Robinhood portfolio, while $U_m(\cdot)$
 In practice, we apply CRRA utility function (\ref{CRRA}) to each gross return observation and then takes the sample average.
 The resulting mean serves as the expected utility implied by the investor's revealed choices over the sample period.
 Wealth at time $t$ is equal to gross returns, assuming the initial wealth $W$ to be equal to one without loss of generality.
+
 
 The main problem related to this approach is inherent to the sample we apply it to, having only 539 observations and inclusion of extreme events such as the COVID crash. 
 These factors inflate the sample variability of our mean-utility estimates, so much that regardless of whether we use daily returns, various rolling-window horizons, or subperiods, the resulting confidence intervals remain prohibitively wide.
@@ -113,55 +108,61 @@ This implies that weakly risk-averse and risk-loving investors would have a grea
 However, if we limit the analysis to the pre-COVID period, the utility of the World ETF strictly dominates for each $\gamma\geq-15.813$, 
 highlighting that the former result might indeed be a result of the volatility experienced in early 2020.  
 
-\subsection{Euler Condition Approach to CRRA Parameter Estimation}
-\subsubsection{Bootstrap Methodology for GMM-Based $\gamma$ Estimation}
-To address the limitations of our cutoff $\gamma$ approach, we turn to the canonical Euler-equation estimator of risk aversion as presented in Chapter 1 of \cite{Cochrane2005}.  
-In that framework, the agent's first-order condition for optimal intertemporal consumption and portfolio choice requires \ref{euler_def} to hold.
-
-Rewriting equation \ref{euler_def} and assuming CRRA utility we arrive at the following condition\footnote{Derivation:
-$U^\prime(x)=x^{-\gamma}$, hence $\frac{U^\prime(c_{t+1})}{U^\prime(c_{t})}=\left(\frac{c_{t+1}}{c_t}\right)^{-\gamma}$}:
+\subsection{Implied Risk Aversion Approach}
+\subsubsection{Deriving the Condition}
+To address the limitations of our cutoff $\gamma$ approach, we turn to the canonical condition of maximizing expected utility by changing the share of wealth invested in the risky asset.  
+In this framework, the agent decides to invest an amount $\alpha$ in the risky asset, his final wealth is therefore:
 \begin{equation}
-    \mathbb{E}\left[ \beta \left( \frac{c_{t+1}}{c_{t}} \right)^{-\gamma} R_{t+1} \right] = 1
-\end{equation}  
+    W_1 = (1-\alpha) W_0 R_f  + \alpha W_0 \tilde R 
+    \label{risky_portfolio}
+\end{equation}
+where $W_0$ is the initial wealth, which we can assume w.l.o.g equal to 1, $R_f$ is the gross return of the risk free asset and $\tilde R$ is the random variable that expresses the returns in the risky asset.
 
-Then, using gross portfolio returns as a proxy of consumption growth and letting $\beta = \frac{1}{1+\bar{r_f}}$ we derive the following GMM moment condition:
+Defining $r=\tilde R - R_f$ we can approximate the CRRA utility of \ref{risky_portfolio} with a second-order taylor expansion around $R_f$:
 \begin{equation}
-    g(\gamma) = \mathbb{E} \left[ \frac{R_{t+1}^{-\gamma}}{1+\bar{r}_f}  R_{t+1} - 1\right] = 0
-    \label{gmm_condition}
-\end{equation}  
+    \mathbb{E}[U(W_1)] \approx R_f^{-\gamma} [\alpha \mathbb{E}[r] - \frac{\gamma}{2}\alpha^2\mathbb{E}[r^2]]
+\end{equation} 
 
-I then use a root-solving algorithm to find the $\hat\gamma$ that satisfies equation \ref{gmm_condition}. 
+The investor chooses its portfolio to maximize the expected utility:
+\begin{equation}
+    \max_{0 \,\le\, \alpha \,\le\, 1}\; \mathbb{E}[U(W_1)]
+    \;\approx\;
+    \max_{0 \,\le\, \alpha \,\le\, 1}\;
+    R_f^{-\gamma}\Bigl[\alpha\,\mathbb{E}[r]\;-\;\tfrac{\gamma}{2}\,\alpha^2\,\mathbb{E}[r^2]\Bigr]
+\end{equation}
 
-\paragraph{Bootstrap Confidence Intervals.}
-The GMM estimator described above yields a single point estimate $\hat\gamma$, but does not indicate its sampling precision.  
-To quantify uncertainty, we apply a nonparametric bootstrap: we repeatedly resample our $T$ return observations (with replacement), re-solve the GMM moment condition in each replicate, and record the resulting $\hat\gamma^{(b)}$ values.  
-The empirical distribution of $\{\hat\gamma^{(b)}\}_{b=1}^B$ then provides a straightforward 95\% confidence interval for $\gamma$.  
-This approach requires no additional distributional assumptions and directly reflects the finite-sample variability of our risk-aversion estimate.
+which yields the following equation\footnote{
+    Derivation:
+    $\text{FOC:}\quad
+    \frac{\partial}{\partial \alpha}\Bigl\{R_f^{-\gamma}[\alpha\,\mathbb{E}[r]-\tfrac{\gamma}{2}\alpha^2\mathbb{E}[r^2]]\Bigr\}
+    =
+    R_f^{-\gamma}\bigl(\mathbb{E}[r]-\gamma\,\alpha\,\mathbb{E}[r^2]\bigr)
+    \;=\;0$}:
+\begin{equation}
+    \alpha^*=
+    \frac{\mathbb{E}[r]}{\gamma\,\mathbb{E}[r^2]}
+\end{equation}
+
+where $\mathbb{E}[r]=\mu-R_f$ and $\mathbb{E}[r^2]=\sigma^2+(\mu-R_f)^2$. 
+Since returns are small, $(\mu-R_f)^2\ll\sigma^2$. We derive the following:
+\begin{equation}
+    \gamma^* = \frac{\mu-R_f}{\alpha \sigma^2}
+    \label{gamma_star}
+\end{equation}
+
+In our case, both $\alpha$ and $\gamma$ are unknown. 
+The variable of interest is $\gamma$, we can therefore use \ref{gamma_star} to compute it for every $\alpha$ in $[0,1]$. 
+
 
 \subsubsection{Empirical Estimates and Interpretation}
 \label{sec:gamma_estimates}
-Before describing the results a necessary premise has to be stated.
-A key condition for the validity of the nonparametric bootstrap is that the observations be independent and identically distributed (i.i.d.).  
-In particular, resampling "with replacement" implicitly treats each data point as a separate draw from the same underlying distribution.  
-If the series exhibits serial dependence, as it would be if we used the rolling returns defined in earlier sections, then the standard bootstrap will underestimate sampling variability.  
-To avoid this issue we resample the data on weekly and monthly frequencies to estimate risk aversion on different timeframes.
+Since we have limited $\alpha$ to be in $[0,1]$ and $\sigma^2 \geq 0$, the implied risk aversion can be negative only if the mean excess returns are negative.
 
-Table \ref{tab:gamma_all} reports our GMM estimates of the CRRA coefficient $\hat\gamma$ alongside 95\% confidence intervals for both the portfolio built on prices (labelled "Mine") and the Fedyk benchmark.  
-A few key observations emerge.
-At daily and weekly horizons, every point estimate of $\hat\gamma$ is not only strictly positive but also bounded away from zero by its confidence interval.  
-This confirms that, under both specifications, the representative investor implied by the Euler-equation GMM is unequivocally risk averse over high-frequency returns.
+Another relevant point that should be discussed is the choice of not using rolling returns. 
+Although they provide a good proxy for assessing the typical return over different horizons and across secruties, 
+these return series suffer from autocorellation by construction, implying a very small variance especially at longer horizons.
+Therefore, the risk aversion estimates provided by \ref{gamma_star} are unreliable and orders of magnitude greater than acceptable values in asset pricing.
+For this reason, we focus or attention on daily, weekly, monthly and three-month returns starting from the first day in the sample. This will avoid the problem with autocorrelation and provide interpretable and useful estimates over different horizons.
 
-Moving to monthly returns, the confidence bands widen substantially, now crossing zero, due to the much smaller number of non-overlapping observations.  
-While the point estimates remain positive, their CIs reflect that, with only \~18 monthly data points, we lack statistical power to reject mild risk neutrality at conventional levels.
-
-Across all horizons, the "Fedyk" market benchmark yields slightly higher $\hat\gamma$ values than our custom portfolio.  
-This suggests that, to satisfy the Euler condition, a representative investor choosing the market must be marginally more risk averse than one choosing the alternative strategy, perhaps compensating for lower volatility or different return skewness.
-
-The strictly positive daily and weekly estimates imply a genuine aversion to risk in the retail investor's revealed preferences.  
-In practical terms, these investors require compensation for variance in returns and would, under a fully rational CRRA framework, tilt away from high-variance holdings unless expected excess returns are sufficient.
-
-These findings underscore that the Euler-GMM approach delivers clear, statistically significant evidence of risk aversion at the daily and weekly horizons—where our sample is large enough to pin down a strictly positive $\gamma$.  
-It is precisely in these shorter-term windows that we can say with confidence that retail investors reveal genuine aversion to risk.  
-As the horizon lengthens and observations dwindle, however, the resulting estimates become too imprecise to draw firm conclusions.
 
 
