@@ -23,24 +23,17 @@ from . import Analyzer
 from src.utils.params import ReturnParams
 
 class RiskTests():
-    def __init__(self, analyzer:Analyzer=None, ff_mkt_index:bool=False, mkt_index:str=None, portfolio_column:str="rh_portfolio"):
+    def __init__(self, analyzer:Analyzer=None, ff_mkt_index:bool=False, mkt_index:List[str]=None, portfolio_column:str="rh_portfolio"):
 
         self.analyzer = analyzer
 
         if mkt_index is None:
             self.mkt_index = self.analyzer.compare_tickers[0] if len(self.analyzer.compare_tickers) > 0 else None # take the first
         else:
-            # build all possible indeces as market proxies 
-            feasible_tickers = self.analyzer.compare_tickers.copy()
-            logger.debug(f"feasible_tickers: {feasible_tickers}")
-            for t in self.analyzer.compare_tickers:
-                logger.debug(f"self.analyzer.compare_tickers: {self.analyzer.compare_tickers}")
-                for h in self.analyzer.return_params.horizons:
-                    feasible_tickers.append(f"{t}_{h}_return")
-                logger.debug(f"self.return_params.horizons: {self.analyzer.return_params.horizons}")
-                logger.debug(f"feasible_tickers: {feasible_tickers}")
-
-            assert mkt_index in feasible_tickers, f"mkt_index {mkt_index} not found in analyzer's feasible tickers: {feasible_tickers}"
+            feasible_tickers = self._build_feasbile_mkt_indeces()
+            
+            err_message = f"mkt_index {mkt_index} not found in analyzer's feasible tickers: {feasible_tickers}"
+            assert mkt_index in feasible_tickers, err_message  
             self.mkt_index = mkt_index
 
         self.ff_mkt_index = ff_mkt_index
@@ -53,6 +46,23 @@ class RiskTests():
         self._build_daily_factors()
 
         pass
+
+    def _build_feasbile_mkt_indeces(self):
+
+        # build all possible indeces as market proxies 
+        feasible_tickers = self.analyzer.compare_tickers.copy()
+        logger.debug(f"feasible_tickers: {feasible_tickers}")
+        # Iterate over tickers
+        for t in self.analyzer.compare_tickers:
+            logger.debug(f"self.analyzer.compare_tickers: {self.analyzer.compare_tickers}")
+            # replicate the rolling horizon nomenclature
+            for h in self.analyzer.return_params.horizons:
+                feasible_tickers.append(f"{t}_{h}_return")
+            logger.debug(f"self.return_params.horizons: {self.analyzer.return_params.horizons}")
+            logger.debug(f"feasible_tickers: {feasible_tickers}")
+        
+        return feasible_tickers
+
 
     def _build_daily_factors(self):
 
@@ -89,12 +99,8 @@ class RiskTests():
         # handle "market" index
         if self.mkt_index and not self.ff_mkt_index:
             self.factors["xmkt"] = self.factors["mkt"] - self.factors["rf"] # excess returns market
-            #self.factors = self.factors[[self.portfolio_column, "rf", "mkt", "xr", "xmkt"]] # suppressed to use factor in regressions
         else:
             self.factors["mkt"] = self.factors["xmkt"] + self.factors["rf"] # normal returns market
-            #cols_to_keep = [self.portfolio_column, "rf", "mkt", "xr", "xmkt"] # suppressed to use factor in regressions
-            #cols_to_keep = [col for col in cols_to_keep if col in self.factors.columns] # suppressed to use factor in regressions
-            #self.factors = self.factors[cols_to_keep] # suppressed to use factor in regressions
 
         return self.factors
     
