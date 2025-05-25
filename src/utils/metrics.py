@@ -77,53 +77,6 @@ def log_ma_returns(
     return returns, horizons
 
 
-def compute_crra_gamma_fourth_moment(returns: np.ndarray) -> float:
-    """
-    Estimates the risk aversion coefficient (gamma) in a CRRA utility function
-    using a higher-order Taylor approximation of expected utility.
-
-    Parameters:
-    - returns: np.ndarray of portfolio returns (gross or net)
-
-    Returns:
-    - Estimated gamma that maximizes expected utility
-    """
-    # cleam array from nans
-    returns = returns[~np.isnan(returns)]
-
-    # Compute empirical moments
-    mu = np.mean(returns)
-    sigma2 = np.var(returns, ddof=1)
-    mu3 = skew(returns, bias=False) * (sigma2 ** 1.5)
-    mu4 = kurtosis(returns, bias=False, fisher=False) * (sigma2 ** 2)  # normal kurt = 3
-
-    def expected_utility(gamma: float) -> float:
-        """
-        Approximated expected utility under CRRA preferences with 4th-order Taylor expansion.
-        """
-        if gamma == 1:
-            # Log utility case
-            return np.mean(np.log(returns))
-        
-        term1 = 1 / (1 - gamma)
-        term2 = -0.5 * gamma * (gamma + 1) * sigma2 / mu**2
-        term3 = (1/6) * gamma * (gamma + 1) * (gamma + 2) * mu3 / mu**3
-        term4 = - (1/24) * gamma * (gamma + 1) * (gamma + 2) * (gamma + 3) * mu4 / mu**4
-        
-        utility = mu**(1 - gamma) * (term1 + term2 + term3 + term4)
-        logger.debug(f"gamma: {gamma} | utility: {utility}")
-        return utility
-
-    # Objective: negative expected utility (since we minimize)
-    objective = lambda gamma: -expected_utility(gamma)
-
-    # Optimize gamma in a reasonable range (e.g., 0.01 to 15)
-    result = minimize_scalar(objective, bounds=(-10, 10), method='bounded')
-    if result.success:
-        logger.debug("success")
-
-    return result.x if result.success else np.nan
-
 def compute_crra_gamma(array:np.ndarray)->float:
     """
     Given the inputs it estimates the gamma of a CRRA utility function.
@@ -182,7 +135,7 @@ def error_ce(gamma:float, array_stocks:np.ndarray, array_benchmark:np.ndarray, p
     return error
 
 
-def find_gamma_certainty_equivalent(array_stocks: np.ndarray, array_benchmark: np.ndarray, parametric:bool=True):
+def find_gamma_certainty_equivalent_cutoff(array_stocks: np.ndarray, array_benchmark: np.ndarray, parametric:bool=True):
     result = minimize(
         error_ce,
         x0=np.array([1.01]),  # initial guess for gamma
@@ -233,17 +186,8 @@ def compute_crra_utility(returns_array:np.ndarray, gamma:float, confint:bool=Fal
         else: 
             return utility_array, ci_low, ci_high
 
-def moment_condition_0(gamma: float,
-                     rp: np.ndarray,
-                     bar_rf: float) -> float:
-    """
-    Sample analogue of E[ (1/(1+bar_rf))*(1+rp)^(-gamma)*(1+rp) ] - 1.
-    """
-    m_t = (1.0 / (1.0 + bar_rf)) * (1.0 + rp) ** (-gamma)
-    return (m_t * (1.0 + rp)).mean() - 1.0
 
-
-def moment_condition(gamma: float,
+def moment_condition_gmm(gamma: float,
                      rp: np.ndarray,
                      rf: np.ndarray) -> float:
     """
@@ -272,23 +216,26 @@ def moment_condition(gamma: float,
 
 
 
-def squared_moment_0(gamma: float,
-                   rp: np.ndarray,
-                   bar_rf: float) -> float:
-    """
-    Square of the moment condition—useful for minimization.
-    """
-    g = moment_condition(gamma, rp, bar_rf)
-    return g * g    
-
 def squared_moment(gamma: float,
                    rp: np.ndarray,
                    rf: np.ndarray) -> float:
     """
     Square of the moment condition—useful for minimization.
     """
-    g = moment_condition(gamma, rp, rf)
+    g = moment_condition_gmm(gamma, rp, rf)
     return g * g    
+
+
+def gamma_closed_form(col:np.ndarray, alpha:float)-> float:
+    """
+    Computes the implied sample CRRA risk aversion from an array of simple returns using second order taylor approximation.
+    """
+    mu = col.mean()
+    s2 = col.var()
+
+
+    gamma = mu/(alpha*s2)
+    return gamma
 
 
 def test_first_order_stochastic_dominance(series_a:pd.Series, series_b:pd.Series):

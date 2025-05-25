@@ -1,15 +1,38 @@
 \begin{thebibliography}{}
 
+\bibitem[Ardia et~al., 2023]{ardia2023fastfurioushighfrequencyanalysis}
+Ardia, D., Aymard, C., and Cenesizoglu, T. (2023).
+\newblock Fast and furious: A high-frequency analysis of robinhood users' trading behavior.
+
+\bibitem[Barber et~al., 2021]{barber2021robinhood}
+Barber, B.~M., Huang, X., Odean, T., and Schwarz, C. (2021).
+\newblock Attention induced trading and returns: Evidence from robinhood users.
+\newblock {\em SSRN Electronic Journal}.
+
 \bibitem[Barber and Odean, 2000]{BarberOdean2000}
 Barber, B.~M. and Odean, T. (2000).
 \newblock Trading is hazardous to your wealth: The common stock investment performance of individual investors.
 \newblock {\em The Journal of Finance}, 55(2):773--806.
+
+\bibitem[Da et~al., 2009]{zhi2009}
+Da, Z., Engelberg, J., and Gao, P. (2009).
+\newblock In search of attention.
+\newblock {\em The Journal of Finance}, 66.
 
 \bibitem[Fedyk, 2024]{Fedyk2024}
 Fedyk, V. (2024).
 \newblock This time is different: Investing in the age of robinhood.
 \newblock Working paper, Arizona State University.
 \newblock Version dated November 2024. Check author's website or SSRN for latest version.
+
+\bibitem[Grinblatt and Keloharju, 2001]{Grinblatt2001}
+Grinblatt, M. and Keloharju, M. (2001).
+\newblock What makes investors trade?
+\newblock {\em The Journal of Finance}, 56(2):589--616.
+
+\bibitem[Semenova and Winkler, 2023]{semenova2023socialcontagionassetprices}
+Semenova, V. and Winkler, J. (2023).
+\newblock Social contagion and asset prices: Reddit's self-organised bull runs.
 
 \bibitem[Welch, 2022]{Welch2022}
 Welch, I. (2022).

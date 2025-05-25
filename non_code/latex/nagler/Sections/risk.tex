@@ -162,7 +162,14 @@ Another relevant point that should be discussed is the choice of not using rolli
 Although they provide a good proxy for assessing the typical return over different horizons and across secruties, 
 these return series suffer from autocorellation by construction, implying a very small variance especially at longer horizons.
 Therefore, the risk aversion estimates provided by \ref{gamma_star} are unreliable and orders of magnitude greater than acceptable values in asset pricing.
-For this reason, we focus or attention on daily, weekly, monthly and three-month returns starting from the first day in the sample. This will avoid the problem with autocorrelation and provide interpretable and useful estimates over different horizons.
+For this reason, we focus or attention on daily, weekly, monthly and bi-monthly returns starting from the first day in the sample. This will avoid the problem with autocorrelation and provide interpretable and useful estimates over different horizons.
 
 
+In table \ref{tab:gamma_implied} we report the implied share invested in the risky asset given a feasible upper and lower bound for investor's risk aversion, namely $\gamma=2$ and $\gamma=5$,
+across all horizons.
+As expected, $\alpha$ falls in a hyperbolic fashion, since \ref{gamma_star} implies $\alpha \propto \frac{1}{\gamma}$.
 
+Across all four holding-period horizons and securities, lower risk aversion implies substantially higher optimal equity weights ($\alpha^*$) tha higher risk aversion.
+Comparing across strategies, the S\&P 500 series has the largest implied shares at $\gamma=2$, rising from 0.766 at one day to 0.890 at five days before settling at 0.708 by sixty days, while its $\gamma=5$ allocations remain above both Robinhood strategies throughout. 
+The World ETF's position at the bottom of the table highlights its lower excess-return profile: even at the longest horizon its $\gamma=2$ weight of 0.328 barely matches the $\gamma=5$ allocation to the Robinhood portfolios. 
+Between the two Robinhood constructions, Fedyk is uniformly more aggressive than Mine, its $\gamma=2$ allocations exceed Mine's by roughly 10-25 percentage points at every horizon, reflecting Fedyk's higher expected excess return per unit variance.

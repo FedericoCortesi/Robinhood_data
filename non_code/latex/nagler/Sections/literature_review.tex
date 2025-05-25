@@ -1,29 +1,50 @@
 \section{Literature Review}
 
-The literature on retail investor performance has evolved considerably over the past two decades. Early foundational work highlighted persistent underperformance by individual investors, while more recent studies leveraging novel, high-frequency data sources have painted a more nuanced picture—one in which method choice can swing conclusions from “retail crowd outperforms” to “retail crowd underperforms.”
+The literature on retail investor performance has evolved considerably over the past two decades. 
+Early foundational work highlighted persistent underperformance by individual investors, while more recent studies leveraging novel, high-frequency data sources have painted a more nuanced picture—one in which method choice can swing conclusions from "retail crowd outperforms" to "retail crowd underperforms."
+This paper introduces a novel approach in studying directly investor performance, while drawing insights on the risk aversion to assess the relaibility of the collected data and possible behavioral biases.
 
-Barber and Odean (2000) provide the canonical starting point. Using account-level brokerage records, they show that individual investors trade excessively, incur higher transaction costs, and exhibit poor timing, leading to underperformance relative to buy-and-hold benchmarks. 
-In their analysis of trading records from a large discount broker, they find that the most active 20\% of investors underperform the market by approximately 4.3 percentage points per year, net of fees. 
-This “trading is hazardous to your wealth” result firmly establishes that behavioral biases—overconfidence, turnover, and attention-driven trading—can overwhelm any potential informational edge among retail participants.
+We proceed in analyzing first overtrading and behavioral biases. 
+\cite{BarberOdean2000}  provide the canonical starting point. Using account-level brokerage records, they show that individual investors engage in trading with excessive frequencey, incurring higher transaction costs, 
+exhibiting poor timing. This ultimately leads to underperformance relative to buy-and-hold benchmarks.
+The main message of their study is in the title of the paper itself, "Trading Is Hazardous to Your Wealth".  
+In their analysis of individual trading accounts from an important broker, they find that the most active accounts underperform the market by approximately 6.5\% per year, net of fees. 
+This result firmly establishes that behavioral biases such as overconfidence, turnover, and attention-driven trading harm returns of retail participants.
+Moreover, \cite{Grinblatt2001} use Finnish account-level data, documenting several behavioral biases in  their trading patterns.
+They show evidence of investors being reluctant to realize losses and that hat trading intensity rises following past returns and when stocks reach monthly highs or lows.
 
-Building on advances in data availability, Welch (2022) and Fedyk (2024) both exploit the Robintrack dataset—a public, hourly snapshot of the number of Robinhood users holding each security—to construct a “Robinhood crowd” portfolio. 
-Welch (2022) introduces two weighting schemes (“dollar” and “share” methods) identical in spirit to those later formalized by Fedyk, and documents that, when one simply applies yesterday's crowd-popularity weights to today's returns, the resulting portfolio generated significant positive alpha over the February 2018-August 2020 sample. 
-The implication is provocative: under a straightforward rebalancing-via-returns approach, retail investors appear to have timed the market successfully, outperforming both the S\&P 500 and global equity benchmarks.
+Building on advances in data availability, \cite{Welch2022} and \cite{Fedyk2024} both exploit the Robintrack dataset to construct a "Robinhood crowd" portfolio, 
+althoug focusing only on U.S. common stocks.
+\cite{Welch2022} introduces two weighting schemes identical to those later used by Fedyk, and documents that, when building a portfolio with yesterday's crowd-popularity weights to today's returns, the resulting performance has significant positive alpha over the February 2018-August 2020 sample. 
+The aggregate Robinhood portfolio earned an average six-factor daily alpha of 6.5 basis points.
+Remarkably, retail investors appear to have timed the market successfully, outperforming a U.S. stock index while achieving similar drawdowns.
 
-Fedyk (2024) closely follows Welch's methodology—aggregating hourly Robintrack counts into daily weights and applying a one-day lag to avoid look-ahead bias—but restricts attention to U.S. common stocks and extends the analysis to November 2024. 
-She confirms Welch's core finding of positive cumulative returns and documents robustness across factor-adjusted performance measures (e.g., Fama-French alphas). 
-Importantly, Fedyk also compares the “dollar” versus “share” weighting schemes and shows that both yield similar outperformance, suggesting that the apparent alpha is not an artifact of price-level distortions.
+\cite{Fedyk2024} closely follows Welch's methodology, aggregating hourly Robintrack counts into daily weights and applying a one-day lag to avoid look-ahead bias. 
+She confirms Welch's core finding of very high positive returns and documents robustness across factor models. 
+Importantly, Fedyk also compares the "dollar" versus "share" weighting schemes and shows that both yield similar outperformance.
+The author also decomposes the returns through three behavioral channels.
+A "buy-the-dip" effect is particularly pronounced in large-cap stocks, showing positive excessive returns in the very-short terms.
+Robinhood investors also show more activity around announcements and analyst recommendation revisions,
+and attention spilloveers driven by WallStreetBets sentiment. 
 
-Despite these striking results, methodological debates have emerged. 
-Both Welch and Fedyk implement a return-based portfolio construction—effectively rebalancing the index every day to match the crowd's evolving popularity.
-Critics argue this fails to capture the persistence of holdings: a security highly favored for several days but briefly displaced will contribute little to the measured performance when its price subsequently spikes. 
-In other words, rebalanced returns reflect only “snapshots” of popularity, not the cumulative wealth path experienced by a held position.
+\cite{ardia2023fastfurioushighfrequencyanalysis} leverage higher frequency data to reveal that Robinhood users exhibit a high-frequency, contrarian trading style:
+Robinhood investors disproportionally buy big losers within an hour of extreme negative returns and show higher sensitivity to overnight moves.
 
-The paper at hand addresses this gap by proposing a price-based valuation approach, wherein yesterday's popularity weights are applied to end-of-day prices and the resulting portfolio value is carried forward. 
-This method preserves path dependency: once a security enters the portfolio, its subsequent price movements affect the portfolio until its popularity declines. 
-Preliminary comparisons show that, under this price-based scheme, the Robinhood crowd barely catches up to passive benchmarks over long horizons and often lags in pre-COVID drawdowns—reversing the apparent outperformance documented by Welch and Fedyk .
+The literature in behavioral finance highlights the importance of limited attention and the importance of information.
+\cite{barber2021robinhood} also make use of the robintrack dataset to show that Robinhood users engage in extreme attention-induced herding episodes.
+Notably, these episodes are followed by large negative returns.
+They document that this herding behavior is driven by Robinhood's "Top Mover" interface, highlighting the importance of gameification in shaping investors preferences. 
+\cite{zhi2009} show that increases in the Google Search Volume Index for a given ticker are correlated with investing activity of retial investors.
+In addition to this, increased retail attention can explain the long run underperformance of IPO stocks.
+Beyond raw attention effects, interface design and social media contagion further shape retail behavior.
+\cite{semenova2023socialcontagionassetprices} use Reddit's WallStreetBets discussions to show that peer-driven cascades amplify price momentum and reversals,
+as traders coordinate through social network to drive short-term bubbles.
 
-Together, these studies illustrate how the choice of weighting and return aggregation methodology can dramatically alter the story of retail performance. 
-Barber and Odean (2000) emphasize the costs of overtrading and behavioral biases; Welch (2022) and Fedyk (2024) harness novel, public “big data” to resurrect a narrative of retail outperformance under a rebalancing-via-returns lens; and the current work tempers those claims by embedding persistence in portfolio construction, offering a more behaviorally realistic measure of the wealth trajectory experienced by Robinhood users.
-
-This evolving debate underscores two key points for the broader finance literature: first, retail investor performance is highly sensitive to measurement design; and second, understanding the behavioral dynamics—attention spikes, herding, and persistence—is critical to accurately assessing whether “the wisdom of the crowd” truly exists or is merely an artifact of how we frame and compute returns.
+%%%%%
+In sum, the existing literature vividly illustrates that retail-investor performance hinges critically on both measurement design and behavioral dynamics
+Yet, a cohesive framework that emebeds risk aversion considerations remains absent.
+This paper fills the gap by evaluating the performance of retail investors not only through risk-adjusted and raw returns but also 
+through CRRA utility estimation, allowing us to compute welfare losses retail investors incur when behavioral biases misalign their portfolios.
+Stochastic dominance tests are also presented, supporting a less beenvolent view of Robinhood investors and raising a question of rationality.
+In doing so, we provide a cohesive assesment of behavioral drivers of returns and risk aversion implied by revealed preferences,
+offering a more structurally consistent and behaviorally meaningful evaluation of whether and how "the wisdom of the crows" truly materializes.

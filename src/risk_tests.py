@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from typing import Tuple, List
 
 from .utils.helpers import load_factors, date_to_num
-from src.utils.metrics import find_gamma_certainty_equivalent, paramteric_expected_utility_crra, compute_crra_utility, squared_moment
+from src.utils.metrics import find_gamma_certainty_equivalent_cutoff, paramteric_expected_utility_crra, compute_crra_utility, squared_moment
 from config.constants import PROJECT_ROOT
 
 # Setup logger
@@ -212,7 +212,7 @@ class RiskTests():
 
 
         # keep the scalar returned by the CE condition
-        gamma_hat = find_gamma_certainty_equivalent(df["xr"].dropna(),
+        gamma_hat = find_gamma_certainty_equivalent_cutoff(df["xr"].dropna(),
                                                     df[mkt].dropna(),
                                                     parametric=parametric)
 

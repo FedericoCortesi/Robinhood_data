@@ -7,7 +7,7 @@
 \caption{Descriptive Statistics for Daily and Rolling Returns
 \newline \footnotesize{\textit{Note: Returns accounting only for investments in Stocks.}}}
 \begin{adjustbox}{width=\textwidth}
-    \begin{tabular}{@{}lllllllll@{}}
+    \begin{tabular}{@{}l|llllllll@{}}
     \toprule
     \multicolumn{1}{r}{\textbf{}}       & \multicolumn{1}{r}{\textbf{count}} & \multicolumn{1}{r}{\textbf{mean}} & \multicolumn{1}{r}{\textbf{std}} & \multicolumn{1}{r}{\textbf{min}} & \multicolumn{1}{r}{\textbf{25\%}} & \multicolumn{1}{r}{\textbf{50\%}} & \multicolumn{1}{r}{\textbf{75\%}} & \multicolumn{1}{r}{\textbf{max}} \\ \midrule
     Fedyk daily return  & 563                                & 0.000990                          & 0.019894                         & -0.135995                        & -0.005807                         & 0.001516                          & 0.009167                          & 0.105441                         \\
@@ -40,7 +40,7 @@
 \caption{Descriptive Statistics for Daily and Rolling Returns
 \newline \footnotesize{\textit{Note: Returns accounting for investments in all types of securities. ETF returns are identical to table \ref{tab:returns_stocks}.}}}
 \begin{adjustbox}{width=\textwidth}
-    \begin{tabular}{@{}lllllllll@{}}
+    \begin{tabular}{@{}l|llllllll@{}}
     \toprule
     \multicolumn{1}{r}{\textbf{}}       & \multicolumn{1}{r}{\textbf{count}} & \multicolumn{1}{r}{\textbf{mean}} & \multicolumn{1}{r}{\textbf{std}} & \multicolumn{1}{r}{\textbf{min}} & \multicolumn{1}{r}{\textbf{25\%}} & \multicolumn{1}{r}{\textbf{50\%}} & \multicolumn{1}{r}{\textbf{75\%}} & \multicolumn{1}{r}{\textbf{max}} \\ \midrule
     Fedyk daily returns           & 563                                & 0.000555                          & 0.020000                         & -0.125369                        & -0.006658                         & 0.000754                          & 0.008755                          & 0.097995                         \\
@@ -74,7 +74,7 @@
 \caption{Descriptive Statistics for Daily Returns, up to February 3$^\text{rd}$ 2020. 
 \newline \footnotesize{\textit{Note: Returns accounting for investments in all types of securities.}}}
 \begin{adjustbox}{width=\textwidth}
-    \begin{tabular}{@{}lllllllll@{}}
+    \begin{tabular}{@{}l|llllllll@{}}
     \toprule
     \multicolumn{1}{r}{\textbf{}}       & \multicolumn{1}{r}{\textbf{count}} & \multicolumn{1}{r}{\textbf{mean}} & \multicolumn{1}{r}{\textbf{std}} & \multicolumn{1}{r}{\textbf{min}} & \multicolumn{1}{r}{\textbf{25\%}} & \multicolumn{1}{r}{\textbf{50\%}} & \multicolumn{1}{r}{\textbf{75\%}} & \multicolumn{1}{r}{\textbf{max}} \\ \midrule
     Mine  & 429                                & -0.000328                         & 0.013581                         & -0.049700                        & -0.006121                         & -0.000106                         & 0.007070                          & 0.065745                         \\
@@ -90,7 +90,7 @@
 \centering
 \caption{Results for One-Way ANOVA Tests on Daily Returns 
 \newline \footnotesize{\textit{This results cover the whole period.}}}
-    \begin{tabular}{lll}
+    \begin{tabular}{l|ll}
     \toprule
         \textbf{subset}        & \multicolumn{1}{r}{\textbf{F Statistic}} & \multicolumn{1}{r}{\textbf{p-value}} \\ \midrule
         (Fedyk, VT)            & 0.123106                                 & 0.725755                             \\
@@ -112,7 +112,7 @@
 \begin{table}[ht]
 \centering
 \caption{Results for One-Way ANOVA Tests on Daily Returns, up to February 3$^\text{rd}$ 2020}
-    \begin{tabular}{lll}
+    \begin{tabular}{l|ll}
     \toprule
         \textbf{subset}        & \multicolumn{1}{r}{\textbf{F Statistic}} & \multicolumn{1}{r}{\textbf{p-value}} \\ \midrule
         (Mine, VOO)                         & 0.861444                       & 0.353597                               \\
@@ -135,7 +135,7 @@
 \centering
 \caption{Results for Fligner Tests on Daily Returns
 \newline \footnotesize{\textit{Results cover the whole period.}}}
-    \begin{tabular}{lll}
+    \begin{tabular}{l|ll}
     \toprule
     \textbf{subset}        & \multicolumn{1}{r}{\textbf{F Statistic}} & \multicolumn{1}{r}{\textbf{p-value}} \\ \midrule
     (Fedyk, Mine, VOO, VT)              & 73.410013                      & 0.000000                       \\
@@ -156,7 +156,7 @@
 \begin{table}[ht]
 \centering
 \caption{Results for Fligner Tests on Daily Returns, up to February 3$^\text{rd}$ 2020}
-    \begin{tabular}{lll}
+    \begin{tabular}{l|ll}
     \toprule
     \textbf{subset}        & \multicolumn{1}{r}{\textbf{F Statistic}} & \multicolumn{1}{r}{\textbf{p-value}} \\ \midrule
     (Fedyk, Mine, VOO, VT)              & 83.536860                      & 0.000000                       \\
@@ -174,20 +174,39 @@
 \label{tab:fligner_before}
 \end{table}
 
+%\begin{table}[ht]
+%\centering
+%\caption{Confidence Interval and Point Estimates for $\hat\gamma$ covering the whole period}
+%    \begin{tabular}{lll}
+%    \toprule
+%    \textbf{Horizon}        & \multicolumn{1}{r}{$\hat\gamma$ \textbf{(Mine)} [95\% CI]} & \multicolumn{1}{r}{$\hat\gamma$ \textbf{(Fedyk)} [95\% CI]} \\ \midrule
+%    Daily                      & 2.875 [0.424, 20.026]                      & 3.071 [0.896, 20.745]                       \\
+%    Weekly                     & 2.908 [0.703, 24.608]                      & 3.101 [0.651, 26.497]                       \\
+%    Monthly                    & 2.51 [-0.518, 29.888]                      & 3.693 [-0.763, 33.333]                       \\
+%    \end{tabular}
+%\label{tab:gamma_all}
+%\end{table}
+    
 \begin{table}[ht]
 \centering
-\caption{Confidence Interval and Point Estimates for $\hat\gamma$ covering the whole period}
-    \begin{tabular}{lll}
+\caption{Implied risky-asset share $\alpha$ by holding-period horizon (days) and CRRA coefficient across portfolios}
+\label{tab:gamma_implied}
+\begin{tabular}{l|c c c c}
     \toprule
-    \textbf{Horizon}        & \multicolumn{1}{r}{$\hat\gamma$ \textbf{(Mine)} [95\% CI]} & \multicolumn{1}{r}{$\hat\gamma$ \textbf{(Fedyk)} [95\% CI]} \\ \midrule
-    Daily                      & 2.875 [0.424, 20.026]                      & 3.071 [0.896, 20.745]                       \\
-    Weekly                     & 2.908 [0.703, 24.608]                      & 3.101 [0.651, 26.497]                       \\
-    Monthly                    & 2.51 [-0.518, 29.888]                      & 3.693 [-0.763, 33.333]                       \\
+    Portfolio & 1 Day & 5 Days & 30 Days & 60 Days \\
+    \midrule
+    Fedyk, $\gamma=2$   & 0.664 & 0.665 & 0.631 & 0.532 \\
+    Fedyk, $\gamma=5$   & 0.266 & 0.267 & 0.253 & 0.214 \\
+    Mine,  $\gamma=2$   & 0.588 & 0.597 & 0.429 & 0.314 \\
+    Mine,  $\gamma=5$   & 0.236 & 0.239 & 0.172 & 0.126 \\
+    S\&P 500, $\gamma=2$ & 0.766 & 0.890 & 0.751 & 0.707 \\
+    S\&P 500, $\gamma=5$ & 0.307 & 0.357 & 0.301 & 0.284 \\
+    World ETF, $\gamma=2$& 0.344 & 0.372 & 0.352 & 0.373 \\
+    World ETF, $\gamma=5$& 0.138 & 0.149 & 0.141 & 0.132 \\
     \end{tabular}
-\label{tab:gamma_all}
 \end{table}
     
-    
+
 
 
 

@@ -106,7 +106,16 @@ class Plotter:
             for j, series in enumerate(self.series_list):
                 returns = series.df
                 label = series.label
-                for k, col in enumerate([c for c in returns.columns if c.endswith(f"_{d}_return")]):
+
+                # Define columns to plot
+                columns_to_plot =  [c for c in returns.columns if c.endswith(f"_{d}_return")]
+
+                # Avoid case where they are empty
+                if len(columns_to_plot) == 0:
+                    logger.warning("No columns to plot found, using return.columns instead")
+                    columns_to_plot = returns.columns
+
+                for k, col in enumerate(columns_to_plot):
 
                     plot_label = f"{label} - {col.replace(f'_{d}_return', '')}" if "rh" in col else f"{col.replace(f'_{d}_return', '')}"
                 
@@ -195,7 +204,16 @@ class Plotter:
             for j, series in enumerate(self.series_list):
                 returns = series.df
                 label = series.label
-                for k, col in enumerate([c for c in returns.columns if c.endswith(f"_{d}_return")]):
+
+                # Define columns to plot
+                columns_to_plot =  [c for c in returns.columns if c.endswith(f"_{d}_return")]
+
+                # Avoid case where they are empty
+                if len(columns_to_plot) == 0:
+                    logger.warning("No columns to plot found, using return.columns instead")
+                    columns_to_plot = returns.columns
+
+                for k, col in enumerate(columns_to_plot):
 
                     plot_label = f"{label} - {col.replace(f'_{d}_return', '')}" if "rh" in col else f"{col.replace(f'_{d}_return', '')}"
 
@@ -287,10 +305,22 @@ class Plotter:
             # counter for color
             plotted_securities = 0
 
+
+
             for j, series in enumerate(self.series_list):
+
                 returns = series.df
                 label = series.label
-                for k, col in enumerate([c for c in returns.columns if c.endswith(f"_{d}_return")]):
+
+                # Define columns to plot
+                columns_to_plot =  [c for c in returns.columns if c.endswith(f"_{d}_return")]
+
+                # Avoid case where they are empty
+                if len(columns_to_plot) == 0:
+                    logger.warning("No columns to plot found, using return.columns instead")
+                    columns_to_plot = returns.columns
+
+                for k, col in enumerate(columns_to_plot):
 
                     plot_label = f"{label} - {col.replace(f'_{d}_return', '')}" if "rh" in col else f"{col.replace(f'_{d}_return', '')}"
 
@@ -454,3 +484,95 @@ class Plotter:
             plt.show()
         
         return dominance
+    
+
+
+    # TODO: complete the logic of this
+    def plot_implied_risk_aversion(self,
+                                    custom_labels: List[str] = None, 
+                                    save: bool = False, 
+                                    file_name: str = "implied_risk_aversion_plot.png", 
+                                    title: str = "Implied Risk Aversion vs Allocation", 
+                                    show: bool = True):
+
+        if not self.series_list:
+            raise ValueError("No return series provided.")
+
+        # Apply Seaborn styling
+        sns.set_style("whitegrid")
+
+        # Use horizons from the first series (assumed common)
+        horizons = self.series_list[0].horizons
+        rows = int(np.ceil(len(horizons)/2))
+
+        fig, axes = plt.subplots(rows, 2, figsize=(18, 4*rows), sharex=True) if rows > 1 else plt.subplots(len(horizons), 1, figsize=(18, 5*len(horizons)), sharex=True)
+        axes = axes.flatten() if len(horizons) > 1 else [axes]
+
+        # Create a list to store all line objects and their labels for the common legend
+        lines = []
+        labels = []
+
+        for i, d in enumerate(horizons):
+            ax = axes[i]
+            ax.axhline(0, color="black", alpha=0.5, linewidth=1)
+
+            # counter for color
+            plotted_securities = 0
+
+            for j, series in enumerate(self.series_list):
+                returns = series.df
+                label = series.label
+
+                # Define columns to plot
+                columns_to_plot =  [c for c in returns.columns if c.endswith(f"_{d}_return")]
+
+                # Avoid case where they are empty
+                if len(columns_to_plot) == 0:
+                    logger.warning("No columns to plot found, using return.columns instead")
+                    columns_to_plot = returns.columns
+
+                for k, col in enumerate(columns_to_plot):
+
+                    plot_label = f"{label} - {col.replace(f'_{d}_return', '')}" if "rh" in col else f"{col.replace(f'_{d}_return', '')}"
+                
+                    # find index 
+                    color_index = plotted_securities % Plotter.index_counter
+                    
+                    line = sns.lineplot(x=returns.index, y=returns[col], 
+                                    ax=ax, color=self.palette[color_index], linewidth=1.0,
+                                    label='_nolegend_')  # Hide individual legends
+                    
+                    # Only add to legend list the first time we see this series (in the first subplot)
+                    if i == 0:
+                        lines.append(line.lines[-1])
+                        labels.append(plot_label)
+
+                    # increase counter for color
+                    plotted_securities += 1
+
+            ax.set_title(f"Horizon: {d} days")
+            ax.tick_params(axis='x', rotation=0)
+            ax.set_ylabel("Log Returns" if i % 2 == 0 else "")
+            ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.3f"))
+            ax.grid(True, linestyle='--', alpha=0.6)
+            # Remove individual legends
+            ax.get_legend().remove() if ax.get_legend() is not None else None
+
+        if custom_labels is not None:
+            assert len(labels) == len(custom_labels), f"Custom labels must be of same lenght as the series. Required length: {len(labels)}, current length; {len(custom_labels)}"
+            labels = custom_labels
+
+        # Create a single legend outside all subplots
+        fig.legend(lines, labels, loc='upper center', bbox_to_anchor=(0.05, 0.98),
+                ncol=(len(labels)//4+1), frameon=True, fontsize='medium')
+
+        fig.suptitle(title, fontsize=16, y=0.99)
+        plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjusted rect to leave space for the legend
+
+        if save:
+            out_dir = f"{self.images_dir}/{file_name}"
+            plt.savefig(out_dir, dpi=600, bbox_inches='tight')
+            print(f"file saved at {out_dir}")
+
+        if show:
+            plt.show()
