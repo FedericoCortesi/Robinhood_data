@@ -237,6 +237,48 @@ def gamma_closed_form(col:np.ndarray, alpha:float)-> float:
     gamma = mu/(alpha*s2)
     return gamma
 
+def crra_certainty_equivalent_utility(utility:float, gamma:float)->float:
+    """
+    Compute the certainty equivalent from a utility value and a risk aversion parameter
+    """
+    if np.isclose(gamma, 1):
+        ce = np.exp(utility)
+    else:
+        ce = ((1-gamma)*utility+1)**(1/(1-gamma))
+
+    return ce
+
+def crra_ce_returns(returns:np.ndarray, gamma:float)->float:
+    """
+    Compute CRRA certainty equivalent for a given gross returns array and a gamma value
+    
+    ------
+    Obtained by reversing the CRRA utility function and some math
+    """
+
+
+    # Apply definition (avoid division by zero)
+    if not np.isclose(gamma, 1):
+        
+        # Apply transformation to returns 
+        returns_modified = returns**(1-gamma)
+        # Take mean
+        returns_modified_bar = np.mean(returns_modified)
+
+        # Apply formula 
+        ce = returns_modified_bar**(1/(1-gamma))
+
+    else:
+        # Apply transformation to returns 
+        returns_modified = np.log(returns) 
+        # Take mean (Expectation) 
+        returns_modified_bar = np.mean(returns_modified)
+        # Adjust formula
+        ce = returns_modified_bar + 1
+
+    return ce 
+
+
 
 def test_first_order_stochastic_dominance(series_a:pd.Series, series_b:pd.Series):
     """
