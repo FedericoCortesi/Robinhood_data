@@ -1,8 +1,7 @@
 % --- LaTeX Homework Template - S. Venkatraman ---
 
 % --- Set document class and font size ---
-
-\documentclass[letterpaper, 12pt]{article}
+\documentclass[a4paper, 12pt]{article}
 
 % --- Package imports ---
 
@@ -12,6 +11,7 @@
   listings, color, inconsolata, pythonhighlight,     % Code formatting
   fancyhdr, sectsty, hyperref, enumerate, enumitem,
   lmodern, textcomp} % Headers/footers, section fonts, links, lists
+\usepackage{microtype} % cite out of border
 \usepackage{amscd}
 \usepackage{booktabs}
 \usepackage{currency}
@@ -60,7 +60,7 @@
 % --- Page formatting settings ---
 
 % Set link colors for labeled items (blue) and citations (red)
-\hypersetup{colorlinks=true, linkcolor=blue, citecolor=black}
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=black}
 
 
 % Make reference section title font smaller
@@ -93,103 +93,13 @@
 % Set all code listings to be styled with the above settings
 \lstset{style=code}
 
-% --- Math/Statistics commands ---
-
-% Add a reference number to a single line of a multi-line equation
-% Usage: "\numberthis\label{labelNameHere}" in an align or gather environment
-\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
-
-% Shortcut for bold text in math mode, e.g. $\b{X}$
-\let\b\mathbf
-
-% Shortcut for bold Greek letters, e.g. $\bg{\beta}$
-\let\bg\boldsymbol
-
-% Shortcut for calligraphic script, e.g. %\mc{M}$
-\let\mc\mathcal
-
 % \mathscr{(letter here)} is sometimes used to denote vector spaces
 \usepackage[mathscr]{euscript}
-
-% Convergence: right arrow with optional text on top
-% E.g. $\converge[w]$ for weak convergence
-\newcommand{\converge}[1][]{\xrightarrow{#1}}
-
-% Normal distribution: arguments are the mean and variance
-% E.g. $\normal{\mu}{\sigma}$
-\newcommand{\normal}[2]{\mathcal{N}\left(#1,#2\right)}
-
-% Uniform distribution: arguments are the left and right endpoints
-% E.g. $\unif{0}{1}$
-\newcommand{\unif}[2]{\text{Uniform}(#1,#2)}
-
-% Independent and identically distributed random variables
-% E.g. $ X_1,...,X_n \iid \normal{0}{1}$
-\newcommand{\iid}{\stackrel{\smash{\text{iid}}}{\sim}}
-
-% Equality: equals sign with optional text on top
-% E.g. $X \equals[d] Y$ for equality in distribution
-\newcommand{\equals}[1][]{\stackrel{\smash{#1}}{=}}
-
-% Math mode symbols for common sets and spaces. Example usage: $\R$
-\newcommand{\R}{\mathbb{R}}   % Real numbers
-\newcommand{\C}{\mathbb{C}}   % Complex numbers
-\newcommand{\Q}{\mathbb{Q}}   % Rational numbers
-\newcommand{\Z}{\mathbb{Z}}   % Integers
-\newcommand{\N}{\mathbb{N}}   % Natural numbers
-\newcommand{\F}{\mathcal{F}}  % Calligraphic F for a sigma algebra
-\newcommand{\El}{\mathcal{L}} % Calligraphic L, e.g. for L^p spaces
-
-% Math mode symbols for probability
-\newcommand{\pr}{\mathbb{P}}    % Probability measure
-\newcommand{\E}{\mathbb{E}}     % Expectation, e.g. $\E(X)$
-\newcommand{\var}{\text{Var}}   % Variance, e.g. $\var(X)$
-\newcommand{\cov}{\text{Cov}}   % Covariance, e.g. $\cov(X,Y)$
-\newcommand{\corr}{\text{Corr}} % Correlation, e.g. $\corr(X,Y)$
-\newcommand{\B}{\mathcal{B}}    % Borel sigma-algebra
-
-% Other miscellaneous symbols
-\newcommand{\tth}{\text{th}}	% Non-italicized 'th', e.g. $n^\tth$
-\newcommand{\Oh}{\mathcal{O}}	% Big-O notation, e.g. $\O(n)$
-\newcommand{\1}{\mathds{1}}	% Indicator function, e.g. $\1_A$
-
-% Additional commands for math mode
-\DeclareMathOperator{\argmax}{argmax}    % Argmax, e.g. $\argmax_{x\in[0,1]} f(x)$
-\DeclareMathOperator{\argmin}{argmin}    % Argmin, e.g. $\argmin_{x\in[0,1]} f(x)$
-\DeclareMathOperator{\spann}{Span}       % Span, e.g. $\spann\{X_1,...,X_n\}$
-\DeclareMathOperator{\bias}{Bias}        % Bias, e.g. $\bias(\hat\theta)$
-\DeclareMathOperator{\ran}{ran}          % Range of an operator, e.g. $\ran(T) 
-\DeclareMathOperator{\dv}{d\!}           % Non-italicized 'with respect to', e.g. $\int f(x) \dv x$
-\DeclareMathOperator{\diag}{diag}        % Diagonal of a matrix, e.g. $\diag(M)$
-\DeclareMathOperator{\trace}{trace}      % Trace of a matrix, e.g. $\trace(M)$
-
-% Numbered theorem, lemma, etc. settings - e.g., a definition, lemma, and theorem appearing in that 
-% order in Section 2 will be numbered Definition 2.1, Lemma 2.2, Theorem 2.3. 
-% Example usage: \begin{theorem}[Name of theorem] Theorem statement \end{theorem}
-\theoremstyle{definition}
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{definition}[theorem]{Definition}
-\newtheorem{example}[theorem]{Example}
-\newtheorem{remark}[theorem]{Remark}
-
-% Un-numbered theorem, lemma, etc. settings
-% Example usage: \begin{lemma*}[Name of lemma] Lemma statement \end{lemma*}
-\newtheorem{theorem*}{Theorem}
-\newtheorem{proposition*}{Proposition}
-\newtheorem{lemma*}{Lemma}
-\newtheorem{corollary*}{Corollary}
-\newtheorem{definition*}{Definition}
-\newtheorem{example*}{Example}
-\newtheorem{remark*}{Remark}
-\newtheorem{claim}{Claim}
 
 % --- Left/right header text (to appear on every page) ---
   
 % Include a line underneath the header, no footer line
-\pagestyle{fancy}
+%\pagestyle{fancy}
 \renewcommand{\footrulewidth}{0pt}
 \renewcommand{\headrulewidth}{0.4pt}
 
@@ -198,20 +108,54 @@
 \graphicspath{{images/}{../images/}}
 
 % Left header text: course name/assignment number
-\lhead{Robinhood Dataset Analysis}
+%\lhead{Robinhood Dataset Analysis}
 
 % Right header text: your name
-\rhead{Federico Vittorio Cortesi}
+%\rhead{Federico Vittorio Cortesi}
+
+% Set font
+\usepackage{fontspec}
+\setmainfont{Arial}
+
+% handle subsubsections table of contents
+\setcounter{tocdepth}{0}
 
 % --- Document starts here ---
 
 \begin{document}
+% Turn off all page numbering:
+\pagenumbering{gobble}
+% Blank pages
+\newpage
+\null
+\newpage
+\null
+\newpage
+\vspace*{\fill}
+\begin{center}
+  \itshape
+  “Einer kann sich bewußtlos stellen; aber auch bewußt?”\\[1.5em]
+  — L. Wittgenstein
+\end{center}
+\newpage
+\null
+\newpage
+\null
+
+% Now restart normal page numbering at 1:
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\tableofcontents
+
+\newpage
+\null
 \input{Sections/introduction}
 \input{Sections/literature_review}
 \input{Sections/robinhood_dataset}
 \input{Sections/building_portfolio}
 
 \input{Sections/returns}
+\input{Sections/factor_models.tex}
 \input{Sections/risk}
 \input{Sections/ssd}
 

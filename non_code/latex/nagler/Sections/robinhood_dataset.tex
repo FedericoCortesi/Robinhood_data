@@ -1,14 +1,12 @@
 \section{Robinhood Dataset}
 \subsection{Description of the Dataset}
-The dataset records the \textbf{number} of Robinhood users holding at least one share of 8,619 securities, with observations taken hourly. 
+The dataset records the number of Robinhood users holding at least one share of 8,619 securities, with observations taken hourly. 
 Following \cite{Welch2022} and \cite{Fedyk2024}, we aggregate this data on a daily basis by selecting the last observation of each trading day.
 
 The sample spans from February 5, 2018, to August 13, 2020, covering 818 days. Note that the dataset includes non-trading days and contains some missing observations.
 
-\textbf{
-    Since the dataset only provides the number of investors per security, we cannot track individual holdings, monetary amounts, or share quantities. 
-    Moreover, buy/sell flows are unobservable; however, we can approximate them using changes in the number of holders.
-}
+Since the dataset only provides the number of investors per security, we cannot track individual holdings, monetary amounts, or share quantities. 
+Moreover, buy/sell flows are unobservable; however, we can approximate them using changes in the number of holders.
 
 We merge this dataset with CRSP to obtain market-level information and later construct a benchmark index. 
 The resulting dataset contains 7,613 unique securities, substantially more than in \cite{Fedyk2024} and \cite{Welch2022}, who restrict their analysis to U.S. common stocks only. 
@@ -26,7 +24,7 @@ Out of the full universe, 8,099 securities were available in CRSP, as it include
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\linewidth]{../images/old/no_positions_date.png}
+    \includegraphics[width=1\linewidth]{../images/old/no_positions_date.png}
     \caption{Daily count of open Robinhood positions, May 2018-August 2020.}
 \end{figure}
 

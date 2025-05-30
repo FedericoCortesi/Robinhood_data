@@ -66,33 +66,33 @@ Only the S\&P 500 (VOO) and the Fama French market index preserve dominance in t
 In other words, whether we compare the portfolio I built against the Fedyk portfolio or traditional market indices, the second-order stochastic dominance over our Robinhood strategy is nearly universal at intraday and weekly horizons. 
 Our approach to building the Robinhood portfolio, fails SSD also against the World ETF at longer horizons.
 
-\subsubsection{All-Pairs Analysis}
-Our analysis now turns to the all-pairs dataset constructed according to Equation \ref{eq:allpairs_return}, which computes returns across all possible entry-exit point combinations. 
-As previously established in Section \ref{sec:allpairs}, CRRA preference analysis indicates that only investors with extreme risk-seeking preferences would derive greater utility from the Robinhood portfolio compared to market indices.
-
-These conclusions are strongly supported by stochastic dominance tests, with some cases demonstrating first-order dominance. 
-When evaluating Fedyk's Robinhood portfolio against market proxies, we find the S\&P 500 and Fama French market index exhibit clear second-order stochastic dominance. 
-The world ETF (VT) achieves dominance over 96\% of evaluation points, falling short of full dominance by only a marginal 4\%. 
-These results hold more strongly when using our alternative Robinhood portfolio construction method, where all three market proxies demonstrate complete second-order dominance.
-
-The pre-pandemic subsample (through February 2020) reveals even more pronounced results in favor of market indices. 
-Fedyk's portfolio fails second-order dominance under all market proxies during this period. 
-Notably, the Fama French index achieves first-order stochastic dominance, while the S\&P 500 and world ETF narrowly miss complete first-order dominance by merely 0.17\% and 5.92\% of evaluation points respectively. 
-
-\begin{figure}[H]
-    \centering
-    \subfloat[S\&P 500]{\includegraphics[width=0.48\textwidth]{../images/risk/ssd_wealth_voo_before.png}}
-    \hfill
-    \subfloat[World ETF]{\includegraphics[width=0.48\textwidth]{../images/risk/ssd_wealth_vt_before.png}}
-    \caption{Second-order stochastic dominance tests comparing Fedyk's Robinhood portfolio to market indices (pre-pandemic period through February 3, 2020).}
-    \label{fig:cutoff_all_sidebyside}
-\end{figure}
-
-Our alternative Robinhood portfolio construction shows even stronger results, demonstrating first-order dominance across all three market proxies in this period.
-The economic implications of these findings are particularly striking. 
-For any Robinhood investor selecting entry and exit points at random, the revealed preferences would appear economically irrational - the Robinhood portfolio either suffers first-order stochastic dominance or comes remarkably close to this threshold. 
-The second-order dominance results further indicate that all risk-averse investors, regardless of their specific utility function form, would have been better served by market indices. 
-These results hold particular significance when considering the pre-pandemic period, where market dominance appears most pronounced.
+%\subsubsection{All-Pairs Analysis}
+%Our analysis now turns to the all-pairs dataset constructed according to Equation \ref{eq:allpairs_return}, which computes returns across all possible entry-exit point combinations. 
+%As previously established in Section \ref{sec:allpairs}, CRRA preference analysis indicates that only investors with extreme risk-seeking preferences would derive greater utility from the Robinhood portfolio compared to market indices.
+%
+%These conclusions are strongly supported by stochastic dominance tests, with some cases demonstrating first-order dominance. 
+%When evaluating Fedyk's Robinhood portfolio against market proxies, we find the S\&P 500 and Fama French market index exhibit clear second-order stochastic dominance. 
+%The world ETF (VT) achieves dominance over 96\% of evaluation points, falling short of full dominance by only a marginal 4\%. 
+%These results hold more strongly when using our alternative Robinhood portfolio construction method, where all three market proxies demonstrate complete second-order dominance.
+%
+%The pre-pandemic subsample (through February 2020) reveals even more pronounced results in favor of market indices. 
+%Fedyk's portfolio fails second-order dominance under all market proxies during this period. 
+%Notably, the Fama French index achieves first-order stochastic dominance, while the S\&P 500 and world ETF narrowly miss complete first-order dominance by merely 0.17\% and 5.92\% of evaluation points respectively. 
+%
+%\begin{figure}[H]
+%    \centering
+%    \subfloat[S\&P 500]{\includegraphics[width=0.48\textwidth]{../images/risk/ssd_wealth_voo_before.png}}
+%    \hfill
+%    \subfloat[World ETF]{\includegraphics[width=0.48\textwidth]{../images/risk/ssd_wealth_vt_before.png}}
+%    \caption{Second-order stochastic dominance tests comparing Fedyk's Robinhood portfolio to market indices (pre-pandemic period through February 3, 2020).}
+%    \label{fig:cutoff_all_sidebyside}
+%\end{figure}
+%
+%Our alternative Robinhood portfolio construction shows even stronger results, demonstrating first-order dominance across all three market proxies in this period.
+%The economic implications of these findings are particularly striking. 
+%For any Robinhood investor selecting entry and exit points at random, the revealed preferences would appear economically irrational - the Robinhood portfolio either suffers first-order stochastic dominance or comes remarkably close to this threshold. 
+%The second-order dominance results further indicate that all risk-averse investors, regardless of their specific utility function form, would have been better served by market indices. 
+%These results hold particular significance when considering the pre-pandemic period, where market dominance appears most pronounced.
 
 \subsubsection{A Proof of Irrationality?}
 Our analysis reveals a fundamental contradiction in Robinhood investors' revealed preferences. 
@@ -110,7 +110,7 @@ The tension persists across all horizons: Daily returns show 95-98\% SSD support
     \centering
     \includegraphics[width=0.8\linewidth]{../images/risk/ssd_number_5d_mkt.png}
     \caption{SSD of the Market over the Robinhood Portfolio.}
-    \label{fig:fsd_fedyk_mine}
+\label{fig:fsd_fedyk_mine}
 \end{figure}    
 
 These results present an inescapable conclusion: Robinhood investors' portfolio choices cannot be rationalized through standard risk-return tradeoffs. 

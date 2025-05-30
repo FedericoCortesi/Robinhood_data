@@ -159,6 +159,7 @@
     \begin{tabular}{l|ll}
     \toprule
     \textbf{subset}        & \multicolumn{1}{r}{\textbf{F Statistic}} & \multicolumn{1}{r}{\textbf{p-value}} \\ \midrule
+    \midrule
     (Fedyk, Mine, VOO, VT)              & 83.536860                      & 0.000000                       \\
     (Mine, VOO, VT)                     & 64.187897                      & 0.000000                       \\
     (Fedyk, VOO, VT)                    & 54.358126                      & 0.000000                       \\
@@ -174,18 +175,20 @@
 \label{tab:fligner_before}
 \end{table}
 
-%\begin{table}[ht]
-%\centering
-%\caption{Confidence Interval and Point Estimates for $\hat\gamma$ covering the whole period}
-%    \begin{tabular}{lll}
-%    \toprule
-%    \textbf{Horizon}        & \multicolumn{1}{r}{$\hat\gamma$ \textbf{(Mine)} [95\% CI]} & \multicolumn{1}{r}{$\hat\gamma$ \textbf{(Fedyk)} [95\% CI]} \\ \midrule
-%    Daily                      & 2.875 [0.424, 20.026]                      & 3.071 [0.896, 20.745]                       \\
-%    Weekly                     & 2.908 [0.703, 24.608]                      & 3.101 [0.651, 26.497]                       \\
-%    Monthly                    & 2.51 [-0.518, 29.888]                      & 3.693 [-0.763, 33.333]                       \\
-%    \end{tabular}
-%\label{tab:gamma_all}
-%\end{table}
+\begin{table}[ht]
+\centering
+\caption{Cutoff $\gamma^*$ for the two Robinhood Portfolio Proxies and Market Indeces.}
+\begin{tabular}{cllll}
+    \toprule
+    \multicolumn{1}{r}{\textbf{Horizon}} & \multicolumn{1}{r}{\textbf{Fedyk - S\&P 500}} & \multicolumn{1}{r}{\textbf{Mine - S\&P 500}} & \multicolumn{1}{r}{\textbf{Fedyk - World ETF}} & \multicolumn{1}{r}{\textbf{Mine - World ETF}} \\
+    \midrule
+    1 Days                        & 1.940                                         & 0.503                                          & 4.221                                          & 4.147                                           \\
+    5 Days                        & 1.759                                         & 0.637                                          & 3.658                                          & 3.387                                           \\
+    30 Days                       & 1.782                                         & 0.839                                          & 3.762                                          & 2.262                                           \\
+    60 Days                       & 1.682                                         & 0.888                                          & 4.099                                          & 2.057                                          
+\end{tabular}
+\label{tab:cutoff_gamma}
+\end{table}
     
 \begin{table}[ht]
 \centering
@@ -193,7 +196,7 @@
 \label{tab:gamma_implied}
 \begin{tabular}{l|c c c c}
     \toprule
-    Portfolio & 1 Day & 5 Days & 30 Days & 60 Days \\
+    \textbf{Portfolio} & \textbf{1 Day} & \textbf{5 Days} & \textbf{30 Days} & \textbf{60 Days} \\
     \midrule
     Fedyk, $\gamma=2$   & 0.664 & 0.665 & 0.631 & 0.532 \\
     Fedyk, $\gamma=5$   & 0.266 & 0.267 & 0.253 & 0.214 \\
@@ -206,6 +209,20 @@
     \end{tabular}
 \end{table}
     
+\begin{table}[ht]
+\centering
+\caption{Sharpe ratios by holding-period horizon (days) across portfolios}
+\label{tab:sharpe_ratio}
+\begin{tabular}{l|c c c c}
+    \toprule
+    \multicolumn{1}{r}{} & \multicolumn{1}{r}{\textbf{1 Days}} & \multicolumn{1}{r}{\textbf{5 Days}} & \multicolumn{1}{r}{\textbf{30 Days}} & \multicolumn{1}{r}{\textbf{60 Days}} \\
+    \midrule
+    Fedyk                & 0.027                               & 0.049                               & 0.121                                & 0.157                                \\
+    Mine                 & 0.024                               & 0.041                               & 0.097                                & 0.124                                \\
+    S\&P 500             & 0.025                               & 0.047                               & 0.111                                & 0.149                                \\
+    World ETF            & 0.010                               & 0.018                               & 0.051                                & 0.069                               
+\end{tabular}
+\end{table}
 
 
 

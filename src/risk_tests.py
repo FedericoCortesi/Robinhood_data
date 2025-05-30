@@ -518,7 +518,7 @@ class RiskTests():
             }
         
 
-    def run_regressions_factor_models(self, df_returns:pd.DataFrame=None, factors:int=0):
+    def run_regressions_factor_models(self, df_returns:pd.DataFrame=None, factors:int=0, print_results:bool=True):
         """
         Run factor models on df_returns.
 
@@ -535,22 +535,29 @@ class RiskTests():
 
         # define df if absent
         if df_returns is None:
-            df_returns = self.factors
+            df_returns = self.factors.copy()
 
-        assert factors in [0, 1, 6], f"Number of factors must be in {[0, 1, 6]}"    
+        # check 
+        acceptable_numbers = [0, 1, 3, 4, 6]
+        assert factors in acceptable_numbers, f"Number of factors must be in {acceptable_numbers}"    
 
         # ectract regressors col
-        ordered_factors = ['xmkt', 'smb', 'hml', 'rmw', 'cma', 'umd']
+        ordered_factors = ['xmkt', 'hml', 'smb', 'umd', 'rmw', 'cma']
         regressors = ordered_factors[:factors]
 
+        # Filter
         X = df_returns[regressors]
         y = df_returns["xr"]
 
         X = sm.add_constant(X)  # this adds the alpha term
 
+        # run regressions
         model = sm.OLS(y, X)
-        results = model.fit()
-        print(results.summary())
+        results = model.fit(cov_type='HAC', cov_kwds={'maxlags':1})
+        
+        if print_results:
+            print(results.summary())
 
+        return results
 
 
