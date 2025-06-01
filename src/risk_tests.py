@@ -16,7 +16,7 @@ from config.constants import PROJECT_ROOT
 # Setup logger
 import logging
 from .utils.custom_formatter import setup_custom_logger
-logger = setup_custom_logger(__name__, level=logging.DEBUG)
+logger = setup_custom_logger(__name__, level=logging.INFO)
 
 # Import other classes
 from . import Analyzer

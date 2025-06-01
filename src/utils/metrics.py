@@ -220,7 +220,7 @@ def squared_moment(gamma: float,
                    rp: np.ndarray,
                    rf: np.ndarray) -> float:
     """
-    Square of the moment condition—useful for minimization.
+    Square of the moment condition, useful for minimization.
     """
     g = moment_condition_gmm(gamma, rp, rf)
     return g * g    

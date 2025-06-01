@@ -1,5 +1,4 @@
-\section{Robinhood Dataset}
-\subsection{Description of the Dataset}
+\section{Description of the Robinhood Dataset}
 The dataset records the number of Robinhood users holding at least one share of 8,619 securities, with observations taken hourly. 
 Following \cite{Welch2022} and \cite{Fedyk2024}, we aggregate this data on a daily basis by selecting the last observation of each trading day.
 
@@ -16,7 +15,7 @@ In terms of security types, common stocks represent 57.3\% of the dataset, while
 Structured products, REITs, and ADRs constitute the remaining share. 
 When classifying by market capitalization, stocks dominate with 83.1\%, followed by ETFs (9.3\%) and other funds (3.3\%).
 
-The total number of open positions on any given day is calculated as the sum of users holding at least one share across all securities—i.e., a row-wise sum across the dataset.
+The total number of open positions on any given day is calculated as the sum of users holding at least one share across all securities, i.e., a row-wise sum across the dataset.
 
 Market data for each security was retrieved from CRSP\footnote{The Center for Research in Security Prices (CRSP), based at the University of Chicago, provides high-quality historical market data widely used in finance research and investment analysis.} via WRDS. 
 Out of the full universe, 8,099 securities were available in CRSP, as it includes only U.S.-listed assets. 
