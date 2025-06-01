@@ -1,6 +1,6 @@
 \section{Assessing Risk Preferences: A Dual-Criterion Approach}
 \subsection{Setup and Definitions}
-The results of section \ref{return_section} paint very different pictures of retail investors. 
+The results of sections \ref{return_section} and \ref{sec:factor_models} paint very different pictures of retail investors. 
 Using the method set forth by \cite{Welch2022} and \cite{Fedyk2024}, analyzed also in section \ref{fedyk_paper_returns}, yields superior returns and similar drawdowns to the market.
 They also conclude that the Robinhood crowd has achieved positive alpha when analyzed under different factor models (table VII, IX, X in \cite{Welch2022} and table 16 in \cite{Fedyk2024}). 
 These results appear to be in contrast with the existing literature on retail investing, most notably \cite{BarberOdean2000}.
@@ -42,7 +42,7 @@ In practice, this remains a useful conceptual framework to understand how risk p
 Formally, we want to find $\gamma^*$ defined as:
 \begin{equation}
     \gamma^* = \min\left\{ \gamma_j : \mathbb{E}[U_p(\gamma_j)] \leq \mathbb{E}[U_m(\gamma_j)] \right\}
-    \label{gamma_cutoff}
+\label{gamma_cutoff}
 \end{equation}
 where $U_p(\cdot)$ is the utility of the Robinhood portfolio, while $U_m(\cdot)$ is the utility of the market portfolio.
 
@@ -56,12 +56,12 @@ These factors inflate the sample variability of our mean-utility estimates.
 Therefore, the resulting confidence intervals for the sample mean remain wide. 
 
 We don't pretend to draw absolute conclusions but a few noteworthy remarks must be stated.
-We compare the two Robinhood portfolios with the S\&P 500 and the Wolrd ETF, resmapling returns every $n$ days instead of taking rolling returns to avoid distortions due to autocorrelation. 
+We compare the two Robinhood portfolios with the S\&P 500 and the World ETF, resmapling returns every $n$ days instead of taking rolling returns to avoid distortions due to autocorrelation. 
 First, the Fedyk approach yields higher $\gamma^*$ values than my approach across comparable horizons and market proxies.
 This can be interpreted as a relative perfomance index, telling us that if we accept the approach based directly on prices, then Robinhood investors would need to have lower risk aversion 
 to not be convinced to hold the market.
 
-Remarkably, investors with a risk aversion paramter even slightly lower than 1 would have a higher utility by investing in the S\&P 500 rather than in the "Mine" portfolio.
+Remarkably, investors with a risk aversion paramter even slightly lower than one would have a higher utility by investing in the S\&P 500 rather than in the "Mine" portfolio.
 Fedyk's portfolio requires a risk aversion between 1.7 and 2; more plausible values although relatively low to empirical estimates.
 When comparing the two Robinhood portfolios with the World ETF, the values for $\gamma$ increase in the 2-4.2 range, 
 higlighting a less attractive performance of this ETF when compared to the Robinhood portfolios.
@@ -147,12 +147,16 @@ Then we define the welfare loss for a certain risk aversion parameter $\gamma$ a
     WL_{\gamma} = CE_{p, \gamma} - CE_{b, \gamma}
 \end{equation}
 
-Where $CE_{p, \gamma}$ and $CE_{b, \gamma}$ are respectively the certainty equivalent of the portfolio and the base strategy to which we compare it, both evaluated for a certain $\gamma$.
-In practice, $WL_\gamma$ quantifies the least riskless returns we would need to pay to an investor with a certain $\gamma$ to make them switch to the alternative strategy.
+Where $CE_{p, \gamma}$ and $CE_{b, \gamma}$ are respectively the certainty equivalent of the portfolio and the base strategy to which we compare it, both evaluated at a certain $\gamma$.
+In practice, the welfare loss measures the net risk-free return adjustment required to make a CRRA investor with parameter $\gamma$ indifferent between the base strategy $b$ and the risky portfolio $p$. 
+If $\mathrm{WL}*\gamma > 0$, then $\mathrm{CE}*{p,\gamma} > \mathrm{CE}*{b,\gamma}$ and the investor would be willing to forgo up to $\mathrm{WL}*\gamma$ of guaranteed return to switch from $b$ into $p$. 
+Conversely, if $\mathrm{WL}*\gamma < 0$, then $\mathrm{CE}*{p,\gamma} < \mathrm{CE}*{b,\gamma}$ and the investor would demand an extra $|\mathrm{WL}*\gamma|$ of risk-free return—on top of $\mathrm{CE}\_{b,\gamma}$—to be indifferent between holding $b$ and switching into $p$.
+
+
 
 \paragraph{Welfare Loss Compared to the Risk-Free Asset}
 When we benchmark each strategy against the the risk-free asset, every risky portfolio must bear a positive welfare loss for sufficiently high risk aversion. 
-The S\&P 500 suffers the smallest penalty, the green curve stays closest to the zero line, implying that even moderately risk-averse investors would demand only a small payment to forsake cash for the index. 
+As can be seen in figure \ref{fig:wl_rf}, the S\&P 500 suffers the smallest penalty, the green curve stays closest to the zero line, implying that even moderately risk-averse investors would demand only a small payment to forsake cash for the index. 
 The World ETF lies slightly below, so it too outperforms the Robinhood baskets but at a marginally higher cost in utility relative to the risk-free benchmark.
 
 Both the "Mine" and Fedyk portfolios incur substantially larger losses.
@@ -160,20 +164,23 @@ At very short horizons, all strategies look similar, the noise of one-day return
 Mine has the steepest utility price, particularly for investors with $\gamma$ above one or two. 
 Fedyk lies between the market indices and my version of the Robinhood mix.
 
-In practical terms, an investor with moderate aversion to risk ($\gamma$ around two) would be willing to pay only a few basis points of expected return to switch from VT or the S\&P 500 into cash, while they would demand markedly larger compensation to move from the Robinhood portfolios back into risk-free assets. 
+In practical terms, because the welfare-loss function $\mathrm{WL}_\gamma$ for VT or the S\&P 500 is relatively flat as $\gamma$ increases—so that investors need only a few basis points of extra return to switch into cash. 
+The behavioral cost of holding those mainstream ETFs remains small over all plausible $\gamma$. In contrast, the welfare-loss curves for the Robinhood portfolios are much steeper, 
+meaning that even modest increases in $\gamma$ translate into substantially higher $\lvert\mathrm{WL}_\gamma\rvert$ (i.e., larger compensation demanded to leave cash). 
 This ordering confirms that, although both Robinhood strategies can outperform in raw returns, their behavioral cost relative to cash is significantly higher than that of mainstream market ETFs.
 Notably, we can highlight the fact that the behavioral cost for investing in Fedyk's portfolio is lower for a wide range of $\gamma$.
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{../images/wl_rf.png}
-\caption{Welfare loss relative to a risk-free asset for four strategies plotted as a function of the CRRA risk-aversion coefficient across 1-, 5-, 30-, and 60-day return horizons.}
+    \caption{Welfare loss relative to a risk-free asset for four strategies plotted as a function of the CRRA risk-aversion coefficient across 1-, 5-, 30-, and 60-day return horizons.}
+\label{fig:wl_rf}
 \end{figure}    
 
 
 
 \paragraph{Welfare Loss Compared to Market Indeces}
 When we measure each Robinhood proxy against the two broad market benchmarks, striking differences emerge in how quickly risk-aversion erodes their advantage.  
-At $\gamma=0$ (risk neutrality), all four curves start above zero—indicating that a completely risk-neutral investor would prefer any of the Robinhood strategies to either the World ETF or the S\&P 500.  
+At $\gamma=0$ (risk neutrality), all four curves start above zero, indicating that a completely risk-neutral investor would prefer any of the Robinhood strategies to either the World ETF or the S\&P 500.  
 Figure \ref{fig:wl_mkt} confirms what we've jsut described.
 First, "Mine" has a higher behavioral cost compared to Fedyk's construction.
 Secondly, taking the World ETF as a proxy for the market instead od the S\&P 500 implies even greater behavioral costs.
@@ -237,17 +244,17 @@ The variable of interest is $\gamma$, we can therefore use \ref{gamma_star} to c
 \subsubsection{Empirical Estimates and Interpretation}
 \label{sec:gamma_estimates}
 The results in this section might diverge slightly with the approach proposed above in section \ref{sec:cutoff} for a couple of reasons. 
-First, here we limit investors preferences to the second moment, assuming directly that higher moments do not influence investor's utility.
-Secondly the limited sample size, especially at longer horizons, limits the precision of the proposed estimates.
-Moreover, in the \ref{sec:cutoff} section we implicitly assumed investors to hold all their wealth either in the Robinhood portfolio or in the market i.e.,
+First, here we limit investors preferences to the second moment, assuming implictly that higher moments do not influence investor's utility.
+Secondly, the limited sample size, especially at longer horizons, limits the precision of the proposed estimates.
+Moreover, in section \ref{sec:cutoff} we implicitly assumed investors to hold all their wealth either in the Robinhood portfolio or in the market i.e.,
 using this section's notation, to have $\alpha=1$.
 Notwithstanding these challenges, some general conclusions can be drawn. 
 
 A relevant point that should be discussed is the choice of not using rolling returns. 
 Although they provide a good proxy for assessing the typical return over different horizons and across secruties, 
 these return series suffer from autocorellation by construction, implying a very small variance especially at longer horizons.
-Therefore, the risk aversion estimates provided by \ref{gamma_star} are unreliable and orders of magnitude greater than acceptable values in asset pricing.
-For this reason, we focus or attention on daily, weekly, monthly and bi-monthly returns starting from the first day in the sample. This will avoid the problem with autocorrelation and provide interpretable and useful estimates over different horizons.
+Therefore, the risk aversion estimates provided by \ref{gamma_star} would be unreliable and orders of magnitude greater than acceptable values in asset pricing.
+For this reason, we focus or attention on daily, weekly, monthly and bi-monthly returns starting from the first day in the sample. 
 
 In table \ref{tab:gamma_implied} we report the implied share invested in the risky asset given a feasible upper and lower bound for investor's risk aversion, namely $\gamma=2$ and $\gamma=5$.
 The full curves are plotted below in Figure \ref{fig:alpha_gamma}.
@@ -267,6 +274,19 @@ Between the two Robinhood constructions, Fedyk is uniformly more aggressive than
 \label{fig:alpha_gamma}
 \end{figure}    
 
-This somewhat counterintuitive results can be interpreted by noticing that the condition we've set (\ref{gamma_star}) is simply a modified version of the Sharpe ratio.
+These somewhat counterintuitive results can be interpreted by noticing that the condition we've set (\ref{gamma_star}) is simply a modified version of the Sharpe ratio.
 It is rational for investors in this framework to allocate a greater portion of their wealth if the risky asset promises higher risk-adjusted returns.
 The results are in table \ref{tab:sharpe_ratio}.
+
+\subsection{Comparing Results}
+This section proposed different approaches which, under different assumptions, provided apparently contrastinng results.   
+The cutoff $\gamma$ estimates reported in Section \ref{sec:cutoff} are associated with wide confidence intervals due to finite sample noise and extreme return realizations, 
+and the implied $\gamma$ values from Section \ref{sec:gamma_estimates} rely on a second-order Taylor approximation that ignores higher moments, so all inferences should be interpreted with appropriate caution.  
+
+Under the assumption that each investor is fully invested ($\alpha= 1$) in either "Mine" or "Fedyk", we compare each portfolio's implied $\gamma$ (from Table \ref{tab:gamma_implied}) against its cutoff $\gamma^*$ versus the S\&P 500 (from Table \ref{tab:cutoff_gamma}). 
+If implied $\gamma(\alpha=1) < \gamma^*$, then a CRRA investor with that implied $\gamma$ would rationally prefer remaining fully invested in that Robinhood basket rather than switching to the S\&P. 
+Concretely, Fedyk's implied $\gamma$ at $\alpha=1$ always falls below its cutoff $\gamma^*$ against the S\&P, so a fully invested Fedyk holder must have sufficiently low risk aversion to justify staying in Fedyk. 
+"Mine", however, only clears that bar at the sixty-day horizon, at shorter horizons, its implied $\gamma$ exceeds the cutoff, meaning a CRRA investor with $\alpha=1$ in Mine would actually prefer the S\&P. 
+Because these generous assumptions and limitations, the fact that implied $\gamma_{\mathrm{Mine}} > \gamma^*$ for most horizons indicates that fully investing in Mine cannot be reconciled with any plausible risk aversion, 
+whereas full investment in Fedyk could only be rationalized by an investor whose $\gamma$ lies below its cutoff.
+

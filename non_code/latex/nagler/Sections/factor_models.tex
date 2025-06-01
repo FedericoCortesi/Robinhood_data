@@ -1,8 +1,60 @@
 \section{Factor Model Evaluation and Alpha Robustness}
-In this section I subject the representative Robinhood portfolio to a series of standard asset pricing tests in order to challenge the unusually large abnormal returns reported in \cite{Fedyk} and \cite{Welch2022}, 
+\label{sec:factor_models}
+In this section I subject the representative Robinhood portfolio to a series of standard asset pricing tests in order to challenge the unusually large abnormal returns reported in \cite{Fedyk2024} and \cite{Welch2022}, 
 more precisely between 14.8\% and 21.4\% annualized alpha.  
+
 I estimate the Capital Asset Pricing Model, the Fama-French three- and four-factor specifications, and the six-factor model using exactly the same factor premia from Kenneth French's database that Fedyk and Welch employs.  
 Unlike his analysis, which is confined to a hand-picked subset of stocks, I apply the portfolio construction procedure developed earlier in this paper to the full universe of available securities.  
 I also extend the sample window through the COVID-19 crash to test the stability of the alpha estimates under extreme market stress.  
 The resulting intercepts are far more muted than those in Fedyk's tables, and many lose statistical significance once pandemic volatility is incorporated.  
 These results call into question the realism of the super-high alpha values in the existing literature and highlight the importance of broad coverage and rigorous methodology in evaluating retail-driven strategies.  
+
+\subsection{Results and Interpretation}
+\subsubsection{Robustness Check: Applying Weights to Prices on a Stock-Only Universe}
+Before extending Fedyk's method to all securities, we proceed by shwoing that the method proposed in this paper has considerably different effects also when restriciting the analysis to stocks only, 
+precisely how the other authors have meade.
+
+The results (avilable in table \ref{tab:mine_stock}) already paint a less rosy picture.
+Fedyk's regressions report positive, statistically significant alphas—on the order of 0.0006 to 0.0008 per period, suggesting that his portfolio construction appears to deliver genuine excess returns above what is explained by standard factor exposures. 
+In contrast, the "Mine" table shows alphas that are effectively zero or slightly negative (approximately -0.0001 to -0.0002) and never reach statistical significance. 
+In practical terms, the absence of any discernible alpha implies that, once my weighting method is applied to the full universe of securities, the Robinhood strategy cannot outperform the market: at best, it simply replicates the benchmark, and any apparent outperformance vanishes.
+
+\subsubsection{Extending the Analysis to All Securities}
+When estimating both my "Mine" strategy and Fedyk's portfolio over the full universe of tradable securities, rather than restricting to U.S. common stocks, the most striking finding is the disappearance of any positive alpha. 
+In Fedyk's regressions, the intercepts hover just above zero (0 to 0.0004), but fail to achieve any significance. 
+However, when I apply the same factor-model framework, including CAPM, three-, four-, and six-factor regressions, to the aggregate set of all equities, my portfolio's intercept is slightly negative (approximately -0.0001 to -0.0004) in every specification and never approaches statistical significance. 
+In other words, what appears to be a faint "edge" in Fedyk's U.S.-only sample entirely vanishes once we broaden the coverage, implying that my Robinhood-style weights simply replicate common factor exposures rather than generating true excess returns.
+The results are in table \ref{tab:mine_all} and \ref{tab:fedyk_all}.
+
+Beyond alpha, several factor-loading shifts arise when using the full universe. 
+Market beta on "Mine" (≈1.01-1.09) remains similar to Fedyk's (≈0.99-1.11). 
+The HML loading is far more negative in "Mine" (-0.42 to -0.49) than in Fedyk (≈+0.09 in three-factor, -0.18 in four-factor), demonstrating a substantial tilt toward growth. 
+SMB falls from Fedyk's large positives (≈+0.69 in three-factor, +0.58 in four-factor) to more moderate values in "Mine" (≈+0.20-0.23).
+Momentum (UMD), strongly negative for Fedyk (≈-0.32 to -0.36), becomes minor and marginal in "Mine" (-0.08) and vanishes in the six-factor. 
+Profitability (RMW) flips from Fedyk's negative (≈-0.31) to a small positive (≈+0.09) in "Mine", while investment (CMA) becomes more strongly negative (≈-1.00 versus Fedyk's -0.63). 
+
+\subsubsection{Excluding the impact of COVID}
+These pre-COVID regressions paint a starkly different picture than when the pandemic period is included.  
+By excluding observations after early February 2020, when a large fraction of the Robinhood portfolios' return spikes occurred, the estimated alphas for both "Mine" and "Fedyk" become negative and highly significant.  
+In other words, much of the apparent outperformance disappears once we remove the extreme volatility of the COVID-19 crash and subsequent rebound.  
+This confirms our earlier return-distribution analysis showing that a disproportionate share of gains arose after February 3rd.  
+
+When observations from the COVID-19 crash are removed, the "Mine" portfolio shows a significant negative alpha in every regression.  
+Results are in table \ref{tab:mine_all_pre}.
+In the CAPM, the intercept is -0.0010 (SE 0.0003, p<.01).  
+The three-factor model yields alpha = -0.0011 (SE 0.0002, p<.01) with a market beta of 1.2400 (SE 0.0269, p<.01).  
+Adding momentum in the four-factor model gives alpha = -0.0011 (SE 0.0002, p<.01), HML = -0.4968 (SE 0.0640, p<.01), and UMD = -0.0465 (SE 0.0530, not significant).  
+In the six-factor model, alpha = -0.0010 (SE 0.0002, p<.01), HML = -0.2195 (SE 0.0530, p<.01), and CMA = -0.9507 (SE 0.1027, p<.01) while RMW is 0.0608 (SE 0.0749, not significant).  
+R-squared values range from 0.8216 in CAPM to 0.8914 in the six-factor model.  
+These results confirm that, before COVID-19, the "Mine" portfolio underperformed all benchmarks and produced no positive alpha.
+
+
+When COVID-19 observations are removed, the "Fedyk" portfolio still produces a null or slightly negative alpha.  
+Results are in table \ref{tab:fedyk_all_pre}.
+In the CAPM regression, the intercept is -0.0004 (SE 0.0003, p < .01).  
+The three-factor model yields alpha = -0.0002 (SE 0.0002, p < .01) with a market beta of 1.1199 (SE 0.0248, p < .01).  
+Adding momentum in the four-factor specification gives alpha = -0.0002 (SE 0.0002, p < .01), HML = -0.3413 (SE 0.0538, p < .01), and UMD = -0.2295 (SE 0.0471, p < .01).  
+In the six-factor model, alpha remains -0.0002 (SE 0.0002, p < .01), HML = -0.2479 (SE 0.0534, p < .01), RMW = -0.2797 (SE 0.0681, p < .01), and CMA = -0.3126 (SE 0.0875, p < .01).  
+R-squared ranges from 0.8040 in CAPM to 0.8660 in the six-factor model.  
+These findings show that, even before COVID-19, "Fedyk" fails to generate any positive alpha once factor exposures are accounted for.  
+
